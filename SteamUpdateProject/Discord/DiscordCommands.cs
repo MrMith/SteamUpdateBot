@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Data.Entity;
+using Discord.WebSocket;
 
 namespace SteamUpdateProject.Discord
 {
@@ -299,6 +300,33 @@ namespace SteamUpdateProject.Discord
 			[Command("debug")]
 			public async Task DebugBool(bool Set)
 			{
+				bool HasPermission = false;
+				if (Context.Guild != null)
+				{
+					SocketGuildUser user = Context.User as SocketGuildUser;
+					var roles = (user as IGuildUser).Guild.Roles;
+
+					foreach (var role in roles)
+					{
+						if (role.Permissions.Administrator || role.Permissions.ManageChannels)
+						{
+							HasPermission = true;
+							break;
+						}
+					}
+				}
+				else //In DMs they should have control ect
+				{
+					HasPermission = true;
+				}
+				
+
+				if(!HasPermission)
+				{
+					await ReplyAsync("Insufficient permissions to execute this command.");
+					return;
+				}
+
 				GuildInfo GuildInfo = DiscordBot.GetGuildInfo(Context.Guild == null ? 0 : Context.Guild.Id, Context.Channel.Id);
 
 				if (GuildInfo != null)
@@ -313,6 +341,7 @@ namespace SteamUpdateProject.Discord
 				}
 
 				await ReplyAsync($"Debug mode set to {Set}.");
+
 			}
 
 			[Command("debug")]
@@ -341,7 +370,7 @@ namespace SteamUpdateProject.Discord
 
 				}
 
-				await ReplyAsync($"Ping is {Context.Client.Latency}.\nSteam Status: {(steamStatus ? "Online" : "Offline")}.\nTotal updates processed: {SteamUpdateBot.SteamClient.UpdatesProcessed} ({(int)(SteamUpdateBot.SteamClient.UpdatesProcessed / (DateTime.UtcNow - Process.GetCurrentProcess().StartTime.ToUniversalTime()).TotalMinutes)} per minute)");
+				await ReplyAsync($"Ping is {Context.Client.Latency}.\nSteam Status: {(steamStatus ? "Online" : "Offline")}.\nTotal updates processed: {SteamUpdateBot.SteamClient.UpdatesProcessed} ({(int)(SteamUpdateBot.SteamClient.UpdatesProcessed / (DateTime.UtcNow - Process.GetCurrentProcess().StartTime.ToUniversalTime()).TotalMinutes)} per minute)\nTotal Execeptions: {SteamUpdateBot.Exceptions}");
 			}
 
 			[Command("forceupdate")]

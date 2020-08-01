@@ -10,7 +10,6 @@ using System.Linq;
 using System.Threading;
 using System.Data.Entity;
 
-
 namespace SteamUpdateProject.Discord
 {
 	class DiscordBot
@@ -18,7 +17,7 @@ namespace SteamUpdateProject.Discord
 		public DiscordSocketClient _client;
 		private readonly Random rand = new Random();
 		private ServiceProvider services;
-
+		private DateTime TimeForStatusUpdate = DateTime.Now;
 		public DiscordBot()
 		{
 			_client = new DiscordSocketClient();
@@ -71,6 +70,12 @@ namespace SteamUpdateProject.Discord
 
 		public async void AppUpdated(AppUpdate app)
 		{
+			if(DateTime.Now > TimeForStatusUpdate)
+			{
+				await _client.SetGameAsync($"Total Steam updates: {SteamUpdateBot.SteamClient.UpdatesProcessed}");
+				TimeForStatusUpdate = DateTime.Now.AddMinutes(15);
+			}
+
 			EmbedBuilder AppEmbed = new EmbedBuilder
 			{
 				Color = new Color(rand.Next(0, 255), rand.Next(0, 255), rand.Next(0, 255)),
@@ -90,18 +95,16 @@ namespace SteamUpdateProject.Discord
 				foreach (GuildInfo ServerInfo in context.GuildInformation.Include(x => x.SubscribedApps).ToList())
 				{
 					if (!ServerInfo.SubscribedApps.Where(x => x.AppID == app.AppID).Any() && !ServerInfo.DebugMode) continue;
-					if (!app.Content && !ServerInfo.ShowContent) continue;
+					if (!app.Content && !ServerInfo.ShowContent && !ServerInfo.DebugMode) continue;
 					if (ServerInfo.GuildID == 0)
 					{
+						//continue; //For some reason DMs are broken af
 						try
 						{
 							var _1st = await _client.GetDMChannelAsync((ulong)ServerInfo.ChannelID);
-							int tries = 0;
-							while (_1st == null || tries >= 25)
+							if (_1st == null)
 							{
 								_1st = await _client.GetDMChannelAsync((ulong)ServerInfo.ChannelID);
-								tries++;
-								Thread.Sleep(100);
 							}
 							await _1st.SendMessageAsync(embed: AppUpdate);
 						}
@@ -109,7 +112,8 @@ namespace SteamUpdateProject.Discord
 						{
 							Console.WriteLine("ERROR: Discord is down or you need to check your connection. Code 0.1");
 							Console.WriteLine(e.ToString());
-							return;
+							Console.WriteLine();
+							Console.WriteLine();
 						}
 					}
 					else
@@ -124,7 +128,8 @@ namespace SteamUpdateProject.Discord
 						{
 							Console.WriteLine("ERROR: Discord is down or you need to check your connection. Code 1.1");
 							Console.WriteLine(e.ToString());
-							return;
+							Console.WriteLine();
+							Console.WriteLine();
 						}
 					}
 				}

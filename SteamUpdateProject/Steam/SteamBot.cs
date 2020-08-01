@@ -87,10 +87,10 @@ namespace SteamUpdateProject.Steam
 					ChangeNumber = callback.CurrentChangeNumber,
 				};
 
-				SteamApps.PICSTokensCallback AppTokenInfo;
+				//SteamApps.PICSTokensCallback AppTokenInfo;
 				try
 				{
-					AppTokenInfo = await Apps.PICSGetAccessTokens(AppsThatUpdated.Key, null);
+					//AppTokenInfo = await Apps.PICSGetAccessTokens(AppsThatUpdated.Key, null);
 				}
 				catch
 				{
@@ -109,7 +109,7 @@ namespace SteamUpdateProject.Steam
 						foreach (var CallBackInfoApps in CallBackInfo.Apps)
 						{
 							KeyValue depotKV = CallBackInfoApps.Value.KeyValues.Children.Where(c => c.Name == "depots").FirstOrDefault();
-							if (depotKV != null && !FullProductInfo.IsPublic)
+							if (depotKV != null && FullProductInfo.IsPublic)
 							{
 								KeyValue depotInfo = depotKV["branches"];
 								if (depotInfo == null) continue;
@@ -122,7 +122,6 @@ namespace SteamUpdateProject.Steam
 											TimeSpan t = DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
 											if (((int)t.TotalSeconds - int.Parse(test2.Value)) < 10) // Needed because it can take a couple of seconds to go through the steam pipeline.
 											{
-												Console.WriteLine("Content Update for " + AppUpdate.AppID);
 												AppUpdate.Content = true;
 											}
 										}
@@ -131,6 +130,8 @@ namespace SteamUpdateProject.Steam
 							}
 							AppUpdate.LastUpdated = DateTime.UtcNow;
 							AppUpdate.Name = CallBackInfoApps.Value.KeyValues["common"]["name"].AsString();
+
+							Console.WriteLine(AppUpdate.Content ? "Content Update for " + AppUpdate.AppID : "Update for " + AppUpdate.AppID);
 
 							using (var context = new SQLDataBase(SteamUpdateBot.ConnectionString))
 							{
@@ -336,7 +337,7 @@ namespace SteamUpdateProject.Steam
 
 			MainChangeTimer.Elapsed += (sender, args) => MainChangeTimer_Elapsed(sender, args);
 			MainChangeTimer.AutoReset = true;
-			MainChangeTimer.Interval = 250;
+			MainChangeTimer.Interval = 500;
 			MainChangeTimer.Start();
 		}
 		void OnMachineAuth(SteamUser.UpdateMachineAuthCallback callback)
