@@ -87,10 +87,10 @@ namespace SteamUpdateProject.Steam
 					ChangeNumber = callback.CurrentChangeNumber,
 				};
 
-				//SteamApps.PICSTokensCallback AppTokenInfo;
+				CustomProductInfo FullProductInfo = null;
 				try
 				{
-					//AppTokenInfo = await Apps.PICSGetAccessTokens(AppsThatUpdated.Key, null);
+					FullProductInfo = GetFullProductInfo(AppsThatUpdated.Key).Result;
 				}
 				catch
 				{
@@ -98,7 +98,7 @@ namespace SteamUpdateProject.Steam
 					return;
 				}
 
-				CustomProductInfo FullProductInfo = GetFullProductInfo(AppsThatUpdated.Key).Result;
+				FullProductInfo = GetFullProductInfo(AppsThatUpdated.Key).Result;
 
 				AsyncJobMultiple<SteamApps.PICSProductInfoCallback>.ResultSet ProductInfo = FullProductInfo.ProductInfo;
 

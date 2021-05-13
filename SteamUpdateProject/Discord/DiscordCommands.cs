@@ -13,8 +13,6 @@ namespace SteamUpdateProject.Discord
 {
 	class DiscordCommands
 	{
-		//maybe patchnotes command? or just a version command that is just date of compiliation		
-
 		const int SECOND = 1;
 		const int MINUTE = 60 * SECOND;
 		const int HOUR = 60 * MINUTE;

@@ -73,7 +73,7 @@ namespace SteamUpdateProject.Discord
 			if(DateTime.Now > TimeForStatusUpdate)
 			{
 				await _client.SetGameAsync($"Total Steam updates: {SteamUpdateBot.SteamClient.UpdatesProcessed}");
-				TimeForStatusUpdate = DateTime.Now.AddMinutes(15);
+				TimeForStatusUpdate = DateTime.Now.AddMinutes(5);
 			}
 
 			EmbedBuilder AppEmbed = new EmbedBuilder
@@ -277,7 +277,7 @@ namespace SteamUpdateProject.Discord
 				//GuildInfo = context.GuildInformation.ToList().Where(x => x.GuildID == channelid && guildid == x.GuildID).FirstOrDefault();
 				var FUCK = context.GuildInformation.ToList();
 				
-				foreach (var info in FUCK)
+				foreach (GuildInfo info in FUCK)
 				{
 					if (info.GuildID == guildid && info.ChannelID == channelid)
 					{
