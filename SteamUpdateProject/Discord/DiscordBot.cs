@@ -90,7 +90,7 @@ namespace SteamUpdateProject.Discord
 
 			Embed AppUpdate = AppEmbed.Build();
 
-			using (var context = new SQLDataBase(SteamUpdateBot.ConnectionString))
+			using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
 			{
 				foreach (GuildInfo ServerInfo in context.GuildInformation.Include(x => x.SubscribedApps).ToList())
 				{
@@ -101,7 +101,7 @@ namespace SteamUpdateProject.Discord
 						//continue; //For some reason DMs are broken af
 						try
 						{
-							var _1st = await _client.GetDMChannelAsync((ulong)ServerInfo.ChannelID);
+							IDMChannel _1st = await _client.GetDMChannelAsync((ulong)ServerInfo.ChannelID);
 							if (_1st == null)
 							{
 								_1st = await _client.GetDMChannelAsync((ulong)ServerInfo.ChannelID);
@@ -120,8 +120,8 @@ namespace SteamUpdateProject.Discord
 					{
 						try
 						{
-							var _1st = _client.GetGuild((ulong)ServerInfo.GuildID);
-							var _2nd = _1st.GetTextChannel((ulong)ServerInfo.ChannelID);
+							SocketGuild _1st = _client.GetGuild((ulong)ServerInfo.GuildID);
+							SocketTextChannel _2nd = _1st.GetTextChannel((ulong)ServerInfo.ChannelID);
 							await _2nd.SendMessageAsync(embed: AppUpdate);
 						}
 						catch (Exception e)
@@ -140,7 +140,7 @@ namespace SteamUpdateProject.Discord
 		{
 			if (!info.SubscribedApps.ToList().Where(x => x.AppID == appid).Any())
 			{
-				using (var context = new SQLDataBase(SteamUpdateBot.ConnectionString))
+				using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
 				{
 					context.GuildInformation.RemoveRange(context.GuildInformation.Include(x => x.SubscribedApps).ToList().Where(x => x.ChannelID == info.ChannelID && x.GuildID == info.GuildID));
 					info.SubscribedApps.Add(new SubedApp(appid));
@@ -164,7 +164,7 @@ namespace SteamUpdateProject.Discord
 		{
 			List<uint> ListOfAddedApps = new List<uint>();
 
-			foreach (var appid in listofapps)
+			foreach (uint appid in listofapps)
 			{
 				if (!info.SubscribedApps.ToList().Where(x => x.AppID == appid).Any())
 				{
@@ -174,10 +174,10 @@ namespace SteamUpdateProject.Discord
 
 			if(ListOfAddedApps.Count != 0)
 			{
-				using (var context = new SQLDataBase(SteamUpdateBot.ConnectionString))
+				using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
 				{
 					context.GuildInformation.RemoveRange(context.GuildInformation.Include(x => x.SubscribedApps).ToList().Where(x => x.ChannelID == info.ChannelID && x.GuildID == info.GuildID));
-					foreach(var app in ListOfAddedApps)
+					foreach(uint app in ListOfAddedApps)
 					{
 						info.SubscribedApps.Add(new SubedApp(app));
 					}					
@@ -193,7 +193,7 @@ namespace SteamUpdateProject.Discord
 		{
 			if (!info.SubscribedApps.ToList().Where(x => x.AppID == appid).Any())
 			{
-				using (var context = new SQLDataBase(SteamUpdateBot.ConnectionString))
+				using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
 				{
 					context.GuildInformation.RemoveRange(context.GuildInformation.ToList().Where(x => x.ChannelID == info.ChannelID && x.GuildID == info.GuildID));
 					info.SubscribedApps.Remove(new SubedApp(appid));
@@ -209,7 +209,7 @@ namespace SteamUpdateProject.Discord
 		{
 			List<uint> AppsThatHaveBeenRemoved = new List<uint>();
 
-			foreach (var appid in listofapps)
+			foreach (uint appid in listofapps)
 			{
 				if (info.SubscribedApps.ToList().Where(x => x.AppID == appid).Any())
 				{
@@ -219,12 +219,12 @@ namespace SteamUpdateProject.Discord
 
 			if (AppsThatHaveBeenRemoved.Count != 0)
 			{
-				using (var context = new SQLDataBase(SteamUpdateBot.ConnectionString))
+				using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
 				{
 					context.GuildInformation.RemoveRange(context.GuildInformation.Include(x => x.SubscribedApps).ToList().Where(x => x.ChannelID == info.ChannelID && x.GuildID == info.GuildID));
-					foreach (var appid in listofapps)
+					foreach (uint appid in listofapps)
 					{
-						foreach(var ToBeRemoved in info.SubscribedApps.Where(x => x.AppID == appid).ToList())
+						foreach(SubedApp ToBeRemoved in info.SubscribedApps.Where(x => x.AppID == appid).ToList())
 						{
 							info.SubscribedApps.Remove(ToBeRemoved);
 						}					
@@ -239,9 +239,9 @@ namespace SteamUpdateProject.Discord
 
 		public static AppInfo GetCachedInfo(long appid, bool QuickSearch = false)
 		{
-			using (var context = new SQLDataBase(SteamUpdateBot.ConnectionString))
+			using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
 			{
-				foreach (var test in context.AppInfoData.ToList())
+				foreach (AppInfo test in context.AppInfoData.ToList())
 				{
 					if (test.AppID == appid)
 					{
@@ -272,10 +272,10 @@ namespace SteamUpdateProject.Discord
 		{
 			long guildid = (long)uguildid;
 			long channelid = (long)uchannelid;
-			using (var context = new SQLDataBase(SteamUpdateBot.ConnectionString))
+			using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
 			{
 				//GuildInfo = context.GuildInformation.ToList().Where(x => x.GuildID == channelid && guildid == x.GuildID).FirstOrDefault();
-				var FUCK = context.GuildInformation.ToList();
+				List<GuildInfo> FUCK = context.GuildInformation.ToList();
 				
 				foreach (GuildInfo info in FUCK)
 				{
@@ -298,7 +298,7 @@ namespace SteamUpdateProject.Discord
 			GuildInfo.ChannelID = channelid;
 			GuildInfo.GuildID = guildid;
 
-			using (var context = new SQLDataBase(SteamUpdateBot.ConnectionString))
+			using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
 			{
 				context.GuildInformation.Add(GuildInfo);
 				context.SaveChanges();

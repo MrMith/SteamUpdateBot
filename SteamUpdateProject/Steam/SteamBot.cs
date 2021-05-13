@@ -79,7 +79,7 @@ namespace SteamUpdateProject.Steam
 			if (LastChangeNumber == callback.CurrentChangeNumber) return;
 			LastChangeNumber = callback.CurrentChangeNumber;
 
-			foreach (var AppsThatUpdated in callback.AppChanges)
+			foreach (KeyValuePair<uint, SteamApps.PICSChangesCallback.PICSChangeData> AppsThatUpdated in callback.AppChanges)
 			{
 				AppUpdate AppUpdate = new AppUpdate
 				{
@@ -104,18 +104,18 @@ namespace SteamUpdateProject.Steam
 
 				if (ProductInfo.Complete)
 				{
-					foreach (var CallBackInfo in ProductInfo.Results)
+					foreach (SteamApps.PICSProductInfoCallback CallBackInfo in ProductInfo.Results)
 					{
-						foreach (var CallBackInfoApps in CallBackInfo.Apps)
+						foreach (KeyValuePair<uint, SteamApps.PICSProductInfoCallback.PICSProductInfo> CallBackInfoApps in CallBackInfo.Apps)
 						{
 							KeyValue depotKV = CallBackInfoApps.Value.KeyValues.Children.Where(c => c.Name == "depots").FirstOrDefault();
 							if (depotKV != null && FullProductInfo.IsPublic)
 							{
 								KeyValue depotInfo = depotKV["branches"];
 								if (depotInfo == null) continue;
-								foreach (var test in depotInfo.Children)
+								foreach (KeyValue test in depotInfo.Children)
 								{
-									foreach (var test2 in test.Children)
+									foreach (KeyValue test2 in test.Children)
 									{
 										if (test2.Name == "timeupdated")
 										{
@@ -133,7 +133,7 @@ namespace SteamUpdateProject.Steam
 
 							Console.WriteLine(AppUpdate.Content ? "Content Update for " + AppUpdate.AppID : "Update for " + AppUpdate.AppID);
 
-							using (var context = new SQLDataBase(SteamUpdateBot.ConnectionString))
+							using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
 							{
 								context.AppInfoData.RemoveRange(context.AppInfoData.ToList().Where(x => x.AppID == AppUpdate.AppID));
 
@@ -168,7 +168,7 @@ namespace SteamUpdateProject.Steam
 				return test.Name;
 			}
 
-			var ProductInfo = await Apps.PICSGetProductInfo(appid, null);
+			AsyncJobMultiple<SteamApps.PICSProductInfoCallback>.ResultSet ProductInfo = await Apps.PICSGetProductInfo(appid, null);
 
 			AppInfo appInfo = new AppInfo()
 			{
@@ -177,13 +177,13 @@ namespace SteamUpdateProject.Steam
 
 			if (ProductInfo.Complete)
 			{
-				foreach (var CallBackInfo in ProductInfo.Results)
+				foreach (SteamApps.PICSProductInfoCallback CallBackInfo in ProductInfo.Results)
 				{
-					foreach (var CallBackInfoApps in CallBackInfo.Apps)
+					foreach (KeyValuePair<uint, SteamApps.PICSProductInfoCallback.PICSProductInfo> CallBackInfoApps in CallBackInfo.Apps)
 					{
 						appInfo.Name = CallBackInfoApps.Value.KeyValues["common"]["name"].AsString();
 
-						using (var context = new SQLDataBase(SteamUpdateBot.ConnectionString))
+						using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
 						{
 							context.AppInfoData.Add(appInfo);
 							context.SaveChanges();
@@ -200,7 +200,7 @@ namespace SteamUpdateProject.Steam
 		public async Task<bool> IsSteamDown()
 		{
 
-			var ProductInfo = await Apps.PICSGetProductInfo(570, null);
+			AsyncJobMultiple<SteamApps.PICSProductInfoCallback>.ResultSet ProductInfo = await Apps.PICSGetProductInfo(570, null);
 			if (ProductInfo.Failed)
 			{
 				return false;
@@ -342,17 +342,16 @@ namespace SteamUpdateProject.Steam
 		}
 		void OnMachineAuth(SteamUser.UpdateMachineAuthCallback callback)
 		{
-
 			int fileSize;
 			byte[] sentryHash;
-			using (var fs = File.Open("sentry.bin", FileMode.OpenOrCreate, FileAccess.ReadWrite))
+			using (FileStream fs = File.Open("sentry.bin", FileMode.OpenOrCreate, FileAccess.ReadWrite))
 			{
 				fs.Seek(callback.Offset, SeekOrigin.Begin);
 				fs.Write(callback.Data, 0, callback.BytesToWrite);
 				fileSize = (int)fs.Length;
 
 				fs.Seek(0, SeekOrigin.Begin);
-				using var sha = SHA1.Create();
+				using SHA1 sha = SHA1.Create();
 				sentryHash = sha.ComputeHash(fs);
 			}
 			steamUser.SendMachineAuthResponse(new SteamUser.MachineAuthDetails

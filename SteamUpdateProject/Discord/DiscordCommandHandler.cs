@@ -40,11 +40,11 @@ namespace SteamUpdateProject.Discord
 			if (!(rawMessage is SocketUserMessage message)) return;
 			if (message.Source != MessageSource.User) return;
 
-			var argPos = 0;
+			int argPos = 0;
 
 			if (!message.HasCharPrefix('!', ref argPos)) return;
 
-			var context = new SocketCommandContext(_discord, message);
+			SocketCommandContext context = new SocketCommandContext(_discord, message);
 
 			await _commands.ExecuteAsync(context, argPos, _services);
 		}

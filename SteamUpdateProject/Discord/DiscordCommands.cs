@@ -118,7 +118,7 @@ namespace SteamUpdateProject.Discord
 						}
 					}
 
-					var ListOfConfirmedAppsAdded = DiscordBot.SubMultipleApps(ListOfAppIDS, GuildInfo);
+					List<uint> ListOfConfirmedAppsAdded = DiscordBot.SubMultipleApps(ListOfAppIDS, GuildInfo);
 
 					if (ListOfConfirmedAppsAdded.Count == 0)
 					{
@@ -183,7 +183,7 @@ namespace SteamUpdateProject.Discord
 				}
 
 				StringBuilder ListTest = new StringBuilder();
-				foreach (var SubbedApp in GuildInfo.SubscribedApps.ToList())
+				foreach (SubedApp SubbedApp in GuildInfo.SubscribedApps.ToList())
 				{
 					AppInfo AppInfo = DiscordBot.GetCachedInfo(SubbedApp.AppID);
 
@@ -207,8 +207,8 @@ namespace SteamUpdateProject.Discord
 
 			public string ElapsedTime(DateTime? nullabledtEvent)
 			{
-				var dtEvent = (DateTime)nullabledtEvent;
-				var ts = new TimeSpan(DateTime.UtcNow.Ticks - dtEvent.Ticks);
+				DateTime dtEvent = (DateTime)nullabledtEvent;
+				TimeSpan ts = new TimeSpan(DateTime.UtcNow.Ticks - dtEvent.Ticks);
 				double delta = Math.Abs(ts.TotalSeconds);
 
 				if (delta < 1 * MINUTE)
@@ -283,7 +283,7 @@ namespace SteamUpdateProject.Discord
 
 				if (GuildInfo != null)
 				{
-					using (var context = new SQLDataBase(SteamUpdateBot.ConnectionString))
+					using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
 					{
 						context.GuildInformation.RemoveRange(context.GuildInformation.Include(x => x.SubscribedApps).ToList().Where(x => x.ChannelID == GuildInfo.ChannelID && x.GuildID == GuildInfo.GuildID));
 						GuildInfo.ShowContent = Set;
@@ -302,9 +302,9 @@ namespace SteamUpdateProject.Discord
 				if (Context.Guild != null)
 				{
 					SocketGuildUser user = Context.User as SocketGuildUser;
-					var roles = (user as IGuildUser).Guild.Roles;
+					IReadOnlyCollection<IRole> roles = (user as IGuildUser).Guild.Roles;
 
-					foreach (var role in roles)
+					foreach (IRole role in roles)
 					{
 						if (role.Permissions.Administrator || role.Permissions.ManageChannels)
 						{
@@ -329,7 +329,7 @@ namespace SteamUpdateProject.Discord
 
 				if (GuildInfo != null)
 				{
-					using (var context = new SQLDataBase(SteamUpdateBot.ConnectionString))
+					using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
 					{
 						context.GuildInformation.RemoveRange(context.GuildInformation.Include(x => x.SubscribedApps).ToList().Where(x => x.ChannelID == GuildInfo.ChannelID && x.GuildID == GuildInfo.GuildID));
 						GuildInfo.DebugMode = Set;
@@ -378,17 +378,18 @@ namespace SteamUpdateProject.Discord
 				{
 					await ReplyAsync($"You're not authorized to use this command.");
 				}
-				var FakeUpdatedApp = new AppUpdate();
+				AppUpdate FakeUpdatedApp = new AppUpdate();
 				FakeUpdatedApp.Name = SteamUpdateBot.SteamClient.GetAppName(appid).Result;
 				FakeUpdatedApp.AppID = appid;
 				FakeUpdatedApp.Content = true;
 				FakeUpdatedApp.ChangeNumber = 1;
 				FakeUpdatedApp.LastUpdated = DateTime.UtcNow.AddYears(10);
 
-				using (var context = new SQLDataBase(SteamUpdateBot.ConnectionString))
+				/*
+				using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
 				{
 					context.AppInfoData.RemoveRange(context.AppInfoData.ToList().Where(x => x.AppID == FakeUpdatedApp.AppID));
-					var test = new AppInfo()
+					AppInfo test = new AppInfo()
 					{
 						Name = FakeUpdatedApp.Name,
 						AppID = appid,
@@ -399,6 +400,7 @@ namespace SteamUpdateProject.Discord
 
 					context.SaveChanges();
 				}
+				*/
 
 				SteamUpdateBot.DiscordClient.AppUpdated(FakeUpdatedApp);
 
