@@ -317,7 +317,6 @@ namespace SteamUpdateProject.Discord
 				{
 					HasPermission = true;
 				}
-				
 
 				if(!HasPermission)
 				{
