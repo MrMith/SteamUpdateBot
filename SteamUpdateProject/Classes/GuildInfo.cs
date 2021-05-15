@@ -16,6 +16,7 @@ namespace SteamUpdateProject
 		public long ChannelID { get; set; }
 		public bool ShowContent { get; set; }
 		public bool DebugMode { get; set; }
+		public bool PublicDepoOnly { get; set; }
 
 		public virtual List<SubedApp> SubscribedApps { get; set; } = new List<SubedApp>(); //Why in the living fuck can't I just make a int list? It never populates the list but if I make this shitty class it will load from the database properly. If you know why please yell at me because I don't know what these cocaine fueled coders are doing with this shit
 

@@ -3,6 +3,8 @@ using SteamUpdateProject.Discord;
 using SteamUpdateProject.Steam;
 using System.IO;
 using System.Runtime.ExceptionServices;
+using Discord;
+using Discord.WebSocket;
 
 namespace SteamUpdateProject
 {
@@ -16,7 +18,7 @@ namespace SteamUpdateProject
 		private static SQLDataBase Database;
 
 		public static string LogPath = Directory.GetCurrentDirectory() + "\\logs\\";
-		public static string ConnectionString = @"Data Source=(localdb)\mssqllocaldb;Initial Catalog=SteamUpdateProjectAids4.SQLDataBase;Integrated Security=True;MultipleActiveResultSets=True";
+		public static string ConnectionString = @"Data Source=(localdb)\mssqllocaldb;Initial Catalog=SteamUpdateProjectTest1.SQLDataBase;Integrated Security=True;MultipleActiveResultSets=True";
 		public static void Main(string[] args)
 		{
 			Database = new SQLDataBase(ConnectionString);
@@ -45,7 +47,10 @@ namespace SteamUpdateProject
 
 		public static void LogCancer(Exception e)
 		{
-			if( e is IOException)
+			if (e is System.Threading.Tasks.TaskCanceledException)
+				return;
+
+			if(e is IOException)
 			{
 				Console.WriteLine(e.InnerException);
 				Console.WriteLine(e.Message);

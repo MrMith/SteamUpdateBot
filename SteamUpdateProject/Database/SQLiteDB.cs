@@ -25,6 +25,11 @@ namespace SteamUpdateProject
 		protected override void OnModelCreating(DbModelBuilder modelBuilder)
 		{
 			modelBuilder.Conventions.Remove<PluralizingEntitySetNameConvention>();
+
+			modelBuilder.Entity<GuildInfo>()
+			.HasMany(p => p.SubscribedApps)
+			.WithOptional()
+			.WillCascadeOnDelete(true);
 		}
 	}
 }

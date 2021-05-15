@@ -257,6 +257,7 @@ namespace SteamUpdateProject.Discord
 				HelpBuilder.AddField("!remove", "Remove a subscription to a Steam Application so you no longer see when it updates by appid (Ex: !remove 730 or !remove 730 530)");
 				HelpBuilder.AddField("!all", "Show all updates (like if the store tags update) or only content updates. Defaults to false. (Ex: !all true)");
 				HelpBuilder.AddField("!status", "Shows the ping of the bot to discord, if steam is down and total updates processed this session.");
+				HelpBuilder.AddField("!public", "Will only send messages if the default public steam branch is updated. (Ex: !public true or !debug false)");
 				HelpBuilder.AddField("!debug", "**NOT RECOMMENDED** Pipes every update through this channel regardless of subscriptions. (Ex: !debug true or !debug false)");
 				await ReplyAsync(embed: HelpBuilder.Build());
 			}
@@ -298,27 +299,7 @@ namespace SteamUpdateProject.Discord
 			[Command("debug")]
 			public async Task DebugBool(bool Set)
 			{
-				bool HasPermission = false;
-				if (Context.Guild != null)
-				{
-					SocketGuildUser user = Context.User as SocketGuildUser;
-					IReadOnlyCollection<IRole> roles = (user as IGuildUser).Guild.Roles;
-
-					foreach (IRole role in roles)
-					{
-						if (role.Permissions.Administrator || role.Permissions.ManageChannels)
-						{
-							HasPermission = true;
-							break;
-						}
-					}
-				}
-				else //In DMs they should have control ect
-				{
-					HasPermission = true;
-				}
-
-				if(!HasPermission)
+				if(!UserHasPermission(Context.User, Context.Guild))
 				{
 					await ReplyAsync("Insufficient permissions to execute this command.");
 					return;
@@ -341,6 +322,40 @@ namespace SteamUpdateProject.Discord
 
 			}
 
+			[Command("public")]
+			public async Task PublicBool()
+			{
+				GuildInfo GuildInfo = DiscordBot.GetGuildInfo(Context.Guild == null ? 0 : Context.Guild.Id, Context.Channel.Id);
+
+				await ReplyAsync($"Public mode is currently set to {GuildInfo.PublicDepoOnly}.");
+			}
+
+			[Command("public")]
+			public async Task PublicBool(bool Set)
+			{
+				if (!UserHasPermission(Context.User, Context.Guild))
+				{
+					await ReplyAsync("Insufficient permissions to execute this command.");
+					return;
+				}
+
+				GuildInfo GuildInfo = DiscordBot.GetGuildInfo(Context.Guild == null ? 0 : Context.Guild.Id, Context.Channel.Id);
+
+				if (GuildInfo != null)
+				{
+					using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
+					{
+						context.GuildInformation.RemoveRange(context.GuildInformation.Include(x => x.SubscribedApps).ToList().Where(x => x.ChannelID == GuildInfo.ChannelID && x.GuildID == GuildInfo.GuildID));
+						GuildInfo.PublicDepoOnly = Set;
+						context.GuildInformation.Add(GuildInfo);
+						context.SaveChanges();
+					}
+				}
+
+				await ReplyAsync($"Public mode set to {Set}.");
+
+			}
+
 			[Command("debug")]
 			public async Task DebugBool()
 			{
@@ -348,6 +363,8 @@ namespace SteamUpdateProject.Discord
 
 				await ReplyAsync($"Debug mode is currently set to {GuildInfo.DebugMode}.");
 			}
+
+
 
 			[Command("status")]
 			public async Task Status()
@@ -404,6 +421,28 @@ namespace SteamUpdateProject.Discord
 				SteamUpdateBot.DiscordClient.AppUpdated(FakeUpdatedApp);
 
 				await ReplyAsync($"Pushed a fake update for {FakeUpdatedApp.Name} ({FakeUpdatedApp.AppID})");
+			}
+
+			public bool UserHasPermission(SocketUser userToBeChecked, SocketGuild guildToBeChecked)
+			{
+				if (guildToBeChecked != null)
+				{
+					SocketGuildUser user = userToBeChecked as SocketGuildUser;
+					IReadOnlyCollection<IRole> roles = (user as IGuildUser).Guild.Roles;
+
+					foreach (IRole role in roles)
+					{
+						if (role.Permissions.Administrator || role.Permissions.ManageChannels)
+						{
+							return true;
+						}
+					}
+					return false;
+				}
+				else //In DMs they should have control ect
+				{
+					return true;
+				}
 			}
 		}
 	}

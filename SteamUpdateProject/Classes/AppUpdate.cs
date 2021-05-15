@@ -11,5 +11,6 @@ namespace SteamUpdateProject
 		public uint ChangeNumber { get; set; }
 		public bool Content { get; set; }
 		public DateTime LastUpdated { get; set; }
+		public string DepoName { get; set; }
 	}
 }

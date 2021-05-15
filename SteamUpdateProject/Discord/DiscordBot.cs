@@ -88,6 +88,10 @@ namespace SteamUpdateProject.Discord
 			AppEmbed.AddField("Change Number", app.ChangeNumber == 1 ? "DEBUG TEST UPDATE - IGNORE" : app.ChangeNumber.ToString(), true);
 			AppEmbed.AddField("AppID", app.AppID);
 
+			if(app.DepoName != null)
+				AppEmbed.AddField("Depo Changed", app.DepoName, true);
+
+
 			Embed AppUpdate = AppEmbed.Build();
 
 			using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
@@ -96,6 +100,7 @@ namespace SteamUpdateProject.Discord
 				{
 					if (!ServerInfo.SubscribedApps.Where(x => x.AppID == app.AppID).Any() && !ServerInfo.DebugMode) continue;
 					if (!app.Content && !ServerInfo.ShowContent && !ServerInfo.DebugMode) continue;
+					if (app.DepoName != null && ServerInfo.PublicDepoOnly && app.DepoName != "public") continue;
 					if (ServerInfo.GuildID == 0)
 					{
 						//continue; //For some reason DMs are broken af
@@ -191,15 +196,19 @@ namespace SteamUpdateProject.Discord
 
 		public static bool RemoveApp(uint appid, GuildInfo info)
 		{
-			if (!info.SubscribedApps.ToList().Where(x => x.AppID == appid).Any())
+			if (info.SubscribedApps.ToList().Where(x => x.AppID == appid).Any())
 			{
 				using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
 				{
-					context.GuildInformation.RemoveRange(context.GuildInformation.ToList().Where(x => x.ChannelID == info.ChannelID && x.GuildID == info.GuildID));
-					info.SubscribedApps.Remove(new SubedApp(appid));
+					context.GuildInformation.RemoveRange(context.GuildInformation.Include(x => x.SubscribedApps).ToList().Where(x => x.ChannelID == info.ChannelID && x.GuildID == info.GuildID));
+					foreach(SubedApp ToBeRemoved in info.SubscribedApps.Where(x => x.AppID == appid).ToList())
+					{
+						info.SubscribedApps.Remove(ToBeRemoved);
+					}
 					context.GuildInformation.Add(info);
-					return true;
+					context.SaveChanges();
 				}
+				return true;
 			}
 
 			return false;

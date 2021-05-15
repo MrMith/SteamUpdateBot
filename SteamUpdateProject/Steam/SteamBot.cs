@@ -31,8 +31,8 @@ namespace SteamUpdateProject.Steam
 		public SteamBot(string[] args, DiscordBot bot)
 		{
 			DiscordClient = bot;
-			user = "lobby_creator2";//args[0];
-			pass = "imakelobbies123";//args[1];
+			user = "lobby_creator3";//args[0]; //This is a fodder steam account so I snooze
+			pass = "WHkAeZqzfFHE6Qd";//args[1];
 			steamClient = new SteamClient();
 
 			steamUser = steamClient.GetHandler<SteamUser>();
@@ -108,6 +108,7 @@ namespace SteamUpdateProject.Steam
 					{
 						foreach (KeyValuePair<uint, SteamApps.PICSProductInfoCallback.PICSProductInfo> CallBackInfoApps in CallBackInfo.Apps)
 						{
+							string DepoChanged = null;
 							KeyValue depotKV = CallBackInfoApps.Value.KeyValues.Children.Where(c => c.Name == "depots").FirstOrDefault();
 							if (depotKV != null && FullProductInfo.IsPublic)
 							{
@@ -122,6 +123,7 @@ namespace SteamUpdateProject.Steam
 											TimeSpan t = DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
 											if (((int)t.TotalSeconds - int.Parse(test2.Value)) < 10) // Needed because it can take a couple of seconds to go through the steam pipeline.
 											{
+												DepoChanged = test.Name;
 												AppUpdate.Content = true;
 											}
 										}
@@ -130,7 +132,8 @@ namespace SteamUpdateProject.Steam
 							}
 							AppUpdate.LastUpdated = DateTime.UtcNow;
 							AppUpdate.Name = CallBackInfoApps.Value.KeyValues["common"]["name"].AsString();
-
+							
+							AppUpdate.DepoName = DepoChanged;
 							Console.WriteLine(AppUpdate.Content ? "Content Update for " + AppUpdate.AppID : "Update for " + AppUpdate.AppID);
 
 							using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
