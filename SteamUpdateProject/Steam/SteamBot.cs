@@ -12,6 +12,8 @@ using System.Data.Entity;
 
 namespace SteamUpdateProject.Steam
 {
+	//Issue
+	//: We're getting rate limited by steam so we cannot figure out if its a content update and what depo is being downloaded :(
 	class SteamBot
 	{
 		readonly DiscordBot DiscordClient;
@@ -98,7 +100,7 @@ namespace SteamUpdateProject.Steam
 					return;
 				}
 
-				FullProductInfo = GetFullProductInfo(AppsThatUpdated.Key).Result;
+				//FullProductInfo = GetFullProductInfo(AppsThatUpdated.Key).Result;
 
 				AsyncJobMultiple<SteamApps.PICSProductInfoCallback>.ResultSet ProductInfo = FullProductInfo.ProductInfo;
 
@@ -214,6 +216,9 @@ namespace SteamUpdateProject.Steam
 
 		public static async Task<ulong> GetAccessToken(uint appid)
 		{
+			if (!SteamUpdateBot.DiscordClient.IsAppSubscribed(appid))
+				return 0; //This helps with rate limiting.
+
 			SteamApps.PICSTokensCallback AppTokenInfo;
 			try
 			{

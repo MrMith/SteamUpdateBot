@@ -68,6 +68,10 @@ namespace SteamUpdateProject.Discord
 				.BuildServiceProvider();
 		}
 
+		/// <summary>
+		/// This will take an <see cref="AppUpdate"/> and take that information and send discord messages to <see cref="GuildInfo"/> that have those Apps subscribed.
+		/// </summary>
+		/// <param name="app"><see cref="AppUpdate"/> that has information like the Steam AppID, if its a content update and the Depo name.</param>
 		public async void AppUpdated(AppUpdate app)
 		{
 			if(DateTime.Now > TimeForStatusUpdate)
@@ -141,6 +145,12 @@ namespace SteamUpdateProject.Discord
 			}
 		}
 
+		/// <summary>
+		/// Takes one steam AppID and adds them to the subscribed list of the relevant <see cref="GuildInfo"/>.
+		/// </summary>
+		/// <param name="appid">Relevant AppID.</param>
+		/// <param name="info">Relevant <see cref="GuildInfo"/></param>
+		/// <returns>If the app was added to the relevant <see cref="GuildInfo"/></returns>
 		public static bool SubApp(uint appid, GuildInfo info)
 		{
 			if (!info.SubscribedApps.ToList().Where(x => x.AppID == appid).Any())
@@ -160,11 +170,11 @@ namespace SteamUpdateProject.Discord
 		}
 
 		/// <summary>
-		/// Takes list of apps and the guild that added them and returns list of apps that they've actually added.
+		/// Takes list of steam appIDs and adds them to the subscribed list of the relevant <see cref="GuildInfo"/>.
 		/// </summary>
 		/// <param name="listofapps">List of apps to add.</param>
-		/// <param name="info">Information about the guild.</param>
-		/// <returns></returns>
+		/// <param name="info">Relevant <see cref="GuildInfo"/></param>
+		/// <returns>List of AppIDs that were added to the subscribed list of <see cref="GuildInfo"/>.</returns>
 		public static List<uint> SubMultipleApps(List<uint> listofapps, GuildInfo info)
 		{
 			List<uint> ListOfAddedApps = new List<uint>();
@@ -194,6 +204,12 @@ namespace SteamUpdateProject.Discord
 			return ListOfAddedApps;
 		}
 
+		/// <summary>
+		/// Removes multiple one AppID from a <see cref="GuildInfo"/>
+		/// </summary>
+		/// <param name="appid">Relevant AppID</param>
+		/// <param name="info">Relevant <see cref="GuildInfo"/></param>
+		/// <returns></returns>
 		public static bool RemoveApp(uint appid, GuildInfo info)
 		{
 			if (info.SubscribedApps.ToList().Where(x => x.AppID == appid).Any())
@@ -214,11 +230,17 @@ namespace SteamUpdateProject.Discord
 			return false;
 		}
 
-		public static List<uint> RemoveMultipleApps(List<uint> listofapps, GuildInfo info)
+		/// <summary>
+		/// Removes multiple subscribed AppIDs from a <see cref="GuildInfo"/>
+		/// </summary>
+		/// <param name="listofapps">Relevant list of AppIDs</param>
+		/// <param name="info">Relevant <see cref="GuildInfo"/></param>
+		/// <returns></returns>
+		public static List<uint> RemoveMultipleApps(List<uint> listOfApps, GuildInfo info)
 		{
 			List<uint> AppsThatHaveBeenRemoved = new List<uint>();
 
-			foreach (uint appid in listofapps)
+			foreach (uint appid in listOfApps)
 			{
 				if (info.SubscribedApps.ToList().Where(x => x.AppID == appid).Any())
 				{
@@ -231,7 +253,7 @@ namespace SteamUpdateProject.Discord
 				using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
 				{
 					context.GuildInformation.RemoveRange(context.GuildInformation.Include(x => x.SubscribedApps).ToList().Where(x => x.ChannelID == info.ChannelID && x.GuildID == info.GuildID));
-					foreach (uint appid in listofapps)
+					foreach (uint appid in listOfApps)
 					{
 						foreach(SubedApp ToBeRemoved in info.SubscribedApps.Where(x => x.AppID == appid).ToList())
 						{
@@ -246,6 +268,12 @@ namespace SteamUpdateProject.Discord
 			return AppsThatHaveBeenRemoved;
 		}
 
+		/// <summary>
+		/// Will attempt to get <see cref="AppInfo"/> from database and if it cannot it will create that information in the database (Only QuickSearch is false)
+		/// </summary>
+		/// <param name="appid">Relevant Steam AppID</param>
+		/// <param name="QuickSearch">Do we only search Database or check database and nothing is found search info from steam</param>
+		/// <returns></returns>
 		public static AppInfo GetCachedInfo(long appid, bool QuickSearch = false)
 		{
 			using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
@@ -277,6 +305,12 @@ namespace SteamUpdateProject.Discord
 			return null;
 		}
 
+		/// <summary>
+		/// Gets <see cref="GuildInfo"/> from database and if there isn't one it will create one and save it in the database.
+		/// </summary>
+		/// <param name="uguildid">Discord Guild ID</param>
+		/// <param name="uchannelid">Discord Text Channel ID</param>
+		/// <returns></returns>
 		public static GuildInfo GetGuildInfo(ulong uguildid, ulong uchannelid)
 		{
 			long guildid = (long)uguildid;
@@ -296,7 +330,8 @@ namespace SteamUpdateProject.Discord
 							ChannelID = info.ChannelID,
 							SubscribedApps = info.SubscribedApps,
 							ShowContent = info.ShowContent,
-							DebugMode = info.DebugMode
+							DebugMode = info.DebugMode,
+							PublicDepoOnly = info.PublicDepoOnly
 						};
 					}
 				}
@@ -314,6 +349,30 @@ namespace SteamUpdateProject.Discord
 			}
 
 			return GuildInfo;
+		}
+
+		/// <summary>
+		/// This checks if a steam app has a guild that is subscribed to it. This is a temp solution to help with steam rate limiting because I don't want to refactor the entire program to add a job system similar to how SteamDB's job system works.
+		/// </summary>
+		/// <param name="appid"></param>
+		/// <returns>If this steam AppID has a server that is subscribed to it.</returns>
+		public bool IsAppSubscribed(uint appid)
+		{
+			using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
+			{
+				foreach(GuildInfo Guild in context.GuildInformation.ToList())
+				{
+					foreach(var AppID in Guild.SubscribedApps)
+					{
+						if(appid == AppID.AppID)
+						{
+							return true;
+						}
+					}
+				}
+			}
+
+			return false;
 		}
 	}
 }
