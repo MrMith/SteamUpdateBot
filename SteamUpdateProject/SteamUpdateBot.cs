@@ -1,5 +1,5 @@
 ﻿using System;
-using SteamUpdateProject.Discord;
+using SteamUpdateProject.DiscordLogic;
 using SteamUpdateProject.Steam;
 using System.IO;
 using System.Runtime.ExceptionServices;
@@ -13,7 +13,8 @@ namespace SteamUpdateProject
 		public static DiscordBot DiscordClient;
 		public static SteamBot SteamClient;
 
-		public static int Exceptions = 0;
+		public static int Exceptions = 0; // Total number of exceptions :)
+		public static int ContentUpdates = 0; // Total number of apps with detectable content filled updates (Basically if its not a store tag change and its public.)
 
 		private static SQLDataBase Database;
 
@@ -47,7 +48,7 @@ namespace SteamUpdateProject
 
 		public static void LogCancer(Exception e)
 		{
-			if (e is System.Threading.Tasks.TaskCanceledException)
+			if (e is System.Threading.Tasks.TaskCanceledException || e is System.Net.WebSockets.WebSocketException || e is Discord.WebSocket.GatewayReconnectException)
 				return;
 
 			if(e is IOException)

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 
-namespace SteamUpdateProject.Discord
+namespace SteamUpdateProject.DiscordLogic
 {
 	class DiscordCommandHandler
 	{

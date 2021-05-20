@@ -10,7 +10,7 @@ using System.Linq;
 using System.Threading;
 using System.Data.Entity;
 
-namespace SteamUpdateProject.Discord
+namespace SteamUpdateProject.DiscordLogic
 {
 	class DiscordBot
 	{

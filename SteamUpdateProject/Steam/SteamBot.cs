@@ -6,18 +6,18 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
-using SteamUpdateProject.Discord;
+using SteamUpdateProject.DiscordLogic;
 using System.Linq;
 using System.Data.Entity;
 
 namespace SteamUpdateProject.Steam
 {
 	//Issue
-	//: We're getting rate limited by steam so we cannot figure out if its a content update and what depo is being downloaded :(
+	//: We're getting rate limited by steam so we cannot figure out if its a content update and what depo is being updated :(
 	class SteamBot
 	{
 		readonly DiscordBot DiscordClient;
-		readonly System.Timers.Timer MainChangeTimer = new System.Timers.Timer(50);
+		readonly System.Timers.Timer MainChangeTimer = new System.Timers.Timer(250);
 		uint LastChangeNumber = 0;
 		public double UpdatesProcessed;
 
@@ -67,10 +67,9 @@ namespace SteamUpdateProject.Steam
 		}
 
 		/// <summary>
-		/// Debug logging, comment this out and I know where all of my temp logging is and can remove them since 99.9999% of the time they're only temp.
+		/// Debug logging, comment this out and I know where all of my temp logging is and can remove it.
 		/// </summary>
-		public void LogShit(string lol) => Console.WriteLine(lol);
-
+		public void LogShit(string Log) => Console.WriteLine(Log);
 
 		/// <summary>
 		/// Main logic to loop through all of steam's changes.
@@ -92,7 +91,7 @@ namespace SteamUpdateProject.Steam
 				CustomProductInfo FullProductInfo = null;
 				try
 				{
-					FullProductInfo = GetFullProductInfo(AppsThatUpdated.Key).Result;
+					FullProductInfo = await GetFullProductInfo(AppsThatUpdated.Key);
 				}
 				catch
 				{
@@ -127,6 +126,7 @@ namespace SteamUpdateProject.Steam
 											{
 												DepoChanged = test.Name;
 												AppUpdate.Content = true;
+												SteamUpdateBot.ContentUpdates++;
 											}
 										}
 									}
@@ -241,7 +241,7 @@ namespace SteamUpdateProject.Steam
 
 			SteamApps.PICSRequest request = new SteamApps.PICSRequest(appid);
 
-			ulong AccessToken = GetAccessToken(appid).Result;
+			ulong AccessToken = await GetAccessToken(appid);
 
 			if (AccessToken == 0)
 			{

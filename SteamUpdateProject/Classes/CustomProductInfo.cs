@@ -7,7 +7,7 @@ using System.Security.Cryptography;
 using System.Threading;
 using System.Timers;
 using System.Threading.Tasks;
-using SteamUpdateProject.Discord;
+using SteamUpdateProject.DiscordLogic;
 using System.Diagnostics;
 using System.Linq;
 

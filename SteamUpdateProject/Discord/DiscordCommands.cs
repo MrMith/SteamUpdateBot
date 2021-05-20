@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using System.Data.Entity;
 using Discord.WebSocket;
 
-namespace SteamUpdateProject.Discord
+namespace SteamUpdateProject.DiscordLogic
 {
 	class DiscordCommands
 	{
@@ -384,7 +384,7 @@ namespace SteamUpdateProject.Discord
 
 				}
 
-				await ReplyAsync($"Ping is {Context.Client.Latency}.\nSteam Status: {(steamStatus ? "Online" : "Offline")}.\nTotal updates processed: {SteamUpdateBot.SteamClient.UpdatesProcessed} ({(int)(SteamUpdateBot.SteamClient.UpdatesProcessed / (DateTime.UtcNow - Process.GetCurrentProcess().StartTime.ToUniversalTime()).TotalMinutes)} per minute)\nTotal Execeptions: {SteamUpdateBot.Exceptions}");
+				await ReplyAsync($"Ping: {Context.Client.Latency}.\nSteam Status: {(steamStatus ? "Online" : "Offline")}.\nTotal updates processed: {SteamUpdateBot.SteamClient.UpdatesProcessed} ({(int)(SteamUpdateBot.SteamClient.UpdatesProcessed / (DateTime.UtcNow - Process.GetCurrentProcess().StartTime.ToUniversalTime()).TotalMinutes)} per minute)\nTotal content updates: {SteamUpdateBot.ContentUpdates}.\nTotal Execeptions: {SteamUpdateBot.Exceptions}");
 			}
 
 			[Command("forceupdate")]
