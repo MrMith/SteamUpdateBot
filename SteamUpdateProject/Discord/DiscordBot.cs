@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Drawing;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
-using Discord;
-using Discord.WebSocket;
-using Discord.Commands;
+using DSharpPlus;
+using DSharpPlus.Entities;
+using DSharpPlus.CommandsNext;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -14,42 +15,37 @@ namespace SteamUpdateProject.DiscordLogic
 {
 	class DiscordBot
 	{
-		public DiscordSocketClient _client;
+		public DiscordClient _client;
 		private readonly Random rand = new Random();
 		private ServiceProvider services;
 		private DateTime TimeForStatusUpdate = DateTime.Now;
-		public DiscordBot()
+		private bool BotReady = false;
+
+		public async Task StartDiscordBot(string token)
 		{
-			_client = new DiscordSocketClient();
-			_client.Ready += ReadyAsync;
-		}
-
-		public async Task MainAsync(string token)
-		{
-			services = ConfigureServices();
-			_client = services.GetRequiredService<DiscordSocketClient>();
-
-			_client.Log += LogAsync;
-			services.GetRequiredService<CommandService>().Log += LogAsync;
-
-			try
+			_client = new DiscordClient(new DiscordConfiguration()
 			{
-				await _client.LoginAsync(TokenType.Bot, token);
-				await _client.StartAsync();
+				Token = token,
+				TokenType = TokenType.Bot,
+				Intents = DiscordIntents.AllUnprivileged
 
-				await services.GetRequiredService<DiscordCommandHandler>().InitializeAsync();
-			}
-			catch
+			});
+			var commands = _client.UseCommandsNext(new CommandsNextConfiguration()
 			{
-				throw new Exception("Error logging into discord bot.");
-			}
+				StringPrefixes = new[] { "!" }
+			});
+
+			commands.RegisterCommands<DiscordCommands.PublicModule>();
+
+			await _client.ConnectAsync();
+			BotReady = true;
 		}
 
-		private Task LogAsync(LogMessage log)
-		{
-			Console.WriteLine(log.ToString());
-			return Task.CompletedTask;
-		}
+		//private Task LogAsync(LogMessage log)
+		//{
+		//	Console.WriteLine(log.ToString());
+		//	return Task.CompletedTask;
+		//}
 
 		private Task ReadyAsync()
 		{
@@ -58,31 +54,23 @@ namespace SteamUpdateProject.DiscordLogic
 			return Task.CompletedTask;
 		}
 
-		private ServiceProvider ConfigureServices()
-		{
-			return new ServiceCollection()
-				.AddSingleton<DiscordSocketClient>()
-				.AddSingleton<CommandService>()
-				.AddSingleton<DiscordCommandHandler>()
-				.AddSingleton<HttpClient>()
-				.BuildServiceProvider();
-		}
-
 		/// <summary>
 		/// This will take an <see cref="AppUpdate"/> and take that information and send discord messages to <see cref="GuildInfo"/> that have those Apps subscribed.
 		/// </summary>
 		/// <param name="app"><see cref="AppUpdate"/> that has information like the Steam AppID, if its a content update and the Depo name.</param>
 		public async void AppUpdated(AppUpdate app)
 		{
+			if (!BotReady) return;
+
 			if(DateTime.Now > TimeForStatusUpdate)
 			{
-				await _client.SetGameAsync($"Total Steam updates: {SteamUpdateBot.SteamClient.UpdatesProcessed}");
+				await _client.UpdateStatusAsync(new DiscordActivity($"Total Steam updates: {SteamUpdateBot.SteamClient.UpdatesProcessed}"));
 				TimeForStatusUpdate = DateTime.Now.AddMinutes(5);
 			}
 
-			EmbedBuilder AppEmbed = new EmbedBuilder
+			DiscordEmbedBuilder AppEmbed = new DiscordEmbedBuilder
 			{
-				Color = new Color(rand.Next(0, 255), rand.Next(0, 255), rand.Next(0, 255)),
+				Color = new DiscordColor(rand.Next(1, 100) / 100, rand.Next(1, 100)/100, rand.Next(1, 100)/100),
 				Timestamp = DateTimeOffset.UtcNow,
 				Title = "Steam App Update!"
 			};
@@ -90,13 +78,13 @@ namespace SteamUpdateProject.DiscordLogic
 			AppEmbed.ImageUrl = app.Name == null ? "https://steamstore-a.akamaihd.net/public/shared/images/header/globalheader_logo.png?t=962016" : "https://steamcdn-a.akamaihd.net/steam/apps/" + app.AppID + "/header.jpg";
 			AppEmbed.AddField("Name", app.Name ?? "Unknown App", true);
 			AppEmbed.AddField("Change Number", app.ChangeNumber == 1 ? "DEBUG TEST UPDATE - IGNORE" : app.ChangeNumber.ToString(), true);
-			AppEmbed.AddField("AppID", app.AppID);
+			AppEmbed.AddField("AppID", app.AppID.ToString());
 
 			if(app.DepoName != null)
 				AppEmbed.AddField("Depo Changed", app.DepoName, true);
 
 
-			Embed AppUpdate = AppEmbed.Build();
+			DiscordEmbed AppUpdate = AppEmbed.Build();
 
 			using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
 			{
@@ -107,15 +95,22 @@ namespace SteamUpdateProject.DiscordLogic
 					if (app.DepoName != null && ServerInfo.PublicDepoOnly && app.DepoName != "public") continue;
 					if (ServerInfo.GuildID == 0)
 					{
-						//continue; //For some reason DMs are broken af
+						continue; //For some reason DMs are broken af
+						
 						try
 						{
-							IDMChannel _1st = await _client.GetDMChannelAsync((ulong)ServerInfo.ChannelID);
-							if (_1st == null)
+							foreach(var guild in _client.Guilds)
 							{
-								_1st = await _client.GetDMChannelAsync((ulong)ServerInfo.ChannelID);
+								foreach(var member in await guild.Value.GetAllMembersAsync())
+								{
+									if (member.Id == (ulong)ServerInfo.ChannelID)
+									{
+										var DmChannel = await member.CreateDmChannelAsync();
+										await DmChannel.SendMessageAsync(embed: AppUpdate);
+									}
+								}
 							}
-							await _1st.SendMessageAsync(embed: AppUpdate);
+							
 						}
 						catch (Exception e)
 						{
@@ -124,13 +119,14 @@ namespace SteamUpdateProject.DiscordLogic
 							Console.WriteLine();
 							Console.WriteLine();
 						}
+						
 					}
 					else
 					{
 						try
 						{
-							SocketGuild _1st = _client.GetGuild((ulong)ServerInfo.GuildID);
-							SocketTextChannel _2nd = _1st.GetTextChannel((ulong)ServerInfo.ChannelID);
+							var _1st = await _client.GetGuildAsync((ulong)ServerInfo.GuildID);
+							var _2nd = _1st.GetChannel((ulong)ServerInfo.ChannelID);
 							await _2nd.SendMessageAsync(embed: AppUpdate);
 						}
 						catch (Exception e)

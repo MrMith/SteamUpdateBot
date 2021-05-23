@@ -3,8 +3,7 @@ using SteamUpdateProject.DiscordLogic;
 using SteamUpdateProject.Steam;
 using System.IO;
 using System.Runtime.ExceptionServices;
-using Discord;
-using Discord.WebSocket;
+using DSharpPlus;
 
 namespace SteamUpdateProject
 {
@@ -20,6 +19,7 @@ namespace SteamUpdateProject
 
 		public static string LogPath = Directory.GetCurrentDirectory() + "\\logs\\";
 		public static string ConnectionString = @"Data Source=(localdb)\mssqllocaldb;Initial Catalog=SteamUpdateProjectTest1.SQLDataBase;Integrated Security=True;MultipleActiveResultSets=True";
+
 		public static void Main(string[] args)
 		{
 			Database = new SQLDataBase(ConnectionString);
@@ -29,7 +29,8 @@ namespace SteamUpdateProject
 
 			if (!Directory.Exists(LogPath)) Directory.CreateDirectory(LogPath);
 			DiscordClient = new DiscordBot();
-			DiscordClient.MainAsync("NjM0MjUxMTU4NjE3MDYzNDI0.XpS8oA.URkcwaHa8l098vaNDSo42V-qm7A").GetAwaiter().GetResult();
+
+			DiscordClient.StartDiscordBot("NjM0MjUxMTU4NjE3MDYzNDI0.XpS8oA.URkcwaHa8l098vaNDSo42V-qm7A").GetAwaiter().GetResult();
 			//DiscordClient.MainAsync(args[2]).GetAwaiter().GetResult();
 
 			SteamClient = new SteamBot(args, DiscordClient);
@@ -48,7 +49,7 @@ namespace SteamUpdateProject
 
 		public static void LogCancer(Exception e)
 		{
-			if (e is System.Threading.Tasks.TaskCanceledException || e is System.Net.WebSockets.WebSocketException || e is Discord.WebSocket.GatewayReconnectException)
+			if (e is System.Threading.Tasks.TaskCanceledException || e is System.Net.WebSockets.WebSocketException || e is DSharpPlus.Exceptions.ServerErrorException)
 				return;
 
 			if(e is IOException)

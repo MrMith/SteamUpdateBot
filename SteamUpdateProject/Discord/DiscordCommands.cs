@@ -1,13 +1,14 @@
-﻿using Discord;
-using Discord.Commands;
+﻿using DSharpPlus;
+using System.Threading.Tasks;
+using DSharpPlus.Entities;
+using DSharpPlus.CommandsNext;
+using DSharpPlus.CommandsNext.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Data.Entity;
-using Discord.WebSocket;
 
 namespace SteamUpdateProject.DiscordLogic
 {
@@ -19,15 +20,14 @@ namespace SteamUpdateProject.DiscordLogic
 		const int DAY = 24 * HOUR;
 		const int MONTH = 30 * DAY;
 
-		public class PublicModule : ModuleBase<SocketCommandContext>
+		public class PublicModule : BaseCommandModule
 		{
-			[Command("removeapp")]
-			[Alias("delapp", "deleteapp", "remove", "unsubscribe")]
-			public async Task RemoveAppAsync(params string[] objects)
+			[Command("removeapp"), Aliases("delapp", "deleteapp", "remove", "unsubscribe")]
+			public async Task RemoveAppAsync(CommandContext ctx, params string[] objects)
 			{
-				EmbedBuilder embedBuilder = new EmbedBuilder();
+				DiscordEmbedBuilder embedBuilder = new DiscordEmbedBuilder();
 
-				GuildInfo GuildInfo = DiscordBot.GetGuildInfo(Context.Guild == null ? 0 : Context.Guild.Id, Context.Channel.Id);
+				GuildInfo GuildInfo = DiscordBot.GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Channel.Id);
 
 				StringBuilder stringBuilder = new StringBuilder();
 
@@ -46,7 +46,7 @@ namespace SteamUpdateProject.DiscordLogic
 
 					if (AppsThatHaveBeenRemoved.Count == 0)
 					{
-						await ReplyAsync("You're not subscribed to those apps!");
+						await ctx.RespondAsync("You're not subscribed to those apps!");
 						return;
 					}
 
@@ -69,14 +69,14 @@ namespace SteamUpdateProject.DiscordLogic
 
 					embedBuilder.Title = "Apps removed:";
 					embedBuilder.AddField("Apps", stringBuilder.ToString(), true);
-					await ReplyAsync(embed: embedBuilder.Build());
+					await ctx.RespondAsync(embed: embedBuilder.Build());
 					return;
 				}
 				else if (uint.TryParse(objects[0], out uint appid)) //Single
 				{
 					if (!DiscordBot.RemoveApp(appid, GuildInfo))
 					{
-						await ReplyAsync("You're not subscribed to this app!");
+						await ctx.RespondAsync("You're not subscribed to this app!");
 						return;
 					}
 
@@ -90,20 +90,19 @@ namespace SteamUpdateProject.DiscordLogic
 					embedBuilder.Title = "Steam Apps removed:";
 					embedBuilder.AddField("Steam App:", $"{AppInfo.Name} ({appid})");
 
-					await ReplyAsync(embed: embedBuilder.Build());
+					await ctx.RespondAsync(embed: embedBuilder.Build());
 					return;
 				}
 
-				await ReplyAsync("ERROR using remove command! Type !help to get help on using this command!");
+				await ctx.RespondAsync("ERROR using remove command! Type !help to get help on using this command!");
 			}
 
-			[Command("subapp")]
-			[Alias("addapp", "subscribeapp", "add", "subscribe")]
-			public async Task AddAppAsync(params string[] objects)
+			[Command("subapp"), Aliases("addapp", "subscribeapp", "add", "subscribe")]
+			public async Task AddAppAsync(CommandContext ctx, params string[] objects)
 			{
-				EmbedBuilder embedBuilder = new EmbedBuilder();
+				DiscordEmbedBuilder embedBuilder = new DiscordEmbedBuilder();
 
-				GuildInfo GuildInfo = DiscordBot.GetGuildInfo(Context.Guild == null ? 0 : Context.Guild.Id, Context.Channel.Id);
+				GuildInfo GuildInfo = DiscordBot.GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Channel.Id);
 
 				//fix this copy and pasted garbage retard
 				if (objects.Length > 1) //Multiple apps
@@ -122,7 +121,7 @@ namespace SteamUpdateProject.DiscordLogic
 
 					if (ListOfConfirmedAppsAdded.Count == 0)
 					{
-						await ReplyAsync("Already subscribed to all apps!");
+						await ctx.RespondAsync("Already subscribed to all apps!");
 						return;
 					}
 					StringBuilder ListTest = new StringBuilder();
@@ -140,14 +139,14 @@ namespace SteamUpdateProject.DiscordLogic
 					}
 
 					embedBuilder.AddField("Apps:", ListTest.ToString());
-					await ReplyAsync(embed: embedBuilder.Build());
+					await ctx.RespondAsync(embed: embedBuilder.Build());
 					return;
 				}
 				else if (uint.TryParse(objects[0], out uint appid)) //single app
 				{
 					if (!DiscordBot.SubApp(appid, GuildInfo))
 					{
-						await ReplyAsync($"Already added app! ({appid})");
+						await ctx.RespondAsync($"Already added app! ({appid})");
 						return;
 					}
 
@@ -161,24 +160,23 @@ namespace SteamUpdateProject.DiscordLogic
 					embedBuilder.Title = "Steam Apps added:";
 					embedBuilder.AddField("Steam App:", $"{AppInfo.Name} ({appid})");
 
-					await ReplyAsync(embed: embedBuilder.Build());
+					await ctx.RespondAsync(embed: embedBuilder.Build());
 					return;
 				}
-				await ReplyAsync("ERROR using add command! Type !help to get help on using this command!");
+				await ctx.RespondAsync("ERROR using add command! Type !help to get help on using this command!");
 			}
 
-			[Command("list")]
-			[Alias("apps")]
-			public async Task ListAllSubscribedApps()
+			[Command("list"), Aliases("apps")]
+			public async Task ListAllSubscribedApps(CommandContext ctx)
 			{
-				GuildInfo GuildInfo = DiscordBot.GetGuildInfo(Context.Guild == null ? 0 : Context.Guild.Id, Context.Channel.Id);
+				GuildInfo GuildInfo = DiscordBot.GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Channel.Id);
 
-				EmbedBuilder embedBuilder = new EmbedBuilder();
+				DiscordEmbedBuilder embedBuilder = new DiscordEmbedBuilder();
 				embedBuilder.Title = "List of subscribed steam apps:";
 
 				if (GuildInfo == null || GuildInfo.SubscribedApps.Count == 0)
 				{
-					await ReplyAsync("No apps found!");
+					await ctx.RespondAsync("No apps found!");
 					return;
 				}
 
@@ -202,7 +200,7 @@ namespace SteamUpdateProject.DiscordLogic
 
 				embedBuilder.AddField("Apps", ListTest.ToString());
 
-				await ReplyAsync(embed: embedBuilder.Build());
+				await ctx.RespondAsync(embed: embedBuilder.Build());
 			}
 
 			public string ElapsedTime(DateTime? nullabledtEvent)
@@ -245,10 +243,10 @@ namespace SteamUpdateProject.DiscordLogic
 				return String.Format("{0} {1} ago", dtEvent.ToShortDateString(), dtEvent.ToShortTimeString());
 			}
 
-			[Command("help")]
-			public async Task HelpCommand()
+			[Command("commands")]
+			public async Task HelpCommand(CommandContext ctx)
 			{
-				EmbedBuilder HelpBuilder = new EmbedBuilder()
+				DiscordEmbedBuilder HelpBuilder = new DiscordEmbedBuilder()
 				{
 					Title = "Help Command"
 				};
@@ -259,28 +257,26 @@ namespace SteamUpdateProject.DiscordLogic
 				HelpBuilder.AddField("!status", "Shows the ping of the bot to discord, if steam is down and total updates processed this session.");
 				HelpBuilder.AddField("!public", "Will only send messages if the default public steam branch is updated. (Ex: !public true or !debug false)");
 				HelpBuilder.AddField("!debug", "**NOT RECOMMENDED** Pipes every update through this channel regardless of subscriptions. (Ex: !debug true or !debug false)");
-				await ReplyAsync(embed: HelpBuilder.Build());
+				await ctx.RespondAsync(embed: HelpBuilder.Build());
 			}
 
-			[Command("showall")]
-			[Alias("all")]
-			public async Task ShowContent()
+			[Command("showall"), Aliases("all")]
+			public async Task ShowContent(CommandContext ctx)
 			{
-				GuildInfo GuildInfo = DiscordBot.GetGuildInfo(Context.Guild == null ? 0 : Context.Guild.Id, Context.Channel.Id);
+				GuildInfo GuildInfo = DiscordBot.GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Channel.Id);
 
 				if (GuildInfo == null)
 				{
-					await ReplyAsync("Show all is set to False.");
+					await ctx.RespondAsync("Show all is set to False.");
 				}
 
-				await ReplyAsync($"Show all is set to: {GuildInfo.ShowContent}.");
+				await ctx.RespondAsync($"Show all is set to: {GuildInfo.ShowContent}.");
 			}
 
 			[Command("showall")]
-			[Alias("all")]
-			public async Task ShowContentBool(bool Set)
+			public async Task ShowContentBool(CommandContext ctx, bool Set)
 			{
-				GuildInfo GuildInfo = DiscordBot.GetGuildInfo(Context.Guild == null ? 0 : Context.Guild.Id, Context.Channel.Id);
+				GuildInfo GuildInfo = DiscordBot.GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Channel.Id);
 
 				if (GuildInfo != null)
 				{
@@ -293,19 +289,19 @@ namespace SteamUpdateProject.DiscordLogic
 					}
 				}
 
-				await ReplyAsync($"Set show all to {Set}.");
+				await ctx.RespondAsync($"Set show all to {Set}.");
 			}
 
 			[Command("debug")]
-			public async Task DebugBool(bool Set)
+			public async Task DebugBool(CommandContext ctx, bool Set)
 			{
-				if(!UserHasPermission(Context.User, Context.Guild))
+				if(!UserHasPermission(ctx.Member, ctx.Guild))
 				{
-					await ReplyAsync("Insufficient permissions to execute this command.");
+					await ctx.RespondAsync("Insufficient permissions to execute this command.");
 					return;
 				}
 
-				GuildInfo GuildInfo = DiscordBot.GetGuildInfo(Context.Guild == null ? 0 : Context.Guild.Id, Context.Channel.Id);
+				GuildInfo GuildInfo = DiscordBot.GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Channel.Id);
 
 				if (GuildInfo != null)
 				{
@@ -318,28 +314,28 @@ namespace SteamUpdateProject.DiscordLogic
 					}
 				}
 
-				await ReplyAsync($"Debug mode set to {Set}.");
+				await ctx.RespondAsync($"Debug mode set to {Set}.");
 
 			}
 
 			[Command("public")]
-			public async Task PublicBool()
+			public async Task PublicBool(CommandContext ctx)
 			{
-				GuildInfo GuildInfo = DiscordBot.GetGuildInfo(Context.Guild == null ? 0 : Context.Guild.Id, Context.Channel.Id);
+				GuildInfo GuildInfo = DiscordBot.GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Channel.Id);
 
-				await ReplyAsync($"Public mode is currently set to {GuildInfo.PublicDepoOnly}.");
+				await ctx.RespondAsync($"Public mode is currently set to {GuildInfo.PublicDepoOnly}.");
 			}
 
 			[Command("public")]
-			public async Task PublicBool(bool Set)
+			public async Task PublicBool(CommandContext ctx, bool Set)
 			{
-				if (!UserHasPermission(Context.User, Context.Guild))
+				if (!UserHasPermission(ctx.Member, ctx.Guild))
 				{
-					await ReplyAsync("Insufficient permissions to execute this command.");
+					await ctx.RespondAsync("Insufficient permissions to execute this command.");
 					return;
 				}
 
-				GuildInfo GuildInfo = DiscordBot.GetGuildInfo(Context.Guild == null ? 0 : Context.Guild.Id, Context.Channel.Id);
+				GuildInfo GuildInfo = DiscordBot.GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Channel.Id);
 
 				if (GuildInfo != null)
 				{
@@ -352,26 +348,26 @@ namespace SteamUpdateProject.DiscordLogic
 					}
 				}
 
-				await ReplyAsync($"Public mode set to {Set}.");
+				await ctx.RespondAsync($"Public mode set to {Set}.");
 
 			}
 
 			[Command("debug")]
-			public async Task DebugBool()
+			public async Task DebugBool(CommandContext ctx)
 			{
-				GuildInfo GuildInfo = DiscordBot.GetGuildInfo(Context.Guild == null ? 0 : Context.Guild.Id, Context.Channel.Id);
+				GuildInfo GuildInfo = DiscordBot.GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Channel.Id);
 
-				await ReplyAsync($"Debug mode is currently set to {GuildInfo.DebugMode}.");
+				await ctx.RespondAsync($"Debug mode is currently set to {GuildInfo.DebugMode}.");
 			}
 
 
 
 			[Command("status")]
-			public async Task Status()
+			public async Task Status(CommandContext ctx)
 			{
 				if (SteamUpdateBot.SteamClient == null)
 				{
-					await ReplyAsync($"SteamBot not ready.");
+					await ctx.RespondAsync($"SteamBot not ready.");
 				}
 				bool steamStatus = false;
 
@@ -384,15 +380,15 @@ namespace SteamUpdateProject.DiscordLogic
 
 				}
 
-				await ReplyAsync($"Ping: {Context.Client.Latency}.\nSteam Status: {(steamStatus ? "Online" : "Offline")}.\nTotal updates processed: {SteamUpdateBot.SteamClient.UpdatesProcessed} ({(int)(SteamUpdateBot.SteamClient.UpdatesProcessed / (DateTime.UtcNow - Process.GetCurrentProcess().StartTime.ToUniversalTime()).TotalMinutes)} per minute)\nTotal content updates: {SteamUpdateBot.ContentUpdates}.\nTotal Execeptions: {SteamUpdateBot.Exceptions}");
+				await ctx.RespondAsync($"Ping: {ctx.Client.Ping}.\nSteam Status: {(steamStatus ? "Online" : "Offline")}.\nTotal updates processed: {SteamUpdateBot.SteamClient.UpdatesProcessed} ({(int)(SteamUpdateBot.SteamClient.UpdatesProcessed / (DateTime.UtcNow - Process.GetCurrentProcess().StartTime.ToUniversalTime()).TotalMinutes)} per minute)\nTotal content updates: {SteamUpdateBot.ContentUpdates}.\nTotal Execeptions: {SteamUpdateBot.Exceptions}");
 			}
 
 			[Command("forceupdate")]
-			public async Task ForceUpdate(uint appid)
+			public async Task ForceUpdate(CommandContext ctx, uint appid)
 			{
-				if (Context.User.Id != 185739967379537920)
+				if (ctx.User.Id != 185739967379537920)
 				{
-					await ReplyAsync($"You're not authorized to use this command.");
+					await ctx.RespondAsync($"You're not authorized to use this command.");
 				}
 				AppUpdate FakeUpdatedApp = new AppUpdate();
 				FakeUpdatedApp.Name = SteamUpdateBot.SteamClient.GetAppName(appid).Result;
@@ -404,7 +400,7 @@ namespace SteamUpdateProject.DiscordLogic
 				/*
 				using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
 				{
-					context.AppInfoData.RemoveRange(context.AppInfoData.ToList().Where(x => x.AppID == FakeUpdatedApp.AppID));
+					ctx.AppInfoData.RemoveRange(ctx.AppInfoData.ToList().Where(x => x.AppID == FakeUpdatedApp.AppID));
 					AppInfo test = new AppInfo()
 					{
 						Name = FakeUpdatedApp.Name,
@@ -412,31 +408,26 @@ namespace SteamUpdateProject.DiscordLogic
 						LastUpdated = FakeUpdatedApp.LastUpdated
 					};
 
-					context.AppInfoData.Add(test);
+					ctx.AppInfoData.Add(test);
 
-					context.SaveChanges();
+					ctx.SaveChanges();
 				}
 				*/
 
 				SteamUpdateBot.DiscordClient.AppUpdated(FakeUpdatedApp);
 
-				await ReplyAsync($"Pushed a fake update for {FakeUpdatedApp.Name} ({FakeUpdatedApp.AppID})");
+				await ctx.RespondAsync($"Pushed a fake update for {FakeUpdatedApp.Name} ({FakeUpdatedApp.AppID})");
 			}
 
-			public bool UserHasPermission(SocketUser userToBeChecked, SocketGuild guildToBeChecked)
+			public bool UserHasPermission(DiscordMember userToBeChecked, DiscordGuild guildToBeChecked)
 			{
 				if (guildToBeChecked != null)
 				{
-					SocketGuildUser user = userToBeChecked as SocketGuildUser;
-					IReadOnlyCollection<IRole> roles = (user as IGuildUser).Guild.Roles;
-
-					foreach (IRole role in roles)
+					if (guildToBeChecked.Permissions == (Permissions.All | Permissions.ManageChannels | Permissions.Administrator))
 					{
-						if (role.Permissions.Administrator || role.Permissions.ManageChannels)
-						{
-							return true;
-						}
+						return true;
 					}
+
 					return false;
 				}
 				else //In DMs they should have control ect
