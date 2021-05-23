@@ -95,21 +95,24 @@ namespace SteamUpdateProject.DiscordLogic
 					if (app.DepoName != null && ServerInfo.PublicDepoOnly && app.DepoName != "public") continue;
 					if (ServerInfo.GuildID == 0)
 					{
-						continue; //For some reason DMs are broken af
+						//continue; //For some reason DMs are broken af
 						
 						try
 						{
-							foreach(var guild in _client.Guilds)
+							foreach(var _guildKVP in _client.Guilds)
 							{
-								foreach(var member in await guild.Value.GetAllMembersAsync())
+								foreach(var _member in await _guildKVP.Value.GetAllMembersAsync())
 								{
-									if (member.Id == (ulong)ServerInfo.ChannelID)
+									if (_member.Id == (ulong)ServerInfo.ChannelID)
 									{
-										var DmChannel = await member.CreateDmChannelAsync();
+										var DmChannel = await _member.CreateDmChannelAsync();
 										await DmChannel.SendMessageAsync(embed: AppUpdate);
+										goto BreakOutOf;
 									}
 								}
 							}
+						BreakOutOf: //Honestly it works and I just don't want to spend more time on it :)
+							continue;
 							
 						}
 						catch (Exception e)

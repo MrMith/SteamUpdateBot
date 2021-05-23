@@ -27,7 +27,16 @@ namespace SteamUpdateProject.DiscordLogic
 			{
 				DiscordEmbedBuilder embedBuilder = new DiscordEmbedBuilder();
 
-				GuildInfo GuildInfo = DiscordBot.GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Channel.Id);
+				GuildInfo GuildInfo = null;
+
+				if(ctx.Guild == null)
+				{
+					GuildInfo = DiscordBot.GetGuildInfo(0, ctx.User.Id);
+				}
+				else
+				{
+					GuildInfo = DiscordBot.GetGuildInfo(ctx.Guild.Id, ctx.Channel.Id);
+				}
 
 				StringBuilder stringBuilder = new StringBuilder();
 
@@ -102,7 +111,16 @@ namespace SteamUpdateProject.DiscordLogic
 			{
 				DiscordEmbedBuilder embedBuilder = new DiscordEmbedBuilder();
 
-				GuildInfo GuildInfo = DiscordBot.GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Channel.Id);
+				GuildInfo GuildInfo = null;
+
+				if (ctx.Guild == null)
+				{
+					GuildInfo = DiscordBot.GetGuildInfo(0, ctx.User.Id);
+				}
+				else
+				{
+					GuildInfo = DiscordBot.GetGuildInfo(ctx.Guild.Id, ctx.Channel.Id);
+				}
 
 				//fix this copy and pasted garbage retard
 				if (objects.Length > 1) //Multiple apps
@@ -169,7 +187,16 @@ namespace SteamUpdateProject.DiscordLogic
 			[Command("list"), Aliases("apps")]
 			public async Task ListAllSubscribedApps(CommandContext ctx)
 			{
-				GuildInfo GuildInfo = DiscordBot.GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Channel.Id);
+				GuildInfo GuildInfo = null;
+
+				if (ctx.Guild == null)
+				{
+					GuildInfo = DiscordBot.GetGuildInfo(0, ctx.User.Id);
+				}
+				else
+				{
+					GuildInfo = DiscordBot.GetGuildInfo(ctx.Guild.Id, ctx.Channel.Id);
+				}
 
 				DiscordEmbedBuilder embedBuilder = new DiscordEmbedBuilder();
 				embedBuilder.Title = "List of subscribed steam apps:";
@@ -263,7 +290,16 @@ namespace SteamUpdateProject.DiscordLogic
 			[Command("showall"), Aliases("all")]
 			public async Task ShowContent(CommandContext ctx)
 			{
-				GuildInfo GuildInfo = DiscordBot.GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Channel.Id);
+				GuildInfo GuildInfo = null;
+
+				if (ctx.Guild == null)
+				{
+					GuildInfo = DiscordBot.GetGuildInfo(0, ctx.User.Id);
+				}
+				else
+				{
+					GuildInfo = DiscordBot.GetGuildInfo(ctx.Guild.Id, ctx.Channel.Id);
+				}
 
 				if (GuildInfo == null)
 				{
@@ -276,7 +312,16 @@ namespace SteamUpdateProject.DiscordLogic
 			[Command("showall")]
 			public async Task ShowContentBool(CommandContext ctx, bool Set)
 			{
-				GuildInfo GuildInfo = DiscordBot.GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Channel.Id);
+				GuildInfo GuildInfo = null;
+
+				if (ctx.Guild == null)
+				{
+					GuildInfo = DiscordBot.GetGuildInfo(0, ctx.User.Id);
+				}
+				else
+				{
+					GuildInfo = DiscordBot.GetGuildInfo(ctx.Guild.Id, ctx.Channel.Id);
+				}
 
 				if (GuildInfo != null)
 				{
@@ -301,7 +346,16 @@ namespace SteamUpdateProject.DiscordLogic
 					return;
 				}
 
-				GuildInfo GuildInfo = DiscordBot.GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Channel.Id);
+				GuildInfo GuildInfo = null;
+
+				if (ctx.Guild == null)
+				{
+					GuildInfo = DiscordBot.GetGuildInfo(0, ctx.User.Id);
+				}
+				else
+				{
+					GuildInfo = DiscordBot.GetGuildInfo(ctx.Guild.Id, ctx.Channel.Id);
+				}
 
 				if (GuildInfo != null)
 				{
@@ -321,7 +375,16 @@ namespace SteamUpdateProject.DiscordLogic
 			[Command("public")]
 			public async Task PublicBool(CommandContext ctx)
 			{
-				GuildInfo GuildInfo = DiscordBot.GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Channel.Id);
+				GuildInfo GuildInfo = null;
+
+				if (ctx.Guild == null)
+				{
+					GuildInfo = DiscordBot.GetGuildInfo(0, ctx.User.Id);
+				}
+				else
+				{
+					GuildInfo = DiscordBot.GetGuildInfo(ctx.Guild.Id, ctx.Channel.Id);
+				}
 
 				await ctx.RespondAsync($"Public mode is currently set to {GuildInfo.PublicDepoOnly}.");
 			}
@@ -335,7 +398,16 @@ namespace SteamUpdateProject.DiscordLogic
 					return;
 				}
 
-				GuildInfo GuildInfo = DiscordBot.GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Channel.Id);
+				GuildInfo GuildInfo = null;
+
+				if (ctx.Guild == null)
+				{
+					GuildInfo = DiscordBot.GetGuildInfo(0, ctx.User.Id);
+				}
+				else
+				{
+					GuildInfo = DiscordBot.GetGuildInfo(ctx.Guild.Id, ctx.Channel.Id);
+				}
 
 				if (GuildInfo != null)
 				{
@@ -355,7 +427,16 @@ namespace SteamUpdateProject.DiscordLogic
 			[Command("debug")]
 			public async Task DebugBool(CommandContext ctx)
 			{
-				GuildInfo GuildInfo = DiscordBot.GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Channel.Id);
+				GuildInfo GuildInfo = null;
+
+				if (ctx.Guild == null)
+				{
+					GuildInfo = DiscordBot.GetGuildInfo(0, ctx.User.Id);
+				}
+				else
+				{
+					GuildInfo = DiscordBot.GetGuildInfo(ctx.Guild.Id, ctx.Channel.Id);
+				}
 
 				await ctx.RespondAsync($"Debug mode is currently set to {GuildInfo.DebugMode}.");
 			}
