@@ -425,7 +425,6 @@ namespace SteamUpdateProject.DiscordLogic
 				if (ctx.User.Id != 185739967379537920)
 				{
 					await ctx.RespondAsync($"You're not authorized to use this command.");
-					return;
 				}
 
 				AppUpdate FakeUpdatedApp = new AppUpdate();
