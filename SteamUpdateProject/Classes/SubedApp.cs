@@ -6,48 +6,44 @@ using System.Text;
 
 namespace SteamUpdateProject
 {
-	public class GlobalData : IEquatable<GlobalData>
+	public class SubedApp : IEquatable<SubedApp>
 	{
-		public GlobalData()
+		public SubedApp()
 		{
 		}
 
-		public GlobalData(long updates, long contentUpdates)
+		public SubedApp(long appid)
 		{
-			Updates = updates;
-			ContentUpdates = contentUpdates;
+			AppID = appid;
 		}
 
 		[Key]
 		public int Key { get; set; }
-		public long Updates { get; set; }
-		public long ContentUpdates { get; set; }
-		public long Exceptions { get; set; }
+		public long AppID { get; set; }
 
 		public override bool Equals(object obj)
 		{
-			return Equals(obj as GlobalData);
+			return Equals(obj as SubedApp);
 		}
 
-		public bool Equals(GlobalData other)
+		public bool Equals(SubedApp other)
 		{
 			return other != null &&
-					Key == other.Key &&
-					Updates == other.Updates &&
-					ContentUpdates == other.ContentUpdates;
+				   Key == other.Key &&
+				   AppID == other.AppID;
 		}
 
 		public override int GetHashCode()
 		{
-			return HashCode.Combine(Key, Updates, Updates);
+			return HashCode.Combine(Key, AppID);
 		}
 
-		public static bool operator ==(GlobalData left, GlobalData right)
+		public static bool operator ==(SubedApp left, SubedApp right)
 		{
-			return EqualityComparer<GlobalData>.Default.Equals(left, right);
+			return EqualityComparer<SubedApp>.Default.Equals(left, right);
 		}
 
-		public static bool operator !=(GlobalData left, GlobalData right)
+		public static bool operator !=(SubedApp left, SubedApp right)
 		{
 			return !(left == right);
 		}

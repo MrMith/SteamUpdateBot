@@ -37,22 +37,6 @@ namespace SteamUpdateProject
 
 			SteamClient = new SteamBot(args, DiscordClient);
 
-			using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString)) //Not the best way about going about it ;(
-			{
-				GlobalData GlobalInfo = context.GlobalInformation.ToList().FirstOrDefault();
-				if(GlobalInfo == null)
-				{
-					GlobalInfo = context.GlobalInformation.Add(new GlobalData());
-				}
-				Updates = GlobalInfo.Updates;
-				Updates = GlobalInfo.ContentUpdates;
-				Exceptions = GlobalInfo.Exceptions;
-
-				context.GlobalInformation.RemoveRange(context.GlobalInformation.ToList());
-				context.GlobalInformation.Add(GlobalInfo);
-				context.SaveChanges();
-			}
-
 			while (SteamClient.isRunning)
 			{
 				SteamClient.manager.RunWaitCallbacks(TimeSpan.FromSeconds(1));

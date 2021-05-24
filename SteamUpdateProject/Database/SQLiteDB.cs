@@ -17,7 +17,6 @@ namespace SteamUpdateProject
 	{
 		public DbSet<AppInfo> AppInfoData { get; set; }
 		public DbSet<GuildInfo> GuildInformation { get; set; }
-		public DbSet<GlobalData> GlobalInformation { get; set; }
 		public SQLDataBase(string connection) : base(connection)
 		{
 			this.Configuration.AutoDetectChangesEnabled = false;
