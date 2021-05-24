@@ -35,7 +35,7 @@ namespace SteamUpdateProject.DiscordLogic
 
 				DiscordEmbedBuilder embedBuilder = new DiscordEmbedBuilder();
 
-				GuildInfo GuildInfo = GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Guild == null ? ctx.Member.Id : ctx.Channel.Id);
+				GuildInfo GuildInfo = GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Guild == null ? ctx.User.Id : ctx.Channel.Id);
 
 				StringBuilder stringBuilder = new StringBuilder();
 
@@ -118,7 +118,7 @@ namespace SteamUpdateProject.DiscordLogic
 
 				DiscordEmbedBuilder embedBuilder = new DiscordEmbedBuilder();
 
-				GuildInfo GuildInfo = GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Guild == null ? ctx.Member.Id : ctx.Channel.Id);
+				GuildInfo GuildInfo = GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Guild == null ? ctx.User.Id : ctx.Channel.Id);
 
 				//fix this copy and pasted garbage retard
 				if (objects.Length > 1) //Multiple apps
@@ -187,7 +187,7 @@ namespace SteamUpdateProject.DiscordLogic
 			{
 				await ctx.TriggerTypingAsync();
 
-				GuildInfo GuildInfo = GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Guild == null ? ctx.Member.Id : ctx.Channel.Id);
+				GuildInfo GuildInfo = GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Guild == null ? ctx.User.Id : ctx.Channel.Id);
 
 				DiscordEmbedBuilder embedBuilder = new DiscordEmbedBuilder();
 				embedBuilder.Title = "List of subscribed steam apps:";
@@ -283,7 +283,7 @@ namespace SteamUpdateProject.DiscordLogic
 			{
 				await ctx.TriggerTypingAsync();
 
-				GuildInfo GuildInfo = GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Guild == null ? ctx.Member.Id : ctx.Channel.Id);
+				GuildInfo GuildInfo = GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Guild == null ? ctx.User.Id : ctx.Channel.Id);
 
 				if (GuildInfo == null)
 				{
@@ -304,7 +304,7 @@ namespace SteamUpdateProject.DiscordLogic
 					return;
 				}
 
-				GuildInfo GuildInfo = GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Guild == null ? ctx.Member.Id : ctx.Channel.Id);
+				GuildInfo GuildInfo = GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Guild == null ? ctx.User.Id : ctx.Channel.Id);
 
 				if (GuildInfo != null)
 				{
@@ -331,7 +331,7 @@ namespace SteamUpdateProject.DiscordLogic
 					return;
 				}
 
-				GuildInfo GuildInfo = GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Guild == null ? ctx.Member.Id : ctx.Channel.Id);
+				GuildInfo GuildInfo = GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Guild == null ? ctx.User.Id : ctx.Channel.Id);
 
 				if (GuildInfo != null)
 				{
@@ -353,7 +353,7 @@ namespace SteamUpdateProject.DiscordLogic
 			{
 				await ctx.TriggerTypingAsync();
 
-				GuildInfo GuildInfo = GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Guild == null ? ctx.Member.Id : ctx.Channel.Id);
+				GuildInfo GuildInfo = GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Guild == null ? ctx.User.Id : ctx.Channel.Id);
 
 				await ctx.RespondAsync($"Public mode is currently set to {GuildInfo.PublicDepoOnly}.");
 			}
@@ -369,7 +369,7 @@ namespace SteamUpdateProject.DiscordLogic
 					return;
 				}
 
-				GuildInfo GuildInfo = GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Guild == null ? ctx.Member.Id : ctx.Channel.Id);
+				GuildInfo GuildInfo = GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Guild == null ? ctx.User.Id : ctx.Channel.Id);
 
 				if (GuildInfo != null)
 				{
@@ -390,7 +390,7 @@ namespace SteamUpdateProject.DiscordLogic
 			{
 				await ctx.TriggerTypingAsync();
 
-				GuildInfo GuildInfo = GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Guild == null ? ctx.Member.Id : ctx.Channel.Id);
+				GuildInfo GuildInfo = GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Guild == null ? ctx.User.Id : ctx.Channel.Id);
 
 				await ctx.RespondAsync($"Debug mode is currently set to {GuildInfo.DebugMode}.");
 			}
@@ -425,7 +425,9 @@ namespace SteamUpdateProject.DiscordLogic
 				if (ctx.User.Id != 185739967379537920)
 				{
 					await ctx.RespondAsync($"You're not authorized to use this command.");
+					return;
 				}
+
 				AppUpdate FakeUpdatedApp = new AppUpdate();
 				FakeUpdatedApp.Name = SteamUpdateBot.SteamClient.GetAppName(appid).Result;
 				FakeUpdatedApp.AppID = appid;
