@@ -26,18 +26,16 @@ namespace SteamUpdateProject.DiscordLogic
 			public async Task RemoveAppAsync(CommandContext ctx, params string[] objects)
 			{
 				await ctx.TriggerTypingAsync();
+
+				if (!HasPermission(ctx.Member, ctx.Channel))
+				{
+					await ctx.RespondAsync($"You do not have permission to run {ctx.Command.Name}.");
+					return;
+				}
+
 				DiscordEmbedBuilder embedBuilder = new DiscordEmbedBuilder();
 
-				GuildInfo GuildInfo = null;
-
-				if(ctx.Guild == null)
-				{
-					GuildInfo = DiscordBot.GetGuildInfo(0, ctx.User.Id);
-				}
-				else
-				{
-					GuildInfo = DiscordBot.GetGuildInfo(ctx.Guild.Id, ctx.Channel.Id);
-				}
+				GuildInfo GuildInfo = GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Guild == null ? ctx.Member.Id : ctx.Channel.Id);
 
 				StringBuilder stringBuilder = new StringBuilder();
 
@@ -111,18 +109,16 @@ namespace SteamUpdateProject.DiscordLogic
 			public async Task AddAppAsync(CommandContext ctx, params string[] objects)
 			{
 				await ctx.TriggerTypingAsync();
+
+				if (!HasPermission(ctx.Member, ctx.Channel))
+				{
+					await ctx.RespondAsync($"You do not have permission to run {ctx.Command.Name}.");
+					return;
+				}
+
 				DiscordEmbedBuilder embedBuilder = new DiscordEmbedBuilder();
 
-				GuildInfo GuildInfo = null;
-
-				if (ctx.Guild == null)
-				{
-					GuildInfo = DiscordBot.GetGuildInfo(0, ctx.User.Id);
-				}
-				else
-				{
-					GuildInfo = DiscordBot.GetGuildInfo(ctx.Guild.Id, ctx.Channel.Id);
-				}
+				GuildInfo GuildInfo = GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Guild == null ? ctx.Member.Id : ctx.Channel.Id);
 
 				//fix this copy and pasted garbage retard
 				if (objects.Length > 1) //Multiple apps
@@ -190,16 +186,8 @@ namespace SteamUpdateProject.DiscordLogic
 			public async Task ListAllSubscribedApps(CommandContext ctx)
 			{
 				await ctx.TriggerTypingAsync();
-				GuildInfo GuildInfo = null;
 
-				if (ctx.Guild == null)
-				{
-					GuildInfo = DiscordBot.GetGuildInfo(0, ctx.User.Id);
-				}
-				else
-				{
-					GuildInfo = DiscordBot.GetGuildInfo(ctx.Guild.Id, ctx.Channel.Id);
-				}
+				GuildInfo GuildInfo = GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Guild == null ? ctx.Member.Id : ctx.Channel.Id);
 
 				DiscordEmbedBuilder embedBuilder = new DiscordEmbedBuilder();
 				embedBuilder.Title = "List of subscribed steam apps:";
@@ -294,16 +282,8 @@ namespace SteamUpdateProject.DiscordLogic
 			public async Task ShowContent(CommandContext ctx)
 			{
 				await ctx.TriggerTypingAsync();
-				GuildInfo GuildInfo = null;
 
-				if (ctx.Guild == null)
-				{
-					GuildInfo = DiscordBot.GetGuildInfo(0, ctx.User.Id);
-				}
-				else
-				{
-					GuildInfo = DiscordBot.GetGuildInfo(ctx.Guild.Id, ctx.Channel.Id);
-				}
+				GuildInfo GuildInfo = GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Guild == null ? ctx.Member.Id : ctx.Channel.Id);
 
 				if (GuildInfo == null)
 				{
@@ -313,20 +293,18 @@ namespace SteamUpdateProject.DiscordLogic
 				await ctx.RespondAsync($"Show all is set to: {GuildInfo.ShowContent}.");
 			}
 
-			[Command("showall"), RequirePermissions(Permissions.ManageChannels)]
+			[Command("showall")]
 			public async Task ShowContentBool(CommandContext ctx, bool Set)
 			{
 				await ctx.TriggerTypingAsync();
-				GuildInfo GuildInfo = null;
 
-				if (ctx.Guild == null)
+				if (!HasPermission(ctx.Member, ctx.Channel))
 				{
-					GuildInfo = DiscordBot.GetGuildInfo(0, ctx.User.Id);
+					await ctx.RespondAsync($"You do not have permission to run {ctx.Command.Name}.");
+					return;
 				}
-				else
-				{
-					GuildInfo = DiscordBot.GetGuildInfo(ctx.Guild.Id, ctx.Channel.Id);
-				}
+
+				GuildInfo GuildInfo = GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Guild == null ? ctx.Member.Id : ctx.Channel.Id);
 
 				if (GuildInfo != null)
 				{
@@ -342,21 +320,18 @@ namespace SteamUpdateProject.DiscordLogic
 				await ctx.RespondAsync($"Set show all to {Set}.");
 			}
 
-			[Command("debug"), RequirePermissions(Permissions.ManageChannels)]
+			[Command("debug")]
 			public async Task DebugBool(CommandContext ctx, bool Set)
 			{
 				await ctx.TriggerTypingAsync();
 
-				GuildInfo GuildInfo = null;
+				if (!HasPermission(ctx.Member, ctx.Channel))
+				{
+					await ctx.RespondAsync($"You do not have permission to run {ctx.Command.Name}.");
+					return;
+				}
 
-				if (ctx.Guild == null)
-				{
-					GuildInfo = DiscordBot.GetGuildInfo(0, ctx.User.Id);
-				}
-				else
-				{
-					GuildInfo = DiscordBot.GetGuildInfo(ctx.Guild.Id, ctx.Channel.Id);
-				}
+				GuildInfo GuildInfo = GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Guild == null ? ctx.Member.Id : ctx.Channel.Id);
 
 				if (GuildInfo != null)
 				{
@@ -377,35 +352,24 @@ namespace SteamUpdateProject.DiscordLogic
 			public async Task PublicBool(CommandContext ctx)
 			{
 				await ctx.TriggerTypingAsync();
-				GuildInfo GuildInfo = null;
 
-				if (ctx.Guild == null)
-				{
-					GuildInfo = DiscordBot.GetGuildInfo(0, ctx.User.Id);
-				}
-				else
-				{
-					GuildInfo = DiscordBot.GetGuildInfo(ctx.Guild.Id, ctx.Channel.Id);
-				}
+				GuildInfo GuildInfo = GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Guild == null ? ctx.Member.Id : ctx.Channel.Id);
 
 				await ctx.RespondAsync($"Public mode is currently set to {GuildInfo.PublicDepoOnly}.");
 			}
 
-			[Command("public"), RequirePermissions(Permissions.ManageChannels)]
+			[Command("public")]
 			public async Task PublicBool(CommandContext ctx, bool Set)
 			{
 				await ctx.TriggerTypingAsync();
 
-				GuildInfo GuildInfo = null;
+				if (!HasPermission(ctx.Member, ctx.Channel))
+				{
+					await ctx.RespondAsync($"You do not have permission to run {ctx.Command.Name}.");
+					return;
+				}
 
-				if (ctx.Guild == null)
-				{
-					GuildInfo = DiscordBot.GetGuildInfo(0, ctx.User.Id);
-				}
-				else
-				{
-					GuildInfo = DiscordBot.GetGuildInfo(ctx.Guild.Id, ctx.Channel.Id);
-				}
+				GuildInfo GuildInfo = GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Guild == null ? ctx.Member.Id : ctx.Channel.Id);
 
 				if (GuildInfo != null)
 				{
@@ -425,16 +389,8 @@ namespace SteamUpdateProject.DiscordLogic
 			public async Task DebugBool(CommandContext ctx)
 			{
 				await ctx.TriggerTypingAsync();
-				GuildInfo GuildInfo = null;
 
-				if (ctx.Guild == null)
-				{
-					GuildInfo = DiscordBot.GetGuildInfo(0, ctx.User.Id);
-				}
-				else
-				{
-					GuildInfo = DiscordBot.GetGuildInfo(ctx.Guild.Id, ctx.Channel.Id);
-				}
+				GuildInfo GuildInfo = GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Guild == null ? ctx.Member.Id : ctx.Channel.Id);
 
 				await ctx.RespondAsync($"Debug mode is currently set to {GuildInfo.DebugMode}.");
 			}
@@ -497,6 +453,16 @@ namespace SteamUpdateProject.DiscordLogic
 				SteamUpdateBot.DiscordClient.AppUpdated(FakeUpdatedApp);
 
 				await ctx.RespondAsync($"Pushed a fake update for {FakeUpdatedApp.Name} ({FakeUpdatedApp.AppID})");
+			}
+
+			public bool HasPermission(DiscordMember u, DiscordChannel c)
+			{
+				return u.PermissionsIn(c).HasPermission(Permissions.Administrator) || u.PermissionsIn(c).HasPermission(Permissions.ManageChannels) || u.PermissionsIn(c).HasPermission(Permissions.All);
+			}
+
+			public GuildInfo GetGuildInfo(ulong GuildID, ulong ChannelID)
+			{
+				return DiscordBot.GetGuildInfo(GuildID, ChannelID);
 			}
 		}
 	}
