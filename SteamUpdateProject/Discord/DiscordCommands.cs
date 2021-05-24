@@ -25,6 +25,7 @@ namespace SteamUpdateProject.DiscordLogic
 			[Command("removeapp"), Aliases("delapp", "deleteapp", "remove", "unsubscribe")]
 			public async Task RemoveAppAsync(CommandContext ctx, params string[] objects)
 			{
+				await ctx.TriggerTypingAsync();
 				DiscordEmbedBuilder embedBuilder = new DiscordEmbedBuilder();
 
 				GuildInfo GuildInfo = null;
@@ -109,6 +110,7 @@ namespace SteamUpdateProject.DiscordLogic
 			[Command("subapp"), Aliases("addapp", "subscribeapp", "add", "subscribe")]
 			public async Task AddAppAsync(CommandContext ctx, params string[] objects)
 			{
+				await ctx.TriggerTypingAsync();
 				DiscordEmbedBuilder embedBuilder = new DiscordEmbedBuilder();
 
 				GuildInfo GuildInfo = null;
@@ -187,6 +189,7 @@ namespace SteamUpdateProject.DiscordLogic
 			[Command("list"), Aliases("apps")]
 			public async Task ListAllSubscribedApps(CommandContext ctx)
 			{
+				await ctx.TriggerTypingAsync();
 				GuildInfo GuildInfo = null;
 
 				if (ctx.Guild == null)
@@ -290,6 +293,7 @@ namespace SteamUpdateProject.DiscordLogic
 			[Command("showall"), Aliases("all")]
 			public async Task ShowContent(CommandContext ctx)
 			{
+				await ctx.TriggerTypingAsync();
 				GuildInfo GuildInfo = null;
 
 				if (ctx.Guild == null)
@@ -309,9 +313,10 @@ namespace SteamUpdateProject.DiscordLogic
 				await ctx.RespondAsync($"Show all is set to: {GuildInfo.ShowContent}.");
 			}
 
-			[Command("showall")]
+			[Command("showall"), RequirePermissions(Permissions.ManageChannels)]
 			public async Task ShowContentBool(CommandContext ctx, bool Set)
 			{
+				await ctx.TriggerTypingAsync();
 				GuildInfo GuildInfo = null;
 
 				if (ctx.Guild == null)
@@ -337,14 +342,10 @@ namespace SteamUpdateProject.DiscordLogic
 				await ctx.RespondAsync($"Set show all to {Set}.");
 			}
 
-			[Command("debug")]
+			[Command("debug"), RequirePermissions(Permissions.ManageChannels)]
 			public async Task DebugBool(CommandContext ctx, bool Set)
 			{
-				if(!UserHasPermission(ctx.Member, ctx.Guild))
-				{
-					await ctx.RespondAsync("Insufficient permissions to execute this command.");
-					return;
-				}
+				await ctx.TriggerTypingAsync();
 
 				GuildInfo GuildInfo = null;
 
@@ -375,6 +376,7 @@ namespace SteamUpdateProject.DiscordLogic
 			[Command("public")]
 			public async Task PublicBool(CommandContext ctx)
 			{
+				await ctx.TriggerTypingAsync();
 				GuildInfo GuildInfo = null;
 
 				if (ctx.Guild == null)
@@ -389,14 +391,10 @@ namespace SteamUpdateProject.DiscordLogic
 				await ctx.RespondAsync($"Public mode is currently set to {GuildInfo.PublicDepoOnly}.");
 			}
 
-			[Command("public")]
+			[Command("public"), RequirePermissions(Permissions.ManageChannels)]
 			public async Task PublicBool(CommandContext ctx, bool Set)
 			{
-				if (!UserHasPermission(ctx.Member, ctx.Guild))
-				{
-					await ctx.RespondAsync("Insufficient permissions to execute this command.");
-					return;
-				}
+				await ctx.TriggerTypingAsync();
 
 				GuildInfo GuildInfo = null;
 
@@ -421,12 +419,12 @@ namespace SteamUpdateProject.DiscordLogic
 				}
 
 				await ctx.RespondAsync($"Public mode set to {Set}.");
-
 			}
 
 			[Command("debug")]
 			public async Task DebugBool(CommandContext ctx)
 			{
+				await ctx.TriggerTypingAsync();
 				GuildInfo GuildInfo = null;
 
 				if (ctx.Guild == null)
@@ -441,11 +439,10 @@ namespace SteamUpdateProject.DiscordLogic
 				await ctx.RespondAsync($"Debug mode is currently set to {GuildInfo.DebugMode}.");
 			}
 
-
-
 			[Command("status")]
 			public async Task Status(CommandContext ctx)
 			{
+				await ctx.TriggerTypingAsync();
 				if (SteamUpdateBot.SteamClient == null)
 				{
 					await ctx.RespondAsync($"SteamBot not ready.");
@@ -461,12 +458,14 @@ namespace SteamUpdateProject.DiscordLogic
 
 				}
 
-				await ctx.RespondAsync($"Ping: {ctx.Client.Ping}.\nSteam Status: {(steamStatus ? "Online" : "Offline")}.\nTotal updates processed: {SteamUpdateBot.SteamClient.UpdatesProcessed} ({(int)(SteamUpdateBot.SteamClient.UpdatesProcessed / (DateTime.UtcNow - Process.GetCurrentProcess().StartTime.ToUniversalTime()).TotalMinutes)} per minute)\nTotal content updates: {SteamUpdateBot.ContentUpdates}.\nTotal Execeptions: {SteamUpdateBot.Exceptions}");
+				await ctx.RespondAsync($"Ping: {ctx.Client.Ping}.\nSteam Status: {(steamStatus ? "Online" : "Offline")}.\nTotal updates processed: {SteamUpdateBot.Updates} ({(int)(SteamUpdateBot.Updates / (DateTime.UtcNow - Process.GetCurrentProcess().StartTime.ToUniversalTime()).TotalMinutes)} per minute)\nTotal content updates: {SteamUpdateBot.ContentUpdates}.\nTotal Exceptions: {SteamUpdateBot.Exceptions}");
 			}
 
 			[Command("forceupdate")]
 			public async Task ForceUpdate(CommandContext ctx, uint appid)
 			{
+				await ctx.TriggerTypingAsync();
+
 				if (ctx.User.Id != 185739967379537920)
 				{
 					await ctx.RespondAsync($"You're not authorized to use this command.");
@@ -498,23 +497,6 @@ namespace SteamUpdateProject.DiscordLogic
 				SteamUpdateBot.DiscordClient.AppUpdated(FakeUpdatedApp);
 
 				await ctx.RespondAsync($"Pushed a fake update for {FakeUpdatedApp.Name} ({FakeUpdatedApp.AppID})");
-			}
-
-			public bool UserHasPermission(DiscordMember userToBeChecked, DiscordGuild guildToBeChecked)
-			{
-				if (guildToBeChecked != null)
-				{
-					if (guildToBeChecked.Permissions == (Permissions.All | Permissions.ManageChannels | Permissions.Administrator))
-					{
-						return true;
-					}
-
-					return false;
-				}
-				else //In DMs they should have control ect
-				{
-					return true;
-				}
 			}
 		}
 	}

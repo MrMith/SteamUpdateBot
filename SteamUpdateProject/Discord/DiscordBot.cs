@@ -64,7 +64,7 @@ namespace SteamUpdateProject.DiscordLogic
 
 			if(DateTime.Now > TimeForStatusUpdate)
 			{
-				await _client.UpdateStatusAsync(new DiscordActivity($"Total Steam updates: {SteamUpdateBot.SteamClient.UpdatesProcessed}"));
+				await _client.UpdateStatusAsync(new DiscordActivity($"Total Steam updates: {SteamUpdateBot.Updates}"));
 				TimeForStatusUpdate = DateTime.Now.AddMinutes(5);
 			}
 

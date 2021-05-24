@@ -19,7 +19,6 @@ namespace SteamUpdateProject.Steam
 		readonly DiscordBot DiscordClient;
 		readonly System.Timers.Timer MainChangeTimer = new System.Timers.Timer(250);
 		uint LastChangeNumber = 0;
-		public double UpdatesProcessed;
 
 		readonly SteamClient steamClient;
 		public CallbackManager manager;
@@ -30,6 +29,7 @@ namespace SteamUpdateProject.Steam
 		private readonly string user;
 		private readonly string pass;
 		string authCode, twoFactorAuth;
+
 		public SteamBot(string[] args, DiscordBot bot)
 		{
 			DiscordClient = bot;
@@ -155,7 +155,8 @@ namespace SteamUpdateProject.Steam
 						}
 					}
 				}
-				UpdatesProcessed++;
+
+				SteamUpdateBot.Updates++;
 				DiscordClient.AppUpdated(AppUpdate);
 			}
 		}

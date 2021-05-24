@@ -4,6 +4,7 @@ using SteamUpdateProject.Steam;
 using System.IO;
 using System.Runtime.ExceptionServices;
 using DSharpPlus;
+using System.Linq;
 
 namespace SteamUpdateProject
 {
@@ -12,8 +13,9 @@ namespace SteamUpdateProject
 		public static DiscordBot DiscordClient;
 		public static SteamBot SteamClient;
 
-		public static int Exceptions = 0; // Total number of exceptions :)
-		public static int ContentUpdates = 0; // Total number of apps with detectable content filled updates (Basically if its not a store tag change and its public.)
+		public static long Exceptions = 0; // Total number of exceptions :)
+		public static long ContentUpdates = 0; // Total number of apps with detectable content filled updates (Basically if its not a store tag change and its public.)
+		public static long Updates = 0; // Total number of app updates
 
 		private static SQLDataBase Database;
 
@@ -31,9 +33,25 @@ namespace SteamUpdateProject
 			DiscordClient = new DiscordBot();
 
 			DiscordClient.StartDiscordBot("NjM0MjUxMTU4NjE3MDYzNDI0.XpS8oA.URkcwaHa8l098vaNDSo42V-qm7A").GetAwaiter().GetResult();
-			//DiscordClient.MainAsync(args[2]).GetAwaiter().GetResult();
+			//DiscordClient.StartDiscordBot(args[2]).GetAwaiter().GetResult();
 
 			SteamClient = new SteamBot(args, DiscordClient);
+
+			using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString)) //Not the best way about going about it ;(
+			{
+				GlobalData GlobalInfo = context.GlobalInformation.ToList().FirstOrDefault();
+				if(GlobalInfo == null)
+				{
+					GlobalInfo = context.GlobalInformation.Add(new GlobalData());
+				}
+				Updates = GlobalInfo.Updates;
+				Updates = GlobalInfo.ContentUpdates;
+				Exceptions = GlobalInfo.Exceptions;
+
+				context.GlobalInformation.RemoveRange(context.GlobalInformation.ToList());
+				context.GlobalInformation.Add(GlobalInfo);
+				context.SaveChanges();
+			}
 
 			while (SteamClient.isRunning)
 			{
