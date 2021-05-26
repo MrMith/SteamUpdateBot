@@ -12,8 +12,6 @@ using System.Data.Entity;
 
 namespace SteamUpdateProject.Steam
 {
-	//Issue
-	//: We're getting rate limited by steam so we cannot figure out if its a content update and what depo is being updated :(
 	class SteamBot
 	{
 		readonly DiscordBot DiscordClient;
@@ -136,7 +134,7 @@ namespace SteamUpdateProject.Steam
 							AppUpdate.Name = CallBackInfoApps.Value.KeyValues["common"]["name"].AsString();
 							
 							AppUpdate.DepoName = DepoChanged;
-							Console.WriteLine(AppUpdate.Content ? "Content Update for " + AppUpdate.AppID : "Update for " + AppUpdate.AppID);
+							//Console.WriteLine(AppUpdate.Content ? "Content Update for " + AppUpdate.AppID : "Update for " + AppUpdate.AppID);
 
 							using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
 							{

@@ -62,15 +62,20 @@ namespace SteamUpdateProject.DiscordLogic
 		{
 			if (!BotReady) return;
 
+			Console.WriteLine($"AppUpdated: {app.AppID} {(app.Content ? "(Content)" : "")}");
+
 			if(DateTime.Now > TimeForStatusUpdate)
 			{
 				await _client.UpdateStatusAsync(new DiscordActivity($"Total Steam updates: {SteamUpdateBot.Updates}"));
+				Console.WriteLine("Updated Time: " + SteamUpdateBot.Updates);
 				TimeForStatusUpdate = DateTime.Now.AddMinutes(5);
 			}
 
+			DiscordColor Color = new DiscordColor(((float)rand.Next(1, 100)) / 100, ((float)rand.Next(1, 100)) / 100, ((float)rand.Next(1, 100)) / 100);
+
 			DiscordEmbedBuilder AppEmbed = new DiscordEmbedBuilder
 			{
-				Color = new DiscordColor(rand.Next(1, 100) / 100, rand.Next(1, 100)/100, rand.Next(1, 100)/100),
+				Color = Color,
 				Timestamp = DateTimeOffset.UtcNow,
 				Title = "Steam App Update!"
 			};
