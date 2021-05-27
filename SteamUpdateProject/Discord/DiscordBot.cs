@@ -17,7 +17,6 @@ namespace SteamUpdateProject.DiscordLogic
 	{
 		public DiscordClient _client;
 		private readonly Random rand = new Random();
-		private ServiceProvider services;
 		private DateTime TimeForStatusUpdate = DateTime.Now;
 		private bool BotReady = false;
 
@@ -36,22 +35,10 @@ namespace SteamUpdateProject.DiscordLogic
 			});
 
 			commands.RegisterCommands<DiscordCommands.PublicModule>();
+			commands.SetHelpFormatter<CustomHelpFormatter>();
 
 			await _client.ConnectAsync();
 			BotReady = true;
-		}
-
-		//private Task LogAsync(LogMessage log)
-		//{
-		//	Console.WriteLine(log.ToString());
-		//	return Task.CompletedTask;
-		//}
-
-		private Task ReadyAsync()
-		{
-			Console.WriteLine($"{_client.CurrentUser} is connected!");
-
-			return Task.CompletedTask;
 		}
 
 		/// <summary>

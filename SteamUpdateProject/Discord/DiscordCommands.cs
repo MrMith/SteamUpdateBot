@@ -22,12 +22,12 @@ namespace SteamUpdateProject.DiscordLogic
 
 		public class PublicModule : BaseCommandModule
 		{
-			[Command("removeapp"), Aliases("delapp", "deleteapp", "remove", "unsubscribe")]
+			[Command("removeapp"), Aliases("delapp", "deleteapp", "remove", "unsubscribe"), Description("Removes Steam App(s) from this channel's subscription list.")]
 			public async Task RemoveAppAsync(CommandContext ctx, params string[] objects)
 			{
 				await ctx.TriggerTypingAsync();
 
-				if (!HasPermission(ctx.Member, ctx.Channel))
+				if (ctx.Guild != null && !HasPermission(ctx.Member, ctx.Channel))
 				{
 					await ctx.RespondAsync($"You do not have permission to run {ctx.Command.Name}.");
 					return;
@@ -105,12 +105,12 @@ namespace SteamUpdateProject.DiscordLogic
 				await ctx.RespondAsync("ERROR using remove command! Type !help to get help on using this command!");
 			}
 
-			[Command("subapp"), Aliases("addapp", "subscribeapp", "add", "subscribe")]
+			[Command("subapp"), Aliases("addapp", "subscribeapp", "add", "subscribe"), Description("Adds Steam App(s) from this channel's subscription list.")]
 			public async Task AddAppAsync(CommandContext ctx, params string[] objects)
 			{
 				await ctx.TriggerTypingAsync();
 
-				if (!HasPermission(ctx.Member, ctx.Channel))
+				if (ctx.Guild != null && !HasPermission(ctx.Member, ctx.Channel))
 				{
 					await ctx.RespondAsync($"You do not have permission to run {ctx.Command.Name}.");
 					return;
@@ -182,7 +182,7 @@ namespace SteamUpdateProject.DiscordLogic
 				await ctx.RespondAsync("ERROR using add command! Type !help to get help on using this command!");
 			}
 
-			[Command("list"), Aliases("apps")]
+			[Command("list"), Aliases("apps"), Description("Displays all of the subscribed apps for this channel and when they were last updated.")]
 			public async Task ListAllSubscribedApps(CommandContext ctx)
 			{
 				await ctx.TriggerTypingAsync();
@@ -261,24 +261,7 @@ namespace SteamUpdateProject.DiscordLogic
 				return String.Format("{0} {1} ago", dtEvent.ToShortDateString(), dtEvent.ToShortTimeString());
 			}
 
-			[Command("commands")]
-			public async Task HelpCommand(CommandContext ctx)
-			{
-				DiscordEmbedBuilder HelpBuilder = new DiscordEmbedBuilder()
-				{
-					Title = "Help Command"
-				};
-
-				HelpBuilder.AddField("!add", "Subscribe to a Steam Application to see when it updates by appid (Ex: !add 730 or !add 730 530)");
-				HelpBuilder.AddField("!remove", "Remove a subscription to a Steam Application so you no longer see when it updates by appid (Ex: !remove 730 or !remove 730 530)");
-				HelpBuilder.AddField("!all", "Show all updates (like if the store tags update) or only content updates. Defaults to false. (Ex: !all true)");
-				HelpBuilder.AddField("!status", "Shows the ping of the bot to discord, if steam is down and total updates processed this session.");
-				HelpBuilder.AddField("!public", "Will only send messages if the default public steam branch is updated. (Ex: !public true or !debug false)");
-				HelpBuilder.AddField("!debug", "**NOT RECOMMENDED** Pipes every update through this channel regardless of subscriptions. (Ex: !debug true or !debug false)");
-				await ctx.RespondAsync(embed: HelpBuilder.Build());
-			}
-
-			[Command("showall"), Aliases("all")]
+			[Command("showall"), Aliases("all"), Description("Shows the current value for show all. What  `Show all` means is if the bot will notify you for content changes only.")]
 			public async Task ShowContent(CommandContext ctx)
 			{
 				await ctx.TriggerTypingAsync();
@@ -293,12 +276,12 @@ namespace SteamUpdateProject.DiscordLogic
 				await ctx.RespondAsync($"Show all is set to: {GuildInfo.ShowContent}.");
 			}
 
-			[Command("showall")]
+			[Command("showall"), Description("Enables/Disables the setting that will only push updates when it a content change (aka not store tag changes)")]
 			public async Task ShowContentBool(CommandContext ctx, bool Set)
 			{
 				await ctx.TriggerTypingAsync();
 
-				if (!HasPermission(ctx.Member, ctx.Channel))
+				if (ctx.Guild != null && !HasPermission(ctx.Member, ctx.Channel))
 				{
 					await ctx.RespondAsync($"You do not have permission to run {ctx.Command.Name}.");
 					return;
@@ -320,12 +303,12 @@ namespace SteamUpdateProject.DiscordLogic
 				await ctx.RespondAsync($"Set show all to {Set}.");
 			}
 
-			[Command("debug")]
+			[Command("debug"), Description("True if you want to push every steam update through this channel.")]
 			public async Task DebugBool(CommandContext ctx, bool Set)
 			{
 				await ctx.TriggerTypingAsync();
 
-				if (!HasPermission(ctx.Member, ctx.Channel))
+				if (ctx.Guild != null && !HasPermission(ctx.Member, ctx.Channel))
 				{
 					await ctx.RespondAsync($"You do not have permission to run {ctx.Command.Name}.");
 					return;
@@ -348,7 +331,7 @@ namespace SteamUpdateProject.DiscordLogic
 
 			}
 
-			[Command("public")]
+			[Command("public"), Description("Value for if you should only notify this channel only when the default public branch is updated.")]
 			public async Task PublicBool(CommandContext ctx)
 			{
 				await ctx.TriggerTypingAsync();
@@ -358,12 +341,12 @@ namespace SteamUpdateProject.DiscordLogic
 				await ctx.RespondAsync($"Public mode is currently set to {GuildInfo.PublicDepoOnly}.");
 			}
 
-			[Command("public")]
+			[Command("public"), Description("What `Public` does is only push notifications through this channel if the steam app's default branch is updated.")]
 			public async Task PublicBool(CommandContext ctx, bool Set)
 			{
 				await ctx.TriggerTypingAsync();
 
-				if (!HasPermission(ctx.Member, ctx.Channel))
+				if (ctx.Guild != null && !HasPermission(ctx.Member, ctx.Channel))
 				{
 					await ctx.RespondAsync($"You do not have permission to run {ctx.Command.Name}.");
 					return;
@@ -385,7 +368,7 @@ namespace SteamUpdateProject.DiscordLogic
 				await ctx.RespondAsync($"Public mode set to {Set}.");
 			}
 
-			[Command("debug")]
+			[Command("debug"), Description("Shows you if debug is true/false (aka if the bot should notify you for every update)")]
 			public async Task DebugBool(CommandContext ctx)
 			{
 				await ctx.TriggerTypingAsync();
@@ -395,7 +378,7 @@ namespace SteamUpdateProject.DiscordLogic
 				await ctx.RespondAsync($"Debug mode is currently set to {GuildInfo.DebugMode}.");
 			}
 
-			[Command("status")]
+			[Command("status"), Description("Shows statistics about updates, updates with content changes, if steam is down or ping.")]
 			public async Task Status(CommandContext ctx)
 			{
 				await ctx.TriggerTypingAsync();
@@ -417,7 +400,7 @@ namespace SteamUpdateProject.DiscordLogic
 				await ctx.RespondAsync($"Ping: {ctx.Client.Ping}.\nSteam Status: {(steamStatus ? "Online" : "Offline")}.\nTotal updates processed: {SteamUpdateBot.Updates} ({(int)(SteamUpdateBot.Updates / (DateTime.UtcNow - Process.GetCurrentProcess().StartTime.ToUniversalTime()).TotalMinutes)} per minute)\nTotal content updates: {SteamUpdateBot.ContentUpdates}.\nTotal Exceptions: {SteamUpdateBot.Exceptions}");
 			}
 
-			[Command("forceupdate")]
+			[Command("forceupdate"), Hidden]
 			public async Task ForceUpdate(CommandContext ctx, uint appid)
 			{
 				await ctx.TriggerTypingAsync();

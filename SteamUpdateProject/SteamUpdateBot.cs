@@ -35,6 +35,11 @@ namespace SteamUpdateProject
 			DiscordClient.StartDiscordBot("NjM0MjUxMTU4NjE3MDYzNDI0.XpS8oA.URkcwaHa8l098vaNDSo42V-qm7A").GetAwaiter().GetResult();
 			//DiscordClient.StartDiscordBot(args[2]).GetAwaiter().GetResult();
 
+			using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
+			{
+				Updates = context.AppInfoData.ToList().Last().Key;
+			}
+
 			SteamClient = new SteamBot(args, DiscordClient);
 
 			while (SteamClient.isRunning)
