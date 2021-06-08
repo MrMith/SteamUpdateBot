@@ -77,7 +77,7 @@ namespace SteamUpdateProject.Steam
 		{
 			if (LastChangeNumber == callback.CurrentChangeNumber) return;
 			LastChangeNumber = callback.CurrentChangeNumber;
-
+			
 			foreach (KeyValuePair<uint, SteamApps.PICSChangesCallback.PICSChangeData> AppsThatUpdated in callback.AppChanges)
 			{
 				AppUpdate AppUpdate = new AppUpdate

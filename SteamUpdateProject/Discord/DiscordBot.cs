@@ -87,8 +87,6 @@ namespace SteamUpdateProject.DiscordLogic
 					if (app.DepoName != null && ServerInfo.PublicDepoOnly && app.DepoName != "public") continue;
 					if (ServerInfo.GuildID == 0)
 					{
-						//continue; //For some reason DMs are broken af
-						
 						try
 						{
 							foreach(var _guildKVP in _client.Guilds)
@@ -114,7 +112,6 @@ namespace SteamUpdateProject.DiscordLogic
 							Console.WriteLine();
 							Console.WriteLine();
 						}
-						
 					}
 					else
 					{
