@@ -378,6 +378,24 @@ namespace SteamUpdateProject.DiscordLogic
 				await ctx.RespondAsync($"Debug mode is currently set to {GuildInfo.DebugMode}.");
 			}
 
+			[Command("name"), Description("Gets the steam app's name from the steam app's ID.")]
+			public async Task IDToName(CommandContext ctx, params string[] objects)
+			{
+				await ctx.TriggerTypingAsync();
+
+				DiscordEmbedBuilder embedBuilder = new DiscordEmbedBuilder();
+
+				foreach(var obj in objects)
+				{
+					if(uint.TryParse(obj, out var AppID))
+					{
+						embedBuilder.AddField(AppID.ToString(), await SteamUpdateBot.SteamClient.GetAppName(AppID));
+					}
+				}
+
+				await ctx.RespondAsync(embedBuilder.Build());
+			}
+
 			[Command("status"), Description("Shows statistics about updates, updates with content changes, if steam is down or ping.")]
 			public async Task Status(CommandContext ctx)
 			{

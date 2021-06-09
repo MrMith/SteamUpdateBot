@@ -51,6 +51,7 @@ namespace SteamUpdateProject.DiscordLogic
 			{
 				await _client.UpdateStatusAsync(new DiscordActivity($"Total Steam updates: {SteamUpdateBot.Updates}"));
 				Console.WriteLine("Updated Time: " + SteamUpdateBot.Updates);
+				SteamUpdateBot.BackupDatabase();
 				TimeForStatusUpdate = DateTime.Now.AddMinutes(5);
 			}
 
@@ -346,7 +347,7 @@ namespace SteamUpdateProject.DiscordLogic
 			{
 				foreach(GuildInfo Guild in context.GuildInformation.ToList())
 				{
-					foreach(var AppID in Guild.SubscribedApps)
+					foreach(var AppID in Guild.SubscribedApps.ToList())
 					{
 						if(appid == AppID.AppID)
 						{

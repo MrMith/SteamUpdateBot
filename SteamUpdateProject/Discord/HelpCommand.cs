@@ -31,6 +31,7 @@ namespace SteamUpdateProject.DiscordLogic
 			HelpBuilder.AddField("!remove", "Remove a subscription to a Steam Application so you no longer see when it updates by appid (Ex: !remove 730 or !remove 730 530)");
 			HelpBuilder.AddField("!all", "Show all updates (like if the store tags update) or only content updates. Defaults to false. (Ex: !all true)");
 			HelpBuilder.AddField("!status", "Shows the ping of the bot to discord, if steam is down and total updates processed this session.");
+			HelpBuilder.AddField("!name", "Converts steam app ID to the steam app's name.");
 			HelpBuilder.AddField("!public", "Will only send messages if the default public steam branch is updated. (Ex: !public true or !debug false)");
 			HelpBuilder.AddField("!debug", "**NOT RECOMMENDED** Pipes every update through this channel regardless of subscriptions. (Ex: !debug true or !debug false)");
 

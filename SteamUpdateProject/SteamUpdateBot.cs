@@ -5,6 +5,7 @@ using System.IO;
 using System.Runtime.ExceptionServices;
 using DSharpPlus;
 using System.Linq;
+using System.Diagnostics;
 
 namespace SteamUpdateProject
 {
@@ -21,6 +22,7 @@ namespace SteamUpdateProject
 		public static long Updates = 0;
 
 		private static SQLDataBase Database;
+		public static bool _firstStartUp = true;
 
 		public static string LogPath = Directory.GetCurrentDirectory() + "\\logs\\";
 		public static string ConnectionString = $"Server=(LocalDB)\\MSSQLLocalDB;Integrated Security=true;AttachDbFileName={Directory.CreateDirectory($"{Directory.GetCurrentDirectory()}//database").FullName}\\SteamInformation.mdf";
@@ -40,7 +42,9 @@ namespace SteamUpdateProject
 
 			using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
 			{
-				Updates = context.AppInfoData.ToList().LastOrDefault().Key;
+				AppInfo LastApp = context.AppInfoData.ToList().LastOrDefault();
+				if (LastApp != null)
+					Updates = LastApp.Key;
 			}
 
 			SteamClient = new SteamBot(args, DiscordClient);
@@ -55,6 +59,34 @@ namespace SteamUpdateProject
 		{
 			Exceptions++;
 			LogCancer(e.Exception);
+		}
+
+		public static void BackupDatabase()
+		{
+			if(_firstStartUp)
+			{
+				//_firstStartUp = false;
+				//return;
+			}
+
+			Directory.CreateDirectory($"{Directory.GetCurrentDirectory()}//backup");
+
+			if (Environment.OSVersion.Platform == PlatformID.Unix)
+			{
+
+			}
+			else //Windows, fuck MacOS.
+			{
+				Process CopyProcessmdf = new Process();
+				CopyProcessmdf.StartInfo.UseShellExecute = false;
+				CopyProcessmdf.StartInfo.RedirectStandardOutput = true;
+				CopyProcessmdf.StartInfo.FileName = "cmd.exe";
+				CopyProcessmdf.StartInfo.WorkingDirectory = Directory.GetCurrentDirectory();
+				CopyProcessmdf.StartInfo.Arguments = $"/c robocopy \"{Directory.GetCurrentDirectory()}\\database\" \"{Directory.GetCurrentDirectory()}\\backup\" *";
+				CopyProcessmdf.Start();
+				CopyProcessmdf.WaitForExit();
+				CopyProcessmdf.Close();
+			}
 		}
 
 		public static void LogCancer(Exception e)
