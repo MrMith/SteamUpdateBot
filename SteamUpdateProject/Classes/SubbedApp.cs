@@ -1,18 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Diagnostics.CodeAnalysis;
-using System.Text;
 
 namespace SteamUpdateProject
 {
-	public class SubedApp : IEquatable<SubedApp>
+	public class SubbedApp : IEquatable<SubbedApp>
 	{
-		public SubedApp()
+		public SubbedApp()
 		{
 		}
 
-		public SubedApp(long appid)
+		public SubbedApp(long appid)
 		{
 			AppID = appid;
 		}
@@ -23,10 +21,10 @@ namespace SteamUpdateProject
 
 		public override bool Equals(object obj)
 		{
-			return Equals(obj as SubedApp);
+			return Equals(obj as SubbedApp);
 		}
 
-		public bool Equals(SubedApp other)
+		public bool Equals(SubbedApp other)
 		{
 			return other != null &&
 				   Key == other.Key &&
@@ -38,12 +36,12 @@ namespace SteamUpdateProject
 			return HashCode.Combine(Key, AppID);
 		}
 
-		public static bool operator ==(SubedApp left, SubedApp right)
+		public static bool operator ==(SubbedApp left, SubbedApp right)
 		{
-			return EqualityComparer<SubedApp>.Default.Equals(left, right);
+			return EqualityComparer<SubbedApp>.Default.Equals(left, right);
 		}
 
-		public static bool operator !=(SubedApp left, SubedApp right)
+		public static bool operator !=(SubbedApp left, SubbedApp right)
 		{
 			return !(left == right);
 		}

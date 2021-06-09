@@ -199,7 +199,7 @@ namespace SteamUpdateProject.DiscordLogic
 				}
 
 				StringBuilder ListTest = new StringBuilder();
-				foreach (SubedApp SubbedApp in GuildInfo.SubscribedApps.ToList())
+				foreach (SubbedApp SubbedApp in GuildInfo.SubscribedApps.ToList())
 				{
 					AppInfo AppInfo = DiscordBot.GetCachedInfo(SubbedApp.AppID);
 
@@ -422,23 +422,6 @@ namespace SteamUpdateProject.DiscordLogic
 				FakeUpdatedApp.Content = true;
 				FakeUpdatedApp.ChangeNumber = 1;
 				FakeUpdatedApp.LastUpdated = DateTime.UtcNow.AddYears(10);
-
-				/*
-				using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
-				{
-					ctx.AppInfoData.RemoveRange(ctx.AppInfoData.ToList().Where(x => x.AppID == FakeUpdatedApp.AppID));
-					AppInfo test = new AppInfo()
-					{
-						Name = FakeUpdatedApp.Name,
-						AppID = appid,
-						LastUpdated = FakeUpdatedApp.LastUpdated
-					};
-
-					ctx.AppInfoData.Add(test);
-
-					ctx.SaveChanges();
-				}
-				*/
 
 				SteamUpdateBot.DiscordClient.AppUpdated(FakeUpdatedApp);
 

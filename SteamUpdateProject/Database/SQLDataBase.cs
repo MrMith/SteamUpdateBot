@@ -1,14 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-//using Microsoft.EntityFrameworkCore;
-using System.Data.Entity;
-using System.Data.Common;
-using System.Data.Odbc;
-using System.Data.OleDb;
-using System.ComponentModel.DataAnnotations;
-using System.Linq.Expressions;
-using System.Linq;
+﻿using System.Data.Entity;
 using System.Data.Entity.ModelConfiguration.Conventions;
 
 namespace SteamUpdateProject

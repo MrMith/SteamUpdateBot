@@ -1,15 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using SteamKit2;
-using System.IO;
-using System.Security.Cryptography;
-using System.Threading;
-using System.Timers;
-using System.Threading.Tasks;
-using SteamUpdateProject.DiscordLogic;
-using System.Diagnostics;
-using System.Linq;
+﻿using SteamKit2;
 
 namespace SteamUpdateProject
 {

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using SteamKit2;
 using System.IO;
@@ -8,7 +7,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using SteamUpdateProject.DiscordLogic;
 using System.Linq;
-using System.Data.Entity;
 
 namespace SteamUpdateProject.Steam
 {
@@ -167,6 +165,7 @@ namespace SteamUpdateProject.Steam
 		public async Task<string> GetAppName(uint appid)
 		{
 			AppInfo test = DiscordBot.GetCachedInfo(appid, true);
+
 			if (test != null)
 			{
 				return test.Name;
@@ -203,8 +202,7 @@ namespace SteamUpdateProject.Steam
 
 		public async Task<bool> IsSteamDown()
 		{
-
-			AsyncJobMultiple<SteamApps.PICSProductInfoCallback>.ResultSet ProductInfo = await Apps.PICSGetProductInfo(570, null);
+			AsyncJobMultiple<SteamApps.PICSProductInfoCallback>.ResultSet ProductInfo = await Apps.PICSGetProductInfo(570, null); //570 is Dota 2.
 			if (ProductInfo.Failed)
 			{
 				return false;

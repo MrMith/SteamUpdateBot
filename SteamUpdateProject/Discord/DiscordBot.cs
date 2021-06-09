@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Drawing;
-using System.Net.Http;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.CommandsNext;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Data.Entity;
 
 namespace SteamUpdateProject.DiscordLogic
@@ -146,7 +142,7 @@ namespace SteamUpdateProject.DiscordLogic
 				using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
 				{
 					context.GuildInformation.RemoveRange(context.GuildInformation.Include(x => x.SubscribedApps).ToList().Where(x => x.ChannelID == info.ChannelID && x.GuildID == info.GuildID));
-					info.SubscribedApps.Add(new SubedApp(appid));
+					info.SubscribedApps.Add(new SubbedApp(appid));
 					
 					context.GuildInformation.Add(info);
 					context.SaveChanges();
@@ -182,7 +178,7 @@ namespace SteamUpdateProject.DiscordLogic
 					context.GuildInformation.RemoveRange(context.GuildInformation.Include(x => x.SubscribedApps).ToList().Where(x => x.ChannelID == info.ChannelID && x.GuildID == info.GuildID));
 					foreach(uint app in ListOfAddedApps)
 					{
-						info.SubscribedApps.Add(new SubedApp(app));
+						info.SubscribedApps.Add(new SubbedApp(app));
 					}					
 					context.GuildInformation.Add(info);
 					context.SaveChanges();
@@ -205,7 +201,7 @@ namespace SteamUpdateProject.DiscordLogic
 				using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
 				{
 					context.GuildInformation.RemoveRange(context.GuildInformation.Include(x => x.SubscribedApps).ToList().Where(x => x.ChannelID == info.ChannelID && x.GuildID == info.GuildID));
-					foreach(SubedApp ToBeRemoved in info.SubscribedApps.Where(x => x.AppID == appid).ToList())
+					foreach(SubbedApp ToBeRemoved in info.SubscribedApps.Where(x => x.AppID == appid).ToList())
 					{
 						info.SubscribedApps.Remove(ToBeRemoved);
 					}
@@ -243,7 +239,7 @@ namespace SteamUpdateProject.DiscordLogic
 					context.GuildInformation.RemoveRange(context.GuildInformation.Include(x => x.SubscribedApps).ToList().Where(x => x.ChannelID == info.ChannelID && x.GuildID == info.GuildID));
 					foreach (uint appid in listOfApps)
 					{
-						foreach(SubedApp ToBeRemoved in info.SubscribedApps.Where(x => x.AppID == appid).ToList())
+						foreach(SubbedApp ToBeRemoved in info.SubscribedApps.Where(x => x.AppID == appid).ToList())
 						{
 							info.SubscribedApps.Remove(ToBeRemoved);
 						}					

@@ -13,14 +13,17 @@ namespace SteamUpdateProject
 		public static DiscordBot DiscordClient;
 		public static SteamBot SteamClient;
 
-		public static long Exceptions = 0; // Total number of exceptions :)
-		public static long ContentUpdates = 0; // Total number of apps with detectable content filled updates (Basically if its not a store tag change and its public.)
-		public static long Updates = 0; // Total number of app updates
+		/// Total number of exceptions :)
+		public static long Exceptions = 0;
+		/// Total number of apps with detectable content filled updates (Basically if its not a store tag change and its public.)
+		public static long ContentUpdates = 0;
+		/// Total number of app updates
+		public static long Updates = 0;
 
 		private static SQLDataBase Database;
 
 		public static string LogPath = Directory.GetCurrentDirectory() + "\\logs\\";
-		public static string ConnectionString = @"Data Source=(localdb)\mssqllocaldb;Initial Catalog=SteamUpdateProjectTest1.SQLDataBase;Integrated Security=True;MultipleActiveResultSets=True";
+		public static string ConnectionString = $"Server=(LocalDB)\\MSSQLLocalDB;Integrated Security=true;AttachDbFileName={Directory.CreateDirectory($"{Directory.GetCurrentDirectory()}//database").FullName}\\SteamInformation.mdf";
 
 		public static void Main(string[] args)
 		{
@@ -37,7 +40,7 @@ namespace SteamUpdateProject
 
 			using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
 			{
-				Updates = context.AppInfoData.ToList().Last().Key;
+				Updates = context.AppInfoData.ToList().LastOrDefault().Key;
 			}
 
 			SteamClient = new SteamBot(args, DiscordClient);
@@ -119,6 +122,5 @@ namespace SteamUpdateProject
 		{
 			return DateTime.UtcNow.ToString().Replace("/","_").Replace(":","-");
 		}
-
 	}
 }
