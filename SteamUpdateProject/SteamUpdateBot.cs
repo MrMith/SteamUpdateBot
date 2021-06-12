@@ -6,6 +6,8 @@ using System.Runtime.ExceptionServices;
 using DSharpPlus;
 using System.Linq;
 using System.Diagnostics;
+using Microsoft.SqlServer.Management.Smo;
+using Microsoft.SqlServer.Management.Common;
 
 namespace SteamUpdateProject
 {
@@ -13,6 +15,7 @@ namespace SteamUpdateProject
 	{
 		public static DiscordBot DiscordClient;
 		public static SteamBot SteamClient;
+		public static SMOHandler SMOHandler;
 
 		/// Total number of exceptions :)
 		public static long Exceptions = 0;
@@ -25,13 +28,32 @@ namespace SteamUpdateProject
 		public static bool _firstStartUp = true;
 
 		public static string LogPath = Directory.GetCurrentDirectory() + "\\logs\\";
-		public static string ConnectionString = $"Server=(LocalDB)\\MSSQLLocalDB;Integrated Security=true;AttachDbFileName={Directory.CreateDirectory($"{Directory.GetCurrentDirectory()}//database").FullName}\\SteamInformation.mdf";
+		public static string ConnectionString = $"Integrated Security=true;";
+		public static string DatabaseDirectory = $"{Directory.GetCurrentDirectory()}\\database";
 
 		public static void Main(string[] args)
 		{
-			Database = new SQLDataBase(ConnectionString);
-			Database.Database.CreateIfNotExists();
+			#region Database start
+			SMOHandler = new SMOHandler();
 
+			ConnectionString += $"Database={SMOHandler.SMODatabase.Name}";
+
+			Database = new SQLDataBase(ConnectionString);
+
+			if(!File.Exists($"{DatabaseDirectory}\\SteamInformation.mdf"))
+			{
+				Database.Database.CreateIfNotExists();
+			}
+
+			//To-Do add ini file with updates, content updates and exceptions.
+			using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
+			{
+				AppInfo LastApp = context.AppInfoData.ToList().LastOrDefault();
+				if (LastApp != null)
+					Updates = LastApp.Key;
+			}
+			#endregion
+			#region Bot Starts, Logging and Main While thread.
 			AppDomain.CurrentDomain.FirstChanceException += FirstChanceHandler;
 
 			if (!Directory.Exists(LogPath)) Directory.CreateDirectory(LogPath);
@@ -40,19 +62,13 @@ namespace SteamUpdateProject
 			DiscordClient.StartDiscordBot("NjM0MjUxMTU4NjE3MDYzNDI0.XpS8oA.URkcwaHa8l098vaNDSo42V-qm7A").GetAwaiter().GetResult();
 			//DiscordClient.StartDiscordBot(args[2]).GetAwaiter().GetResult();
 
-			using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
-			{
-				AppInfo LastApp = context.AppInfoData.ToList().LastOrDefault();
-				if (LastApp != null)
-					Updates = LastApp.Key;
-			}
-
 			SteamClient = new SteamBot(args, DiscordClient);
 
 			while (SteamClient.isRunning)
 			{
 				SteamClient.manager.RunWaitCallbacks(TimeSpan.FromSeconds(1));
 			}
+#endregion
 		}
 
 		private static void FirstChanceHandler(object sender, FirstChanceExceptionEventArgs e)
@@ -61,12 +77,13 @@ namespace SteamUpdateProject
 			LogCancer(e.Exception);
 		}
 
+		//Will transfer over to SMO in due time :)
 		public static void BackupDatabase()
 		{
 			if(_firstStartUp)
 			{
-				//_firstStartUp = false;
-				//return;
+				_firstStartUp = false;
+				return;
 			}
 
 			Directory.CreateDirectory($"{Directory.GetCurrentDirectory()}//backup");
