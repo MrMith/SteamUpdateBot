@@ -8,6 +8,10 @@ using Microsoft.SqlServer.Management.Common;
 
 namespace SteamUpdateProject
 {
+	/// <summary>
+	/// This handles everything related to SMO aka SQL Server Management Objects.
+	/// See this for more reading -> https://docs.microsoft.com/en-us/sql/relational-databases/server-management-objects-smo/overview-smo?view=sql-server-ver15
+	/// </summary>
 	class SMOHandler
 	{
 		public Database SMODatabase;

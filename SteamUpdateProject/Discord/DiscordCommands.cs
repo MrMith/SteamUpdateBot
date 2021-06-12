@@ -415,7 +415,7 @@ namespace SteamUpdateProject.DiscordLogic
 
 				}
 
-				await ctx.RespondAsync($"Ping: {ctx.Client.Ping}.\nSteam Status: {(steamStatus ? "Online" : "Offline")}.\nTotal updates processed: {SteamUpdateBot.Updates} ({(int)(SteamUpdateBot.Updates / (DateTime.UtcNow - Process.GetCurrentProcess().StartTime.ToUniversalTime()).TotalMinutes)} per minute)\nTotal content updates: {SteamUpdateBot.ContentUpdates}.\nTotal Exceptions: {SteamUpdateBot.Exceptions}");
+				await ctx.RespondAsync($"Ping: {ctx.Client.Ping}.\nSteam Status: {(steamStatus ? "Online" : "Offline")}.\nTotal updates processed: {SteamUpdateBot.Updates} ({(int)(SteamUpdateBot.Updates / SteamUpdateBot.MinutesRunning)} per minute)\nTotal content updates: {SteamUpdateBot.ContentUpdates}.\nTotal Exceptions: {SteamUpdateBot.Exceptions}");
 			}
 
 			[Command("secret"), Hidden]

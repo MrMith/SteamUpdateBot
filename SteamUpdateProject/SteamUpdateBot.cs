@@ -16,6 +16,7 @@ namespace SteamUpdateProject
 		public static DiscordBot DiscordClient;
 		public static SteamBot SteamClient;
 		public static SMOHandler SMOHandler;
+		public static INIHandler INIHandler;
 
 		/// Total number of exceptions :)
 		public static long Exceptions = 0;
@@ -23,6 +24,8 @@ namespace SteamUpdateProject
 		public static long ContentUpdates = 0;
 		/// Total number of app updates
 		public static long Updates = 0;
+		/// Total number of minutes this program as been 
+		public static long MinutesRunning = 0;
 
 		private static SQLDataBase Database;
 		public static bool _firstStartUp = true;
@@ -45,16 +48,14 @@ namespace SteamUpdateProject
 				Database.Database.CreateIfNotExists();
 			}
 
-			//To-Do add ini file with updates, content updates and exceptions.
-			using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
-			{
-				AppInfo LastApp = context.AppInfoData.ToList().LastOrDefault();
-				if (LastApp != null)
-					Updates = LastApp.Key;
-			}
 			#endregion
+
 			#region Bot Starts, Logging and Main While thread.
 			AppDomain.CurrentDomain.FirstChanceException += FirstChanceHandler;
+
+			INIHandler = new INIHandler();
+
+			INIHandler.ReadData();
 
 			if (!Directory.Exists(LogPath)) Directory.CreateDirectory(LogPath);
 			DiscordClient = new DiscordBot();
