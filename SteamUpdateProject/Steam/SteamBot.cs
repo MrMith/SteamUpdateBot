@@ -29,8 +29,8 @@ namespace SteamUpdateProject.Steam
 		public SteamBot(string[] args, DiscordBot bot)
 		{
 			DiscordClient = bot;
-			user = "lobby_creator4";//args[0]; //This is a fodder steam account so I snooze
-			pass = "p876MH7rfKC7sxV!";//args[1];
+			user = args[0]; //This is a fodder steam account so I snooze
+			pass = args[1];
 			steamClient = new SteamClient();
 
 			steamUser = steamClient.GetHandler<SteamUser>();

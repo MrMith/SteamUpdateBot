@@ -60,8 +60,8 @@ namespace SteamUpdateProject
 			if (!Directory.Exists(LogPath)) Directory.CreateDirectory(LogPath);
 			DiscordClient = new DiscordBot();
 
-			DiscordClient.StartDiscordBot("NjM0MjUxMTU4NjE3MDYzNDI0.XpS8oA.URkcwaHa8l098vaNDSo42V-qm7A").GetAwaiter().GetResult();
-			//DiscordClient.StartDiscordBot(args[2]).GetAwaiter().GetResult();
+			//DiscordClient.StartDiscordBot("").GetAwaiter().GetResult();
+			DiscordClient.StartDiscordBot(args[2]).GetAwaiter().GetResult();
 
 			SteamClient = new SteamBot(args, DiscordClient);
 
@@ -86,6 +86,8 @@ namespace SteamUpdateProject
 				_firstStartUp = false;
 				return;
 			}
+
+			SteamUpdateBot.MinutesRunning += 5;
 
 			Directory.CreateDirectory($"{Directory.GetCurrentDirectory()}//backup");
 

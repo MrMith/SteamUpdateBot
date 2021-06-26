@@ -53,6 +53,7 @@ namespace SteamUpdateProject.DiscordLogic
 				Console.WriteLine("Updated Time: " + SteamUpdateBot.Updates);
 				SteamUpdateBot.BackupDatabase();
 				SteamUpdateBot.INIHandler.WriteData();
+
 				TimeForStatusUpdate = DateTime.Now.AddMinutes(5);
 			}
 
