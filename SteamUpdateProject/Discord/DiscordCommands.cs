@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Data.Entity;
+using SteamKit2;
 
 namespace SteamUpdateProject.DiscordLogic
 {
@@ -454,6 +455,60 @@ namespace SteamUpdateProject.DiscordLogic
 				await ctx.RespondAsync($"Set override to {DevOverride}.");
 			}
 
+			[Command("branches"), Description("Lists all of the branches for a certain steam app.")]
+			[Aliases("branch")]
+			public async Task Branches(CommandContext ctx)
+			{
+				await ctx.TriggerTypingAsync();
+
+				await ctx.RespondAsync("Useage: branches <AppID>");
+			}
+
+			[Command("branches"), Description("Lists all of the branches for a certain steam app.")]
+			public async Task Branches(CommandContext ctx, uint AppID)
+			{
+				await ctx.TriggerTypingAsync();
+
+				DiscordEmbedBuilder embedBuilder = new DiscordEmbedBuilder();
+
+				var customProductInfo = await Steam.SteamBot.GetFullProductInfo(AppID);
+
+				var CompleteInfo = customProductInfo.ProductInfo;
+
+				if(CompleteInfo.Complete)
+				{
+					foreach (var CallBackInfo in CompleteInfo.Results)
+					{
+						foreach (var CallBackInfoApps in CallBackInfo.Apps)
+						{
+							KeyValue depotKV = CallBackInfoApps.Value.KeyValues.Children.Where(c => c.Name == "depots").FirstOrDefault();
+							if (depotKV == null)
+								continue;
+
+							KeyValue depotInfo = depotKV["branches"];
+							if (depotInfo == null) continue;
+							foreach (KeyValue test in depotInfo.Children)
+							{
+								foreach (KeyValue test2 in test.Children)
+								{
+									if (test2.Name != "timeupdated")
+										continue;
+
+									embedBuilder.AddField($"{test.Name}",$"Last updated {ElapsedTime(DateTime.UnixEpoch.AddSeconds(double.Parse(test2.Value)))}");
+								}
+							}
+						}
+					}
+				}
+
+				if(embedBuilder.Fields.Count == 0)
+				{
+					embedBuilder.AddField("Unable to find anything for this AppID.", "");
+				}
+
+				await ctx.RespondAsync(embedBuilder.Build());
+			}
+			
 
 			[Command("devoverride"), Hidden]
 			public async Task Devoverride(CommandContext ctx)

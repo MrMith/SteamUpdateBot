@@ -75,7 +75,7 @@ namespace SteamUpdateProject.Steam
 		{
 			if (LastChangeNumber == callback.CurrentChangeNumber) return;
 			LastChangeNumber = callback.CurrentChangeNumber;
-			
+
 			foreach (KeyValuePair<uint, SteamApps.PICSChangesCallback.PICSChangeData> AppsThatUpdated in callback.AppChanges)
 			{
 				AppUpdate AppUpdate = new AppUpdate
@@ -99,58 +99,61 @@ namespace SteamUpdateProject.Steam
 
 				AsyncJobMultiple<SteamApps.PICSProductInfoCallback>.ResultSet ProductInfo = FullProductInfo.ProductInfo;
 
-				if (ProductInfo.Complete)
+				if (!ProductInfo.Complete)
+					continue;
+
+				foreach (SteamApps.PICSProductInfoCallback CallBackInfo in ProductInfo.Results)
 				{
-					foreach (SteamApps.PICSProductInfoCallback CallBackInfo in ProductInfo.Results)
+					foreach (KeyValuePair<uint, SteamApps.PICSProductInfoCallback.PICSProductInfo> CallBackInfoApps in CallBackInfo.Apps)
 					{
-						foreach (KeyValuePair<uint, SteamApps.PICSProductInfoCallback.PICSProductInfo> CallBackInfoApps in CallBackInfo.Apps)
+						KeyValue depotKV = CallBackInfoApps.Value.KeyValues.Children.Where(c => c.Name == "depots").FirstOrDefault();
+						if (depotKV == null || !FullProductInfo.IsPublic)
+							continue;
+
+						KeyValue depotInfo = depotKV["branches"];
+						if (depotInfo == null) continue;
+						foreach (KeyValue test in depotInfo.Children)
 						{
-							string DepoChanged = null;
-							KeyValue depotKV = CallBackInfoApps.Value.KeyValues.Children.Where(c => c.Name == "depots").FirstOrDefault();
-							if (depotKV != null && FullProductInfo.IsPublic)
+							foreach (KeyValue test2 in test.Children)
 							{
-								KeyValue depotInfo = depotKV["branches"];
-								if (depotInfo == null) continue;
-								foreach (KeyValue test in depotInfo.Children)
-								{
-									foreach (KeyValue test2 in test.Children)
-									{
-										if (test2.Name == "timeupdated")
-										{
-											TimeSpan t = DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
-											if (((int)t.TotalSeconds - int.Parse(test2.Value)) < 10) // Needed because it can take a couple of seconds to go through the steam pipeline.
-											{
-												DepoChanged = test.Name;
-												AppUpdate.Content = true;
-												SteamUpdateBot.ContentUpdates++;
-											}
-										}
-									}
-								}
-							}
-							AppUpdate.LastUpdated = DateTime.UtcNow;
-							AppUpdate.Name = CallBackInfoApps.Value.KeyValues["common"]["name"].AsString();
-							
-							AppUpdate.DepoName = DepoChanged;
-							//Console.WriteLine(AppUpdate.Content ? "Content Update for " + AppUpdate.AppID : "Update for " + AppUpdate.AppID);
+								if (test2.Name != "timeupdated")
+									continue;
 
-							using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
+								DateTime Test1 = DateTime.UtcNow;
+								DateTime Test2 = DateTime.UnixEpoch;
+
+								TimeSpan t = Test1 - Test2;
+
+								if ((t.TotalSeconds - double.Parse(test2.Value)) > 10) // Needed because it can take a couple of seconds to go through the steam pipeline.
+									continue;
+
+								AppUpdate.DepoName = test.Name;
+								AppUpdate.Content = true;
+								SteamUpdateBot.ContentUpdates++;
+							}
+						}
+
+						AppUpdate.LastUpdated = DateTime.UtcNow;
+						AppUpdate.Name = CallBackInfoApps.Value.KeyValues["common"]["name"].AsString();
+						//Console.WriteLine(AppUpdate.Content ? "Content Update for " + AppUpdate.AppID : "Update for " + AppUpdate.AppID);
+
+						using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
+						{
+							context.AppInfoData.RemoveRange(context.AppInfoData.ToList().Where(x => x.AppID == AppUpdate.AppID));
+
+							AppInfo appinfo = new AppInfo()
 							{
-								context.AppInfoData.RemoveRange(context.AppInfoData.ToList().Where(x => x.AppID == AppUpdate.AppID));
+								AppID = AppUpdate.AppID,
+								Name = AppUpdate.Name,
+								LastUpdated = AppUpdate.LastUpdated
+							};
 
-								AppInfo appinfo = new AppInfo()
-								{
-									AppID = AppUpdate.AppID,
-									Name = AppUpdate.Name,
-									LastUpdated = AppUpdate.LastUpdated
-								};
-
-								context.AppInfoData.Add(appinfo);
-								context.SaveChanges();
-							}
+							context.AppInfoData.Add(appinfo);
+							context.SaveChanges();
 						}
 					}
 				}
+
 
 				SteamUpdateBot.Updates++;
 				DiscordClient.AppUpdated(AppUpdate);
