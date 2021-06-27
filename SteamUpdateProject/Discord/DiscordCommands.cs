@@ -471,10 +471,12 @@ namespace SteamUpdateProject.DiscordLogic
 
 				DiscordEmbedBuilder embedBuilder = new DiscordEmbedBuilder();
 
+				embedBuilder.Title = $"{await SteamUpdateBot.SteamClient.GetAppName(AppID)} ({AppID})";
+
 				var customProductInfo = await Steam.SteamBot.GetFullProductInfo(AppID);
 
 				var CompleteInfo = customProductInfo.ProductInfo;
-
+				
 				if(CompleteInfo.Complete)
 				{
 					foreach (var CallBackInfo in CompleteInfo.Results)
@@ -503,7 +505,7 @@ namespace SteamUpdateProject.DiscordLogic
 
 				if(embedBuilder.Fields.Count == 0)
 				{
-					embedBuilder.AddField("Unable to find anything for this AppID.", "");
+					embedBuilder.AddField("N/A", "Unable to find anything for this AppID.");
 				}
 
 				await ctx.RespondAsync(embedBuilder.Build());
