@@ -149,7 +149,6 @@ namespace SteamUpdateProject.Steam
 							};
 
 							context.AppInfoData.Add(appinfo);
-							context.SaveChanges();
 						}
 					}
 				}
@@ -192,7 +191,7 @@ namespace SteamUpdateProject.Steam
 						using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
 						{
 							context.AppInfoData.Add(appInfo);
-							context.SaveChanges();
+							
 						}
 
 						return CallBackInfoApps.Value.KeyValues["common"]["name"].AsString();

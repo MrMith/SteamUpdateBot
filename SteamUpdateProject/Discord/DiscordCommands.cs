@@ -308,7 +308,7 @@ namespace SteamUpdateProject.DiscordLogic
 						context.GuildInformation.RemoveRange(context.GuildInformation.Include(x => x.SubscribedApps).ToList().Where(x => x.ChannelID == GuildInfo.ChannelID && x.GuildID == GuildInfo.GuildID));
 						GuildInfo.ShowContent = Set;
 						context.GuildInformation.Add(GuildInfo);
-						context.SaveChanges();
+						
 					}
 				}
 
@@ -335,7 +335,7 @@ namespace SteamUpdateProject.DiscordLogic
 						context.GuildInformation.RemoveRange(context.GuildInformation.Include(x => x.SubscribedApps).ToList().Where(x => x.ChannelID == GuildInfo.ChannelID && x.GuildID == GuildInfo.GuildID));
 						GuildInfo.DebugMode = Set;
 						context.GuildInformation.Add(GuildInfo);
-						context.SaveChanges();
+						
 					}
 				}
 
@@ -373,7 +373,7 @@ namespace SteamUpdateProject.DiscordLogic
 						context.GuildInformation.RemoveRange(context.GuildInformation.Include(x => x.SubscribedApps).ToList().Where(x => x.ChannelID == GuildInfo.ChannelID && x.GuildID == GuildInfo.GuildID));
 						GuildInfo.PublicDepoOnly = Set;
 						context.GuildInformation.Add(GuildInfo);
-						context.SaveChanges();
+						
 					}
 				}
 
@@ -487,16 +487,16 @@ namespace SteamUpdateProject.DiscordLogic
 							if (depotKV == null)
 								continue;
 
-							KeyValue depotInfo = depotKV["branches"];
-							if (depotInfo == null) continue;
-							foreach (KeyValue test in depotInfo.Children)
+							KeyValue branchesKVP = depotKV["branches"];
+							if (branchesKVP == null) continue;
+							foreach (KeyValue branchKVP in branchesKVP.Children)
 							{
-								foreach (KeyValue test2 in test.Children)
+								foreach (KeyValue branchData in branchKVP.Children)
 								{
-									if (test2.Name != "timeupdated")
+									if (branchData.Name != "timeupdated")
 										continue;
 
-									embedBuilder.AddField($"{test.Name}",$"Last updated {ElapsedTime(DateTime.UnixEpoch.AddSeconds(double.Parse(test2.Value)))}");
+									embedBuilder.AddField($"{branchKVP.Name}",$"Last updated {ElapsedTime(DateTime.UnixEpoch.AddSeconds(double.Parse(branchData.Value)))}");
 								}
 							}
 						}

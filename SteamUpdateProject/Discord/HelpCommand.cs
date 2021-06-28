@@ -28,7 +28,7 @@ namespace SteamUpdateProject.DiscordLogic
 		public override BaseHelpFormatter WithSubcommands(IEnumerable<Command> cmds)
 		{
 			string P = this.Context.Prefix;
-
+			HelpBuilder.AddField("**[NOTICE]**","This bot has full DM Support!");
 			HelpBuilder.AddField($"{P}add", $"Subscribe to a Steam Application to see when it updates by appid (Ex: {P}add 730 or {P}add 730 530)");
 			HelpBuilder.AddField($"{P}remove", $"Remove a subscription to a Steam Application so you no longer see when it updates by appid (Ex: {P}remove 730 or {P}remove 730 530)");
 			HelpBuilder.AddField($"{P}all", $"Show all updates (like if the store tags update) or only content updates. Defaults to false. (Ex: {P}all true)");

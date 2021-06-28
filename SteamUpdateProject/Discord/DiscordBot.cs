@@ -148,7 +148,7 @@ namespace SteamUpdateProject.DiscordLogic
 					info.SubscribedApps.Add(new SubbedApp(appid));
 					
 					context.GuildInformation.Add(info);
-					context.SaveChanges();
+					
 					return true;
 				}
 			}
@@ -184,7 +184,7 @@ namespace SteamUpdateProject.DiscordLogic
 						info.SubscribedApps.Add(new SubbedApp(app));
 					}					
 					context.GuildInformation.Add(info);
-					context.SaveChanges();
+					
 				}
 			}
 
@@ -209,7 +209,7 @@ namespace SteamUpdateProject.DiscordLogic
 						info.SubscribedApps.Remove(ToBeRemoved);
 					}
 					context.GuildInformation.Add(info);
-					context.SaveChanges();
+					
 				}
 				return true;
 			}
@@ -248,7 +248,7 @@ namespace SteamUpdateProject.DiscordLogic
 						}					
 					}
 					context.GuildInformation.Add(info);
-					context.SaveChanges();
+					
 				}
 			}
 			
@@ -284,7 +284,7 @@ namespace SteamUpdateProject.DiscordLogic
 				if (AppInfo.Name != null)
 				{
 					context.AppInfoData.Add(AppInfo);
-					context.SaveChanges();
+					
 					return AppInfo;
 				}
 			}
@@ -332,7 +332,7 @@ namespace SteamUpdateProject.DiscordLogic
 			using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
 			{
 				context.GuildInformation.Add(GuildInfo);
-				context.SaveChanges();
+				
 			}
 
 			return GuildInfo;

@@ -43,7 +43,7 @@ namespace SteamUpdateProject
 
 			Database = new SQLDataBase(ConnectionString);
 
-			if(!File.Exists($"{DatabaseDirectory}\\SteamInformation.mdf"))
+			if (!File.Exists($"{DatabaseDirectory}\\SteamInformation.mdf"))
 			{
 				Database.Database.CreateIfNotExists();
 			}
@@ -69,7 +69,7 @@ namespace SteamUpdateProject
 			{
 				SteamClient.manager.RunWaitCallbacks(TimeSpan.FromSeconds(1));
 			}
-#endregion
+			#endregion
 		}
 
 		private static void FirstChanceHandler(object sender, FirstChanceExceptionEventArgs e)
@@ -81,7 +81,7 @@ namespace SteamUpdateProject
 		//Will transfer over to SMO in due time :)
 		public static void BackupDatabase()
 		{
-			if(_firstStartUp)
+			if (_firstStartUp)
 			{
 				_firstStartUp = false;
 				return;
@@ -97,6 +97,11 @@ namespace SteamUpdateProject
 			}
 			else //Windows, fuck MacOS.
 			{
+				using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
+				{
+					context.SaveChanges();
+				}
+
 				Process CopyProcessmdf = new Process();
 				CopyProcessmdf.StartInfo.UseShellExecute = false;
 				CopyProcessmdf.StartInfo.RedirectStandardOutput = true;
@@ -114,7 +119,7 @@ namespace SteamUpdateProject
 			if (e is System.Threading.Tasks.TaskCanceledException || e is System.Net.WebSockets.WebSocketException || e is DSharpPlus.Exceptions.ServerErrorException)
 				return;
 
-			if(e is IOException)
+			if (e is IOException)
 			{
 				Console.WriteLine(e.InnerException);
 				Console.WriteLine(e.Message);
@@ -151,7 +156,7 @@ namespace SteamUpdateProject
 					sw.WriteLine();
 					sw.WriteLine();
 				}
-				
+
 			}
 			catch
 			{
@@ -167,12 +172,12 @@ namespace SteamUpdateProject
 				Console.WriteLine();
 				Console.WriteLine();
 			}
-			
+
 		}
 
 		public static string GetFormattedDate()
 		{
-			return DateTime.UtcNow.ToString().Replace("/","_").Replace(":","-");
+			return DateTime.UtcNow.ToString().Replace("/", "_").Replace(":", "-");
 		}
 	}
 }
