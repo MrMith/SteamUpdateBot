@@ -105,25 +105,22 @@ namespace SteamUpdateProject.Steam
 						KeyValue depotKV = CallBackInfoApps.Value.KeyValues.Children.Where(c => c.Name == "depots").FirstOrDefault();
 						if (depotKV != null && FullProductInfo.IsPublic)
 						{
-							KeyValue depotInfo = depotKV["branches"];
-							if (depotInfo != null)
+							KeyValue allBranchesKV = depotKV["branches"]; //Branches List 
+							if (allBranchesKV != null)
 							{
-								foreach (KeyValue test in depotInfo.Children)
+								foreach (KeyValue branchKV in allBranchesKV.Children) //One single branch
 								{
-									foreach (KeyValue test2 in test.Children)
+									foreach (KeyValue timeUpdatedKV in branchKV.Children) //Time updated Key value pair (KVP)
 									{
-										if (test2.Name != "timeupdated")
+										if (timeUpdatedKV.Name != "timeupdated")
 											continue;
 
-										DateTime Test1 = DateTime.UtcNow;
-										DateTime Test2 = DateTime.UnixEpoch;
+										TimeSpan t = DateTime.UtcNow - DateTime.UnixEpoch;
 
-										TimeSpan t = Test1 - Test2;
-
-										if ((t.TotalSeconds - double.Parse(test2.Value)) > 10) // Needed because it can take a couple of seconds to go through the steam pipeline.
+										if ((t.TotalSeconds - double.Parse(timeUpdatedKV.Value)) > 10) // Needed because it can take a couple of seconds to go through the steam pipeline.
 											continue;
 
-										AppUpdate.DepoName = test.Name;
+										AppUpdate.DepoName = branchKV.Name;
 										AppUpdate.Content = true;
 										SteamUpdateBot.ContentUpdates++;
 									}
@@ -165,11 +162,11 @@ namespace SteamUpdateProject.Steam
 		/// <returns></returns>
 		public async Task<string> GetAppName(uint appid)
 		{
-			AppInfo test = DiscordBot.GetCachedInfo(appid, true);
+			AppInfo CachedInfo = DiscordBot.GetCachedInfo(appid, true);
 
-			if (test != null)
+			if (CachedInfo != null)
 			{
-				return test.Name;
+				return CachedInfo.Name;
 			}
 
 			AsyncJobMultiple<SteamApps.PICSProductInfoCallback>.ResultSet ProductInfo = await Apps.PICSGetProductInfo(appid, null);

@@ -40,10 +40,10 @@ namespace SteamUpdateProject
 
 			using (StreamReader reader = new StreamReader(_operatingFile))
 			{
-				var test = reader.ReadToEnd().Split("\n");
-				for (int i = 0; i <= test.Length-1; i++)
+				string[] INIDataByLine = reader.ReadToEnd().Split("\n");
+				for (int i = 0; i <= INIDataByLine.Length - 1; i++)
 				{
-					if (long.TryParse(test[i], out var number))
+					if (long.TryParse(INIDataByLine[i], out long number))
 					{
 						switch(i)
 						{

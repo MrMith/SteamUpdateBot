@@ -155,7 +155,7 @@ namespace SteamUpdateProject.DiscordLogic
 						await ctx.RespondAsync("Already subscribed to all apps!");
 						return;
 					}
-					StringBuilder ListTest = new StringBuilder();
+					StringBuilder builderToReturn = new StringBuilder();
 
 					foreach (uint app in ListOfConfirmedAppsAdded)
 					{
@@ -166,10 +166,10 @@ namespace SteamUpdateProject.DiscordLogic
 
 						AppInfo.Name = SteamUpdateBot.SteamClient.GetAppName(app).Result;
 
-						ListTest.AppendLine($"{AppInfo.Name} ({AppInfo.AppID})");
+						builderToReturn.AppendLine($"{AppInfo.Name} ({AppInfo.AppID})");
 					}
 
-					embedBuilder.AddField("Apps:", ListTest.ToString());
+					embedBuilder.AddField("Apps:", builderToReturn.ToString());
 					await ctx.RespondAsync(embed: embedBuilder.Build());
 					return;
 				}
@@ -213,7 +213,8 @@ namespace SteamUpdateProject.DiscordLogic
 					return;
 				}
 
-				StringBuilder ListTest = new StringBuilder();
+				StringBuilder builderToReturn = new StringBuilder();
+
 				foreach (SubbedApp SubbedApp in GuildInfo.SubscribedApps.ToList())
 				{
 					AppInfo AppInfo = DiscordBot.GetCachedInfo(SubbedApp.AppID);
@@ -222,16 +223,16 @@ namespace SteamUpdateProject.DiscordLogic
 
 					if (AppInfo.LastUpdated != null)
 					{
-						ListTest.Append($"{AppInfo.Name} ({SubbedApp.AppID})");
-						ListTest.AppendLine($" was last updated {ElapsedTime(AppInfo.LastUpdated)}.");
+						builderToReturn.Append($"{AppInfo.Name} ({SubbedApp.AppID})");
+						builderToReturn.AppendLine($" was last updated {ElapsedTime(AppInfo.LastUpdated)}.");
 					}
 					else
 					{
-						ListTest.AppendLine($"{AppInfo.Name} ({SubbedApp.AppID})");
+						builderToReturn.AppendLine($"{AppInfo.Name} ({SubbedApp.AppID})");
 					}
 				}
 
-				embedBuilder.AddField("Apps", ListTest.ToString());
+				embedBuilder.AddField("Apps", builderToReturn.ToString());
 
 				await ctx.RespondAsync(embed: embedBuilder.Build());
 			}
@@ -400,9 +401,9 @@ namespace SteamUpdateProject.DiscordLogic
 
 				DiscordEmbedBuilder embedBuilder = new DiscordEmbedBuilder();
 
-				foreach (var obj in objects)
+				foreach (string obj in objects)
 				{
-					if (uint.TryParse(obj, out var AppID))
+					if (uint.TryParse(obj, out uint AppID))
 					{
 						embedBuilder.AddField(AppID.ToString(), await SteamUpdateBot.SteamClient.GetAppName(AppID));
 					}
@@ -436,7 +437,7 @@ namespace SteamUpdateProject.DiscordLogic
 			[Command("secret"), Hidden]
 			public async Task SecretCommand(CommandContext ctx)
 			{
-				var rand = new Random();
+				Random rand = new Random();
 
 				int Index = rand.Next(0, SecretLinks.Count - 1);
 
@@ -489,35 +490,35 @@ namespace SteamUpdateProject.DiscordLogic
 
 				embedBuilder.Title = $"{await SteamUpdateBot.SteamClient.GetAppName(AppID)} ({AppID})";
 
-				var customProductInfo = await Steam.SteamBot.GetFullProductInfo(AppID);
+				CustomProductInfo customProductInfo = await Steam.SteamBot.GetFullProductInfo(AppID);
 
-				var CompleteInfo = customProductInfo.ProductInfo;
-				
-					foreach (var CallBackInfo in CompleteInfo)
+				System.Collections.ObjectModel.ReadOnlyCollection<SteamApps.PICSProductInfoCallback> CompleteInfo = customProductInfo.ProductInfo;
+
+				foreach (SteamApps.PICSProductInfoCallback CallBackInfo in CompleteInfo)
+				{
+					foreach (KeyValuePair<uint, SteamApps.PICSProductInfoCallback.PICSProductInfo> CallBackInfoApps in CallBackInfo.Apps)
 					{
-						foreach (var CallBackInfoApps in CallBackInfo.Apps)
+						KeyValue depotKV = CallBackInfoApps.Value.KeyValues.Children.Where(c => c.Name == "depots").FirstOrDefault();
+						if (depotKV == null)
+							continue;
+
+						KeyValue branchesKVP = depotKV["branches"];
+						if (branchesKVP == null) continue;
+						foreach (KeyValue branchKVP in branchesKVP.Children)
 						{
-							KeyValue depotKV = CallBackInfoApps.Value.KeyValues.Children.Where(c => c.Name == "depots").FirstOrDefault();
-							if (depotKV == null)
-								continue;
-
-							KeyValue branchesKVP = depotKV["branches"];
-							if (branchesKVP == null) continue;
-							foreach (KeyValue branchKVP in branchesKVP.Children)
+							foreach (KeyValue branchData in branchKVP.Children)
 							{
-								foreach (KeyValue branchData in branchKVP.Children)
-								{
-									if (branchData.Name != "timeupdated")
-										continue;
+								if (branchData.Name != "timeupdated")
+									continue;
 
-									embedBuilder.AddField($"{branchKVP.Name}",$"Last updated {ElapsedTime(DateTime.UnixEpoch.AddSeconds(double.Parse(branchData.Value)))}");
-								}
+								embedBuilder.AddField($"{branchKVP.Name}", $"Last updated {ElapsedTime(DateTime.UnixEpoch.AddSeconds(double.Parse(branchData.Value)))}");
 							}
 						}
 					}
-				
+				}
 
-				if(embedBuilder.Fields.Count == 0)
+
+				if (embedBuilder.Fields.Count == 0)
 				{
 					embedBuilder.AddField("N/A", "Unable to find anything for this AppID.");
 				}
@@ -527,7 +528,7 @@ namespace SteamUpdateProject.DiscordLogic
 
 			public bool HasPermission(DiscordMember u, DiscordChannel c)
 			{
-				if(u.Id == 185739967379537920 && DevOverride) // To-do remove this backdoor.
+				if (u.Id == 185739967379537920 && DevOverride) // To-do remove this backdoor.
 				{ // To-do remove this backdoor.
 					return true; // To-do remove this backdoor.
 				} // To-do remove this backdoor.

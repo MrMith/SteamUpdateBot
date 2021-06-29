@@ -28,7 +28,8 @@ namespace SteamUpdateProject.DiscordLogic
 				Intents = DiscordIntents.AllUnprivileged
 
 			});
-			var commands = _client.UseCommandsNext(new CommandsNextConfiguration()
+
+			CommandsNextExtension commands = _client.UseCommandsNext(new CommandsNextConfiguration()
 			{
 				StringPrefixes = new[] { "!" }
 			});
@@ -91,13 +92,13 @@ namespace SteamUpdateProject.DiscordLogic
 					{
 						try
 						{
-							foreach(var _guildKVP in _client.Guilds)
+							foreach(KeyValuePair<ulong, DiscordGuild> _guildKVP in _client.Guilds)
 							{
-								foreach(var _member in await _guildKVP.Value.GetAllMembersAsync())
+								foreach(DiscordMember _member in await _guildKVP.Value.GetAllMembersAsync())
 								{
 									if (_member.Id == (ulong)ServerInfo.ChannelID)
 									{
-										var DmChannel = await _member.CreateDmChannelAsync();
+										DiscordDmChannel DmChannel = await _member.CreateDmChannelAsync();
 										await DmChannel.SendMessageAsync(embed: AppUpdate);
 										goto BreakOutOf;
 									}
@@ -119,8 +120,8 @@ namespace SteamUpdateProject.DiscordLogic
 					{
 						try
 						{
-							var _1st = await _client.GetGuildAsync((ulong)ServerInfo.GuildID);
-							var _2nd = _1st.GetChannel((ulong)ServerInfo.ChannelID);
+							DiscordGuild _1st = await _client.GetGuildAsync((ulong)ServerInfo.GuildID);
+							DiscordChannel _2nd = _1st.GetChannel((ulong)ServerInfo.ChannelID);
 							await _2nd.SendMessageAsync(embed: AppUpdate);
 						}
 						catch (Exception e)
@@ -268,11 +269,11 @@ namespace SteamUpdateProject.DiscordLogic
 		{
 			using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
 			{
-				foreach (AppInfo test in context.AppInfoData.ToList())
+				foreach (AppInfo DBAppInfo in context.AppInfoData.ToList())
 				{
-					if (test.AppID == appid)
+					if (DBAppInfo.AppID == appid)
 					{
-						return test;
+						return DBAppInfo;
 					}
 				}
 
@@ -351,7 +352,7 @@ namespace SteamUpdateProject.DiscordLogic
 			{
 				foreach(GuildInfo Guild in context.GuildInformation.ToList())
 				{
-					foreach(var AppID in Guild.SubscribedApps.ToList())
+					foreach(SubbedApp AppID in Guild.SubscribedApps.ToList())
 					{
 						if(appid == AppID.AppID)
 						{

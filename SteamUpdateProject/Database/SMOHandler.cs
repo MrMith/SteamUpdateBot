@@ -21,11 +21,11 @@ namespace SteamUpdateProject
 		{
 			SMOServer = new Server();
 
-			foreach (var test in SMOServer.Databases)
+			foreach (object dataBase in SMOServer.Databases)
 			{
-				if (test.ToString().Contains("STEAMINFORMATION", StringComparison.OrdinalIgnoreCase))
+				if (dataBase.ToString().Contains("STEAMINFORMATION", StringComparison.OrdinalIgnoreCase))
 				{
-					SMODatabase = test as Database;
+					SMODatabase = dataBase as Database;
 				}
 			}
 
