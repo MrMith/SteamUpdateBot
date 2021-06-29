@@ -118,7 +118,7 @@ namespace SteamUpdateProject.DiscordLogic.Commands
 			await ctx.RespondAsync(embedBuilder.Build());
 		}
 
-		[Command("status"), Description("Shows statistics about updates, updates with content changes, if steam is down or ping.")]
+		[Command("status"), Description("Shows statistics about updates, if steam is down or ping.")]
 		public async Task Status(CommandContext ctx)
 		{
 			await ctx.TriggerTypingAsync();

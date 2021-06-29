@@ -178,7 +178,7 @@ namespace SteamUpdateProject.DiscordLogic.Commands
 			await ctx.RespondAsync("ERROR using add command! Type !help to get help on using this command!");
 		}
 
-		[Command("list"), Aliases("apps"), Description("Displays all of the subscribed apps for this channel and when they were last updated.")]
+		[Command("list"), Aliases("apps"), Description("Displays all of the subscribed apps for this channel.")]
 		public async Task ListAllSubscribedApps(CommandContext ctx)
 		{
 			await ctx.TriggerTypingAsync();
@@ -260,7 +260,7 @@ namespace SteamUpdateProject.DiscordLogic.Commands
 			await ctx.RespondAsync($"Set show all to {Set}.");
 		}
 
-		[Command("debug"), Description("**Not recommended** pipes **EVERY** steam update through as if you were subscribed to it.")]
+		[Command("debug"), Description("***WARNING*** *EVERY* steam update goes through as if you were subscribed to it.")]
 		public async Task DebugBool(CommandContext ctx)
 		{
 			await ctx.TriggerTypingAsync();
@@ -270,7 +270,7 @@ namespace SteamUpdateProject.DiscordLogic.Commands
 			await ctx.RespondAsync($"Debug mode is currently set to {GuildInfo.DebugMode}.");
 		}
 
-		[Command("debug"), Description("**Not recommended** pipes **EVERY** steam update through as if you were subscribed to it.")]
+		[Command("debug"), Description("***WARNING*** *EVERY* steam update goes through as if you were subscribed to it.")]
 		public async Task DebugBool(CommandContext ctx, bool Set)
 		{
 			await ctx.TriggerTypingAsync();
@@ -298,7 +298,7 @@ namespace SteamUpdateProject.DiscordLogic.Commands
 
 		}
 
-		[Command("public"), Description("Should we only notify this channel if the update is on the default public branch (aka no betas)")]
+		[Command("public"), Description("Should we only notify this channel if the update is on the default public branch.")]
 		public async Task PublicBool(CommandContext ctx)
 		{
 			await ctx.TriggerTypingAsync();
@@ -308,7 +308,7 @@ namespace SteamUpdateProject.DiscordLogic.Commands
 			await ctx.RespondAsync($"Public mode is currently set to {GuildInfo.PublicDepoOnly}.");
 		}
 
-		[Command("public"), Description("Should we only notify this channel if the update is on the default public branch (aka no betas)")]
+		[Command("public"), Description("Should we only notify this channel if the update is on the default public branch.")]
 		public async Task PublicBool(CommandContext ctx, bool Set)
 		{
 			await ctx.TriggerTypingAsync();
