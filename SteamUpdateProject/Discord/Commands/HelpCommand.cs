@@ -7,7 +7,7 @@ using DSharpPlus.CommandsNext.Entities;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 
-namespace SteamUpdateProject.DiscordLogic
+namespace SteamUpdateProject.DiscordLogic.Commands
 {
 	/// <summary>
 	/// Generic help command from DSharpPlus. To-Do: rewrite to not be hardcoded.
@@ -30,6 +30,18 @@ namespace SteamUpdateProject.DiscordLogic
 
 		public override BaseHelpFormatter WithSubcommands(IEnumerable<Command> cmds)
 		{
+			HelpBuilder.AddField("**[NOTICE]**", "This bot has full DM Support!");
+			foreach (var cmd in cmds)
+			{
+				if (cmd.Description == null)
+					continue;
+
+				HelpBuilder.AddField($"{Context.Prefix}{cmd.Name}", cmd.Description);
+				// _embed.AddField(cmd.Name, cmd.Description);            
+				// _strBuilder.AppendLine($"{cmd.Name} - {cmd.Description}");
+			}
+
+			/*
 			string P = this.Context.Prefix;
 			HelpBuilder.AddField("**[NOTICE]**","This bot has full DM Support!");
 			HelpBuilder.AddField($"{P}add", $"Subscribe to a Steam Application to see when it updates by appid (Ex: {P}add 730 or {P}add 730 530)");
@@ -40,6 +52,7 @@ namespace SteamUpdateProject.DiscordLogic
 			HelpBuilder.AddField($"{P}public", $"Will only send messages if the default public steam branch is updated. (Ex: {P}public true or {P}debug false)");
 			HelpBuilder.AddField($"{P}branches", $"Lists all of the branches for a certain steam app. (Ex: {P}branches <AppID>");
 			HelpBuilder.AddField($"{P}debug", $"**NOT RECOMMENDED** Pipes every update through this channel regardless of subscriptions. (Ex: {P}debug true or {P}debug false)");
+			*/
 
 			return this;
 		}
