@@ -4,6 +4,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SteamUpdateProject
 {
+	/// <summary>
+	/// Dummy class that is used to pass information (Like AppID and Name) from one area to another (Ex: SteamBot to DiscordBot)
+	/// </summary>
 	public class AppInfo : IEquatable<AppInfo>
 	{
 		[Key]

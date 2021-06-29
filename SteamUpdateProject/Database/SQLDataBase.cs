@@ -3,6 +3,9 @@ using System.Data.Entity.ModelConfiguration.Conventions;
 
 namespace SteamUpdateProject
 {
+	/// <summary>
+	/// The main <see cref="DbContext"/> class, I have very little knowledge of how/why this works. Help.
+	/// </summary>
 	public class SQLDataBase : DbContext
 	{
 		public DbSet<AppInfo> AppInfoData { get; set; }

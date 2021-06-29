@@ -7,6 +7,9 @@ using System.IO;
 
 namespace SteamUpdateProject
 {
+	/// <summary>
+	/// This handles small data like <see cref="SteamUpdateBot.Updates"/>, <see cref="SteamUpdateBot.ContentUpdates"/>, <see cref="SteamUpdateBot.Exceptions"/> and finally <see cref="SteamUpdateBot.MinutesRunning"/> so we can keep track of those small things.
+	/// </summary>
 	class INIHandler
 	{
 		private string _operatingPath = Directory.GetCurrentDirectory();

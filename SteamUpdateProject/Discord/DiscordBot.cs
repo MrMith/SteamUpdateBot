@@ -9,6 +9,9 @@ using System.Data.Entity;
 
 namespace SteamUpdateProject.DiscordLogic
 {
+	/// <summary>
+	/// This runs all of the discord bot logic like logging in, sending messages for when an app updates and finally handles subscribing and unsubscribing from apps.
+	/// </summary>
 	class DiscordBot
 	{
 		public DiscordClient _client;
@@ -148,7 +151,7 @@ namespace SteamUpdateProject.DiscordLogic
 					info.SubscribedApps.Add(new SubbedApp(appid));
 					
 					context.GuildInformation.Add(info);
-					
+					context.SaveChanges();
 					return true;
 				}
 			}
@@ -184,7 +187,7 @@ namespace SteamUpdateProject.DiscordLogic
 						info.SubscribedApps.Add(new SubbedApp(app));
 					}					
 					context.GuildInformation.Add(info);
-					
+					context.SaveChanges();
 				}
 			}
 
@@ -209,7 +212,7 @@ namespace SteamUpdateProject.DiscordLogic
 						info.SubscribedApps.Remove(ToBeRemoved);
 					}
 					context.GuildInformation.Add(info);
-					
+					context.SaveChanges();
 				}
 				return true;
 			}
@@ -248,7 +251,7 @@ namespace SteamUpdateProject.DiscordLogic
 						}					
 					}
 					context.GuildInformation.Add(info);
-					
+					context.SaveChanges();
 				}
 			}
 			
@@ -284,7 +287,7 @@ namespace SteamUpdateProject.DiscordLogic
 				if (AppInfo.Name != null)
 				{
 					context.AppInfoData.Add(AppInfo);
-					
+					context.SaveChanges();
 					return AppInfo;
 				}
 			}
@@ -305,9 +308,8 @@ namespace SteamUpdateProject.DiscordLogic
 			using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
 			{
 				//GuildInfo = context.GuildInformation.ToList().Where(x => x.GuildID == channelid && guildid == x.GuildID).FirstOrDefault();
-				List<GuildInfo> FUCK = context.GuildInformation.ToList();
-				
-				foreach (GuildInfo info in FUCK)
+
+				foreach (GuildInfo info in context.GuildInformation.ToList())
 				{
 					if (info.GuildID == guildid && info.ChannelID == channelid)
 					{
@@ -332,7 +334,7 @@ namespace SteamUpdateProject.DiscordLogic
 			using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
 			{
 				context.GuildInformation.Add(GuildInfo);
-				
+				context.SaveChanges();
 			}
 
 			return GuildInfo;

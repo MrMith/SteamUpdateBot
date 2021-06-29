@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using SteamUpdateProject.DiscordLogic;
 using System.Linq;
+using System.Collections.ObjectModel;
 
 namespace SteamUpdateProject.Steam
 {
@@ -97,39 +98,36 @@ namespace SteamUpdateProject.Steam
 
 				//FullProductInfo = GetFullProductInfo(AppsThatUpdated.Key).Result;
 
-				AsyncJobMultiple<SteamApps.PICSProductInfoCallback>.ResultSet ProductInfo = FullProductInfo.ProductInfo;
-
-				if (!ProductInfo.Complete)
-					continue;
-
-				foreach (SteamApps.PICSProductInfoCallback CallBackInfo in ProductInfo.Results)
+				foreach (SteamApps.PICSProductInfoCallback CallBackInfo in FullProductInfo.ProductInfo)
 				{
 					foreach (KeyValuePair<uint, SteamApps.PICSProductInfoCallback.PICSProductInfo> CallBackInfoApps in CallBackInfo.Apps)
 					{
 						KeyValue depotKV = CallBackInfoApps.Value.KeyValues.Children.Where(c => c.Name == "depots").FirstOrDefault();
-						if (depotKV == null || !FullProductInfo.IsPublic)
-							continue;
-
-						KeyValue depotInfo = depotKV["branches"];
-						if (depotInfo == null) continue;
-						foreach (KeyValue test in depotInfo.Children)
+						if (depotKV != null && FullProductInfo.IsPublic)
 						{
-							foreach (KeyValue test2 in test.Children)
+							KeyValue depotInfo = depotKV["branches"];
+							if (depotInfo != null)
 							{
-								if (test2.Name != "timeupdated")
-									continue;
+								foreach (KeyValue test in depotInfo.Children)
+								{
+									foreach (KeyValue test2 in test.Children)
+									{
+										if (test2.Name != "timeupdated")
+											continue;
 
-								DateTime Test1 = DateTime.UtcNow;
-								DateTime Test2 = DateTime.UnixEpoch;
+										DateTime Test1 = DateTime.UtcNow;
+										DateTime Test2 = DateTime.UnixEpoch;
 
-								TimeSpan t = Test1 - Test2;
+										TimeSpan t = Test1 - Test2;
 
-								if ((t.TotalSeconds - double.Parse(test2.Value)) > 10) // Needed because it can take a couple of seconds to go through the steam pipeline.
-									continue;
+										if ((t.TotalSeconds - double.Parse(test2.Value)) > 10) // Needed because it can take a couple of seconds to go through the steam pipeline.
+											continue;
 
-								AppUpdate.DepoName = test.Name;
-								AppUpdate.Content = true;
-								SteamUpdateBot.ContentUpdates++;
+										AppUpdate.DepoName = test.Name;
+										AppUpdate.Content = true;
+										SteamUpdateBot.ContentUpdates++;
+									}
+								}
 							}
 						}
 
@@ -149,6 +147,7 @@ namespace SteamUpdateProject.Steam
 							};
 
 							context.AppInfoData.Add(appinfo);
+							context.SaveChanges();
 						}
 					}
 				}
@@ -191,7 +190,7 @@ namespace SteamUpdateProject.Steam
 						using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
 						{
 							context.AppInfoData.Add(appInfo);
-							
+							context.SaveChanges();
 						}
 
 						return CallBackInfoApps.Value.KeyValues["common"]["name"].AsString();
@@ -246,7 +245,7 @@ namespace SteamUpdateProject.Steam
 			{
 				try
 				{
-					customProductInfo.ProductInfo = await SteamUpdateBot.SteamClient.Apps.PICSGetProductInfo(appid, null, false, false);
+					customProductInfo.ProductInfo = (await SteamUpdateBot.SteamClient.Apps.PICSGetProductInfo(appid, null, false, false)).Results;
 					customProductInfo.IsPublic = true;
 				}
 				catch
@@ -257,12 +256,12 @@ namespace SteamUpdateProject.Steam
 			}
 			else
 			{
-				request.AccessToken = AccessToken;
-				request.Public = false;
-				customProductInfo.IsPublic = false;
 				try
 				{
-					customProductInfo.ProductInfo = await SteamUpdateBot.SteamClient.Apps.PICSGetProductInfo(new List<SteamApps.PICSRequest>() { request }, new List<SteamApps.PICSRequest>() { });
+					request.AccessToken = AccessToken;
+					request.Public = false;
+					customProductInfo.IsPublic = false;
+					customProductInfo.ProductInfo = (await SteamUpdateBot.SteamClient.Apps.PICSGetProductInfo(new List<SteamApps.PICSRequest>() { request }, new List<SteamApps.PICSRequest>() { })).Results;
 				}
 				catch
 				{

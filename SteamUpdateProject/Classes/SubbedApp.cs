@@ -4,6 +4,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SteamUpdateProject
 {
+	/// <summary>
+	/// this is a dummy class that the database uses because I can't make a int list.
+	/// </summary>
 	public class SubbedApp : IEquatable<SubbedApp>
 	{
 		public SubbedApp()

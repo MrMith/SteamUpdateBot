@@ -78,7 +78,10 @@ namespace SteamUpdateProject
 			LogCancer(e.Exception);
 		}
 
-		//Will transfer over to SMO in due time :)
+		/// <summary>
+		///This is basically as much as a shitty hack as a shitty hack could be and 
+		///brings me great shame :) but it works.
+		/// </summary>
 		public static void BackupDatabase()
 		{
 			if (_firstStartUp)
@@ -114,6 +117,10 @@ namespace SteamUpdateProject
 			}
 		}
 
+		/// <summary>
+		/// This is my primary logging function to try and understand what breaks and when it does so.
+		/// </summary>
+		/// <param name="e">Exception that makes me cry</param>
 		public static void LogCancer(Exception e)
 		{
 			if (e is System.Threading.Tasks.TaskCanceledException || e is System.Net.WebSockets.WebSocketException || e is DSharpPlus.Exceptions.ServerErrorException)
@@ -175,9 +182,13 @@ namespace SteamUpdateProject
 
 		}
 
+		/// <summary>
+		/// Replaces the : character for a - character and replaces the / character for a _ character so it can be used to represent file names in Windows.
+		/// </summary>
+		/// <returns>Windows formatted string</returns>
 		public static string GetFormattedDate()
 		{
-			return DateTime.UtcNow.ToString().Replace("/", "_").Replace(":", "-");
+			return DateTime.UtcNow.ToString().Replace("/", "_").Replace(":", "-"); //I feel like theres a cleaner way to do this?
 		}
 	}
 }

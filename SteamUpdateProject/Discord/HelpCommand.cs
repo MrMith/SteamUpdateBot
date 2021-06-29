@@ -9,6 +9,9 @@ using DSharpPlus.Entities;
 
 namespace SteamUpdateProject.DiscordLogic
 {
+	/// <summary>
+	/// Generic help command from DSharpPlus. To-Do: rewrite to not be hardcoded.
+	/// </summary>
 	public class CustomHelpFormatter : BaseHelpFormatter
 	{
 		protected DiscordEmbedBuilder HelpBuilder;

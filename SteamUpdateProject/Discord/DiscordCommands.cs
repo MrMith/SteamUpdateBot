@@ -21,6 +21,9 @@ namespace SteamUpdateProject.DiscordLogic
 		const int DAY = 24 * HOUR;
 		const int MONTH = 30 * DAY;
 
+		/// <summary>
+		/// Handles all of the discord commands. To-Do: Cleanup
+		/// </summary>
 		public class PublicModule : BaseCommandModule
 		{
 			public bool DevOverride = false;
@@ -308,7 +311,7 @@ namespace SteamUpdateProject.DiscordLogic
 						context.GuildInformation.RemoveRange(context.GuildInformation.Include(x => x.SubscribedApps).ToList().Where(x => x.ChannelID == GuildInfo.ChannelID && x.GuildID == GuildInfo.GuildID));
 						GuildInfo.ShowContent = Set;
 						context.GuildInformation.Add(GuildInfo);
-						
+						context.SaveChanges();
 					}
 				}
 
@@ -335,7 +338,7 @@ namespace SteamUpdateProject.DiscordLogic
 						context.GuildInformation.RemoveRange(context.GuildInformation.Include(x => x.SubscribedApps).ToList().Where(x => x.ChannelID == GuildInfo.ChannelID && x.GuildID == GuildInfo.GuildID));
 						GuildInfo.DebugMode = Set;
 						context.GuildInformation.Add(GuildInfo);
-						
+						context.SaveChanges();
 					}
 				}
 
@@ -373,7 +376,7 @@ namespace SteamUpdateProject.DiscordLogic
 						context.GuildInformation.RemoveRange(context.GuildInformation.Include(x => x.SubscribedApps).ToList().Where(x => x.ChannelID == GuildInfo.ChannelID && x.GuildID == GuildInfo.GuildID));
 						GuildInfo.PublicDepoOnly = Set;
 						context.GuildInformation.Add(GuildInfo);
-						
+						context.SaveChanges();
 					}
 				}
 
@@ -455,6 +458,19 @@ namespace SteamUpdateProject.DiscordLogic
 				await ctx.RespondAsync($"Set override to {DevOverride}.");
 			}
 
+			[Command("devoverride"), Hidden]
+			public async Task Devoverride(CommandContext ctx)
+			{
+				await ctx.TriggerTypingAsync();
+
+				if (ctx.User.Id != 185739967379537920)
+				{
+					await ctx.RespondAsync($"You're not authorized to use this command. Only the bot owner can use this.");
+				}
+
+				await ctx.RespondAsync($"Override is set to {DevOverride}.");
+			}
+
 			[Command("branches"), Description("Lists all of the branches for a certain steam app.")]
 			[Aliases("branch")]
 			public async Task Branches(CommandContext ctx)
@@ -477,9 +493,7 @@ namespace SteamUpdateProject.DiscordLogic
 
 				var CompleteInfo = customProductInfo.ProductInfo;
 				
-				if(CompleteInfo.Complete)
-				{
-					foreach (var CallBackInfo in CompleteInfo.Results)
+					foreach (var CallBackInfo in CompleteInfo)
 					{
 						foreach (var CallBackInfoApps in CallBackInfo.Apps)
 						{
@@ -501,7 +515,7 @@ namespace SteamUpdateProject.DiscordLogic
 							}
 						}
 					}
-				}
+				
 
 				if(embedBuilder.Fields.Count == 0)
 				{
@@ -509,20 +523,6 @@ namespace SteamUpdateProject.DiscordLogic
 				}
 
 				await ctx.RespondAsync(embedBuilder.Build());
-			}
-			
-
-			[Command("devoverride"), Hidden]
-			public async Task Devoverride(CommandContext ctx)
-			{
-				await ctx.TriggerTypingAsync();
-
-				if (ctx.User.Id != 185739967379537920)
-				{
-					await ctx.RespondAsync($"You're not authorized to use this command. Only the bot owner can use this.");
-				}
-
-				await ctx.RespondAsync($"Override is set to {DevOverride}.");
 			}
 
 			public bool HasPermission(DiscordMember u, DiscordChannel c)
