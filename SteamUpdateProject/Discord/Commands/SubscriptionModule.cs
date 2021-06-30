@@ -5,10 +5,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Text;
-using System.Data.Entity;
-using SteamKit2;
 
 namespace SteamUpdateProject.DiscordLogic.Commands
 {
@@ -336,10 +333,8 @@ namespace SteamUpdateProject.DiscordLogic.Commands
 
 		public bool HasPermission(DiscordMember u, DiscordChannel c)
 		{
-			if (u.Id == 185739967379537920 && SteamUpdateBot.DiscordClient.DevOverride) // To-do remove this backdoor.
-			{ // To-do remove this backdoor.
-				return true; // To-do remove this backdoor.
-			} // To-do remove this backdoor.
+			if (u.Id == SteamUpdateBot.OverrideDiscordID && SteamUpdateBot.DiscordClient.DevOverride)
+				return true;
 
 			return u.PermissionsIn(c).HasPermission(Permissions.Administrator) || u.PermissionsIn(c).HasPermission(Permissions.ManageChannels) || u.PermissionsIn(c).HasPermission(Permissions.All);
 		}

@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Builders;
 using DSharpPlus.CommandsNext.Converters;
 using DSharpPlus.CommandsNext.Entities;
-using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 
 namespace SteamUpdateProject.DiscordLogic.Commands

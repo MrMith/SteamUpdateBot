@@ -3,17 +3,12 @@ using SteamUpdateProject.DiscordLogic;
 using SteamUpdateProject.Steam;
 using System.IO;
 using System.Runtime.ExceptionServices;
-using DSharpPlus;
-using System.Diagnostics;
-using Microsoft.SqlServer.Management.Smo;
-using Microsoft.SqlServer.Management.Common;
 
 namespace SteamUpdateProject
 {
-	//To-do
-
-	//Move backdoor to being a runtime argument
-
+	/// <summary>
+	/// Main logic that handles the steam bot, discord bot and managing the database.
+	/// </summary>
 	class SteamUpdateBot
 	{
 		public static DiscordBot DiscordClient;
@@ -36,7 +31,15 @@ namespace SteamUpdateProject
 		public static string LogPath = Directory.GetCurrentDirectory() + "\\logs\\";
 		public static string ConnectionString = $"Integrated Security=true;";
 		public static string DatabaseDirectory = $"{Directory.GetCurrentDirectory()}\\database";
+		public static ulong OverrideDiscordID;
 
+		/// <summary>
+		/// 0 = Steam account username
+		/// 1 = Steam account password
+		/// 2 = Discord bot token
+		/// 3 = Override discord user ID (Not required)
+		/// </summary>
+		/// <param name="args"></param>
 		public static void Main(string[] args)
 		{
 			#region Database start
@@ -57,14 +60,15 @@ namespace SteamUpdateProject
 			AppDomain.CurrentDomain.FirstChanceException += FirstChanceHandler;
 
 			INIHandler = new INIHandler();
-
 			INIHandler.ReadData();
 
 			if (!Directory.Exists(LogPath)) Directory.CreateDirectory(LogPath);
-			DiscordClient = new DiscordBot();
 
-			//DiscordClient.StartDiscordBot("").GetAwaiter().GetResult();
+			DiscordClient = new DiscordBot();
 			DiscordClient.StartDiscordBot(args[2]).GetAwaiter().GetResult();
+
+			if (args.Length > 2 && ulong.TryParse(args[3], out var discordID))
+				OverrideDiscordID = discordID;
 
 			SteamClient = new SteamBot(args, DiscordClient);
 

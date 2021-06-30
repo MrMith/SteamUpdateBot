@@ -6,7 +6,6 @@ using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using SteamUpdateProject.DiscordLogic;
-using System.Collections.ObjectModel;
 
 namespace SteamUpdateProject.Steam
 {

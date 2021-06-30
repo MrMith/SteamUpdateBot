@@ -1,13 +1,9 @@
-﻿using DSharpPlus;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Text;
-using System.Data.Entity;
 using SteamKit2;
 
 namespace SteamUpdateProject.DiscordLogic.Commands
@@ -22,9 +18,9 @@ namespace SteamUpdateProject.DiscordLogic.Commands
 		{
 			await ctx.TriggerTypingAsync();
 
-			if (ctx.User.Id != 185739967379537920)
+			if (ctx.User.Id != SteamUpdateBot.OverrideDiscordID)
 			{
-				await ctx.RespondAsync($"You're not authorized to use this command. Only the bot owner can use this.");
+				await ctx.RespondAsync($"You're not authorized to use this command. Only the override user can use this.");
 			}
 
 			SteamUpdateBot.DiscordClient.DevOverride = _ov;
@@ -37,9 +33,9 @@ namespace SteamUpdateProject.DiscordLogic.Commands
 		{
 			await ctx.TriggerTypingAsync();
 
-			if (ctx.User.Id != 185739967379537920)
+			if (ctx.User.Id != SteamUpdateBot.OverrideDiscordID)
 			{
-				await ctx.RespondAsync($"You're not authorized to use this command. Only the bot owner can use this.");
+				await ctx.RespondAsync($"You're not authorized to use this command. Only the override user can use this.");
 			}
 
 			await ctx.RespondAsync($"Override is set to {SteamUpdateBot.DiscordClient.DevOverride}.");

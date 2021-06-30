@@ -4,7 +4,6 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.CommandsNext;
 using System.Collections.Generic;
-using System.Data.Entity;
 using SteamUpdateProject.DiscordLogic.Commands;
 
 namespace SteamUpdateProject.DiscordLogic
