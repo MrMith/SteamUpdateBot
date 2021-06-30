@@ -6,7 +6,6 @@ using DSharpPlus.CommandsNext.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Text;
 using System.Data.Entity;
 using SteamKit2;
@@ -46,7 +45,7 @@ namespace SteamUpdateProject.DiscordLogic.Commands
 					}
 				}
 
-				List<uint> AppsThatHaveBeenRemoved = DiscordBot.RemoveMultipleApps(ListOfAppIDS, GuildInfo);
+				List<uint> AppsThatHaveBeenRemoved = GuildInfo.RemoveMultipleApps(ListOfAppIDS);
 
 				if (AppsThatHaveBeenRemoved.Count == 0)
 				{
@@ -78,7 +77,7 @@ namespace SteamUpdateProject.DiscordLogic.Commands
 			}
 			else if (uint.TryParse(objects[0], out uint appid)) //Single
 			{
-				if (!DiscordBot.RemoveApp(appid, GuildInfo))
+				if (!GuildInfo.RemoveApp(appid))
 				{
 					await ctx.RespondAsync("You're not subscribed to this app!");
 					return;
@@ -129,7 +128,7 @@ namespace SteamUpdateProject.DiscordLogic.Commands
 					}
 				}
 
-				List<uint> ListOfConfirmedAppsAdded = DiscordBot.SubMultipleApps(ListOfAppIDS, GuildInfo);
+				List<uint> ListOfConfirmedAppsAdded = GuildInfo.SubMultipleApps(ListOfAppIDS);
 
 				if (ListOfConfirmedAppsAdded.Count == 0)
 				{
@@ -156,7 +155,7 @@ namespace SteamUpdateProject.DiscordLogic.Commands
 			}
 			else if (uint.TryParse(objects[0], out uint appid)) //single app
 			{
-				if (!DiscordBot.SubApp(appid, GuildInfo))
+				if (!GuildInfo.SubApp(appid))
 				{
 					await ctx.RespondAsync($"Already added app! ({appid})");
 					return;
@@ -196,7 +195,7 @@ namespace SteamUpdateProject.DiscordLogic.Commands
 
 			StringBuilder builderToReturn = new StringBuilder();
 
-			foreach (SubbedApp SubbedApp in GuildInfo.SubscribedApps.ToList())
+			foreach (SubbedApp SubbedApp in GuildInfo.SubscribedApps)
 			{
 				AppInfo AppInfo = DiscordBot.GetCachedInfo(SubbedApp.AppID);
 
@@ -250,7 +249,7 @@ namespace SteamUpdateProject.DiscordLogic.Commands
 			{
 				using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
 				{
-					context.GuildInformation.RemoveRange(context.GuildInformation.Include(x => x.SubscribedApps).ToList().Where(x => x.ChannelID == GuildInfo.ChannelID && x.GuildID == GuildInfo.GuildID));
+					context.GuildInformation.RemoveRange(context.AllGuilds.FindAll(guild => guild == GuildInfo));
 					GuildInfo.ShowContent = Set;
 					context.GuildInformation.Add(GuildInfo);
 					context.SaveChanges();
@@ -287,7 +286,7 @@ namespace SteamUpdateProject.DiscordLogic.Commands
 			{
 				using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
 				{
-					context.GuildInformation.RemoveRange(context.GuildInformation.Include(x => x.SubscribedApps).ToList().Where(x => x.ChannelID == GuildInfo.ChannelID && x.GuildID == GuildInfo.GuildID));
+					context.AllGuilds.FindAll(guild => guild == GuildInfo);
 					GuildInfo.DebugMode = Set;
 					context.GuildInformation.Add(GuildInfo);
 					context.SaveChanges();
@@ -325,7 +324,7 @@ namespace SteamUpdateProject.DiscordLogic.Commands
 			{
 				using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
 				{
-					context.GuildInformation.RemoveRange(context.GuildInformation.Include(x => x.SubscribedApps).ToList().Where(x => x.ChannelID == GuildInfo.ChannelID && x.GuildID == GuildInfo.GuildID));
+					context.AllGuilds.FindAll(guild => guild == GuildInfo);
 					GuildInfo.PublicDepoOnly = Set;
 					context.GuildInformation.Add(GuildInfo);
 					context.SaveChanges();

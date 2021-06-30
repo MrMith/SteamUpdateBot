@@ -6,7 +6,6 @@ using DSharpPlus.CommandsNext.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Text;
 using System.Data.Entity;
 using SteamKit2;
@@ -72,7 +71,8 @@ namespace SteamUpdateProject.DiscordLogic.Commands
 			{
 				foreach (KeyValuePair<uint, SteamApps.PICSProductInfoCallback.PICSProductInfo> CallBackInfoApps in CallBackInfo.Apps)
 				{
-					KeyValue depotKV = CallBackInfoApps.Value.KeyValues.Children.Where(c => c.Name == "depots").FirstOrDefault();
+					KeyValue depotKV = CallBackInfoApps.Value.KeyValues.Children.Find(child => child.Name == "depots");
+
 					if (depotKV == null)
 						continue;
 

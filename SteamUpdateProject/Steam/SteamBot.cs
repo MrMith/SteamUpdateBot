@@ -6,56 +6,54 @@ using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using SteamUpdateProject.DiscordLogic;
-using System.Linq;
 using System.Collections.ObjectModel;
 
 namespace SteamUpdateProject.Steam
 {
 	class SteamBot
 	{
-		readonly DiscordBot _discordClient;
-		readonly System.Timers.Timer _mainChangeTimer = new System.Timers.Timer(250);
-		uint LastChangeNumber = 0;
+		private readonly DiscordBot _discordClient;
+		private readonly SteamClient _steamClient;
+		private readonly SteamUser _steamUser;
+		private readonly System.Timers.Timer _mainChangeTimer = new System.Timers.Timer(250);
+		private uint _lastChangeNumber = 0;
+		private readonly string _user;
+		private readonly string _pass;
+		private string _authCode, _twoFactorAuth;
+		private SteamApps _apps { get; set; }
 
-		readonly SteamClient steamClient;
-		public CallbackManager manager;
-		SteamApps Apps { get; set; }
-		readonly SteamUser steamUser;
-
-		public bool isRunning;
-		private readonly string user;
-		private readonly string pass;
-		string authCode, twoFactorAuth;
+		public CallbackManager Manager;
+		public bool IsRunning;
 
 		public SteamBot(string[] args, DiscordBot bot)
 		{
 			_discordClient = bot;
-			user = args[0]; //This is a fodder steam account so I snooze
-			pass = args[1];
-			steamClient = new SteamClient();
+			_user = args[0]; //This is a fodder steam account so I snooze
+			_pass = args[1];
+			_steamClient = new SteamClient();
 
-			steamUser = steamClient.GetHandler<SteamUser>();
+			_steamUser = _steamClient.GetHandler<SteamUser>();
 
-			isRunning = true;
+			IsRunning = true;
 
 			Console.WriteLine("Connecting to Steam...");
 
-			steamClient.Connect();
+			_steamClient.Connect();
 
-			manager = new CallbackManager(steamClient);
+			Manager = new CallbackManager(_steamClient);
 
-			manager.Subscribe<SteamClient.ConnectedCallback>(OnConnected);
-			manager.Subscribe<SteamClient.DisconnectedCallback>(OnDisconnected);
-			manager.Subscribe<SteamUser.LoggedOnCallback>(OnLoggedOn);
-			manager.Subscribe<SteamUser.UpdateMachineAuthCallback>(OnMachineAuth);
-			manager.Subscribe<SteamApps.PICSChangesCallback>(AppChanges);
+			Manager.Subscribe<SteamClient.ConnectedCallback>(OnConnected);
+			Manager.Subscribe<SteamClient.DisconnectedCallback>(OnDisconnected);
+			Manager.Subscribe<SteamUser.LoggedOnCallback>(OnLoggedOn);
+			Manager.Subscribe<SteamUser.UpdateMachineAuthCallback>(OnMachineAuth);
+			Manager.Subscribe<SteamApps.PICSChangesCallback>(AppChanges);
 		}
 
 		async void MainChangeTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
 		{
 			try
 			{
-				await Apps.PICSGetChangesSince(LastChangeNumber, true, false);
+				await _apps.PICSGetChangesSince(_lastChangeNumber, true, false);
 			}
 			catch (Exception ex)
 			{
@@ -74,8 +72,8 @@ namespace SteamUpdateProject.Steam
 		/// <param name="callback"></param>
 		async void AppChanges(SteamApps.PICSChangesCallback callback)
 		{
-			if (LastChangeNumber == callback.CurrentChangeNumber) return;
-			LastChangeNumber = callback.CurrentChangeNumber;
+			if (_lastChangeNumber == callback.CurrentChangeNumber) return;
+			_lastChangeNumber = callback.CurrentChangeNumber;
 
 			foreach (KeyValuePair<uint, SteamApps.PICSChangesCallback.PICSChangeData> AppsThatUpdated in callback.AppChanges)
 			{
@@ -102,7 +100,7 @@ namespace SteamUpdateProject.Steam
 				{
 					foreach (var CallBackInfoApps in CallBackInfo.Apps)
 					{
-						KeyValue depotKV = CallBackInfoApps.Value.KeyValues.Children.Where(c => c.Name == "depots").FirstOrDefault();
+						KeyValue depotKV = CallBackInfoApps.Value.KeyValues.Children.Find(child => child.Name == "depots");
 						if (depotKV != null && FullProductInfo.IsPublic)
 						{
 							KeyValue allBranchesKV = depotKV["branches"]; //Branches List 
@@ -134,7 +132,7 @@ namespace SteamUpdateProject.Steam
 
 						using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
 						{
-							context.AppInfoData.RemoveRange(context.AppInfoData.ToList().Where(x => x.AppID == AppUpdate.AppID));
+							context.AppInfoData.RemoveRange(context.AllApps.FindAll(SubbedApp => SubbedApp.AppID == AppUpdate.AppID));
 
 							AppInfo appinfo = new AppInfo()
 							{
@@ -169,38 +167,37 @@ namespace SteamUpdateProject.Steam
 				return CachedInfo.Name;
 			}
 
-			var ProductInfo = await Apps.PICSGetProductInfo(appid, null);
+			var ProductInfo = await _apps.PICSGetProductInfo(appid, null);
 
 			AppInfo appInfo = new AppInfo()
 			{
-				AppID = appid
+				AppID = appid,
+				Name = "Unknown App"
 			};
 
-			if (ProductInfo.Complete)
+			if (!ProductInfo.Complete)
+				return "Unknown App";
+
+			foreach (var CallBackInfo in ProductInfo.Results)
 			{
-				foreach (var CallBackInfo in ProductInfo.Results)
+				foreach (var CallBackInfoApps in CallBackInfo.Apps)
 				{
-					foreach (var CallBackInfoApps in CallBackInfo.Apps)
+					appInfo.Name = CallBackInfoApps.Value.KeyValues["common"]["name"].AsString();
+
+					using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
 					{
-						appInfo.Name = CallBackInfoApps.Value.KeyValues["common"]["name"].AsString();
-
-						using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
-						{
-							context.AppInfoData.Add(appInfo);
-							context.SaveChanges();
-						}
-
-						return CallBackInfoApps.Value.KeyValues["common"]["name"].AsString();
+						context.AppInfoData.Add(appInfo);
+						context.SaveChanges();
 					}
 				}
 			}
 
-			return "Unknown App";
+			return appInfo.Name;
 		}
 
 		public async Task<bool> IsSteamDown()
 		{
-			var ProductInfo = await Apps.PICSGetProductInfo(570, null); //570 is Dota 2.
+			var ProductInfo = await _apps.PICSGetProductInfo(570, null); //570 is Dota 2.
 			if (ProductInfo.Failed)
 			{
 				return false;
@@ -215,13 +212,14 @@ namespace SteamUpdateProject.Steam
 				return 0; //This helps with rate limiting.
 
 			SteamApps.PICSTokensCallback AppTokenInfo;
+
 			try
 			{
-				AppTokenInfo = await SteamUpdateBot.SteamClient.Apps.PICSGetAccessTokens(appid, null);
+				AppTokenInfo = await SteamUpdateBot.SteamClient._apps.PICSGetAccessTokens(appid, null);
 
-				if (AppTokenInfo.AppTokensDenied.Contains(appid)) return 0;
+				if (AppTokenInfo.AppTokensDenied.Contains(appid) || !AppTokenInfo.AppTokens.ContainsKey(appid)) return 0;
 
-				return AppTokenInfo.AppTokens.Where(c => c.Key == appid).FirstOrDefault().Value;
+				return AppTokenInfo.AppTokens[appid];
 			}
 			catch
 			{
@@ -242,7 +240,7 @@ namespace SteamUpdateProject.Steam
 			{
 				try
 				{
-					customProductInfo.ProductInfo = (await SteamUpdateBot.SteamClient.Apps.PICSGetProductInfo(appid, null, false, false)).Results;
+					customProductInfo.ProductInfo = (await SteamUpdateBot.SteamClient._apps.PICSGetProductInfo(appid, null, false, false)).Results;
 					customProductInfo.IsPublic = true;
 				}
 				catch
@@ -258,7 +256,7 @@ namespace SteamUpdateProject.Steam
 					request.AccessToken = AccessToken;
 					request.Public = false;
 					customProductInfo.IsPublic = false;
-					customProductInfo.ProductInfo = (await SteamUpdateBot.SteamClient.Apps.PICSGetProductInfo(new List<SteamApps.PICSRequest>() { request }, new List<SteamApps.PICSRequest>() { })).Results;
+					customProductInfo.ProductInfo = (await SteamUpdateBot.SteamClient._apps.PICSGetProductInfo(new List<SteamApps.PICSRequest>() { request }, new List<SteamApps.PICSRequest>() { })).Results;
 				}
 				catch
 				{
@@ -272,7 +270,7 @@ namespace SteamUpdateProject.Steam
 		#region CodeThat100PercentIsntFromOtherProjects👀
 		void OnConnected(SteamClient.ConnectedCallback callback)
 		{
-			Console.WriteLine("Connected to Steam! Logging in '{0}'...", user);
+			Console.WriteLine("Connected to Steam! Logging in '{0}'...", _user);
 
 			byte[] sentryHash = null;
 			if (File.Exists("sentry.bin"))
@@ -281,12 +279,12 @@ namespace SteamUpdateProject.Steam
 				sentryHash = CryptoHelper.SHAHash(sentryFile);
 			}
 
-			steamUser.LogOn(new SteamUser.LogOnDetails
+			_steamUser.LogOn(new SteamUser.LogOnDetails
 			{
-				Username = user,
-				Password = pass,
-				AuthCode = authCode,
-				TwoFactorCode = twoFactorAuth,
+				Username = _user,
+				Password = _pass,
+				AuthCode = _authCode,
+				TwoFactorCode = _twoFactorAuth,
 				SentryFileHash = sentryHash,
 			});
 
@@ -301,7 +299,7 @@ namespace SteamUpdateProject.Steam
 
 			Thread.Sleep(TimeSpan.FromSeconds(5));
 
-			steamClient.Connect();
+			_steamClient.Connect();
 		}
 		void OnLoggedOn(SteamUser.LoggedOnCallback callback)
 		{
@@ -315,12 +313,12 @@ namespace SteamUpdateProject.Steam
 				if (is2FA)
 				{
 					Console.Write("Please enter your 2 factor auth code from your authenticator app: ");
-					twoFactorAuth = Console.ReadLine();
+					_twoFactorAuth = Console.ReadLine();
 				}
 				else
 				{
 					Console.Write("Please enter the auth code sent to the email at {0}: ", callback.EmailDomain);
-					authCode = Console.ReadLine();
+					_authCode = Console.ReadLine();
 				}
 
 				return;
@@ -336,7 +334,7 @@ namespace SteamUpdateProject.Steam
 
 			// at this point, we'd be able to perform actions on Steam
 			//Console.WriteLine("Test");
-			Apps = steamClient.GetHandler<SteamApps>();
+			_apps = _steamClient.GetHandler<SteamApps>();
 
 			_mainChangeTimer.Elapsed += (sender, args) => MainChangeTimer_Elapsed(sender, args);
 			_mainChangeTimer.AutoReset = true;
@@ -357,7 +355,7 @@ namespace SteamUpdateProject.Steam
 				using SHA1 sha = SHA1.Create();
 				sentryHash = sha.ComputeHash(fs);
 			}
-			steamUser.SendMachineAuthResponse(new SteamUser.MachineAuthDetails
+			_steamUser.SendMachineAuthResponse(new SteamUser.MachineAuthDetails
 			{
 				JobID = callback.JobID,
 

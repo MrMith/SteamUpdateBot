@@ -4,7 +4,6 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.CommandsNext;
 using System.Collections.Generic;
-//using System.Linq;
 using System.Data.Entity;
 using SteamUpdateProject.DiscordLogic.Commands;
 
@@ -93,13 +92,16 @@ namespace SteamUpdateProject.DiscordLogic
 					{
 						try
 						{
+							DiscordDmChannel DmChannel = null;
+
 							foreach (KeyValuePair<ulong, DiscordGuild> _guildKVP in Client.Guilds)
 							{
+								if (DmChannel != null) continue;
 								foreach (DiscordMember _member in await _guildKVP.Value.GetAllMembersAsync())
 								{
 									if (_member.Id == (ulong)ServerInfo.ChannelID)
 									{
-										DiscordDmChannel DmChannel = await _member.CreateDmChannelAsync();
+										DmChannel = await _member.CreateDmChannelAsync();
 										await DmChannel.SendMessageAsync(embed: AppUpdate);
 										continue;
 									}
@@ -132,114 +134,6 @@ namespace SteamUpdateProject.DiscordLogic
 					}
 				}
 			}
-		}
-
-		/// <summary>
-		/// Takes one steam AppID and adds them to the subscribed list of the relevant <see cref="GuildInfo"/>.
-		/// </summary>
-		/// <param name="appid">Relevant AppID.</param>
-		/// <param name="info">Relevant <see cref="GuildInfo"/></param>
-		/// <returns>If the app was added to the relevant <see cref="GuildInfo"/></returns>
-		public static bool SubApp(uint appid, GuildInfo info)
-		{
-			if (!info.IsSubbed(appid))
-			{
-				using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
-				{
-					context.GuildInformation.RemoveRange(context.AllGuilds.FindAll(guild => guild.ChannelID == info.ChannelID && guild.GuildID == info.GuildID));
-					info.AddApp(appid);
-					context.GuildInformation.Add(info);
-					context.SaveChanges();
-					return true;
-				}
-			}
-
-			return false;
-		}
-
-		/// <summary>
-		/// Takes list of steam appIDs and adds them to the subscribed list of the relevant <see cref="GuildInfo"/>.
-		/// </summary>
-		/// <param name="listofapps">List of apps to add.</param>
-		/// <param name="info">Relevant <see cref="GuildInfo"/></param>
-		/// <returns>List of AppIDs that were added to the subscribed list of <see cref="GuildInfo"/>.</returns>
-		public static List<uint> SubMultipleApps(List<uint> listofapps, GuildInfo info)
-		{
-			List<uint> ListOfAddedApps = new List<uint>();
-
-			foreach (uint appid in listofapps)
-			{
-				if (!info.SubscribedApps.Exists(x => x.AppID == appid))
-				{
-					ListOfAddedApps.Add(appid);
-				}
-			}
-
-			if (ListOfAddedApps.Count != 0)
-			{
-				using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
-				{
-					context.GuildInformation.RemoveRange(context.AllGuilds.FindAll(guild => guild.ChannelID == info.ChannelID && guild.GuildID == info.GuildID));
-					foreach (uint app in ListOfAddedApps)
-					{
-						info.SubscribedApps.Add(new SubbedApp(app));
-					}
-					context.GuildInformation.Add(info);
-					context.SaveChanges();
-				}
-			}
-
-			return ListOfAddedApps;
-		}
-
-		/// <summary>
-		/// Removes multiple one AppID from a <see cref="GuildInfo"/>
-		/// </summary>
-		/// <param name="appid">Relevant AppID</param>
-		/// <param name="info">Relevant <see cref="GuildInfo"/></param>
-		/// <returns></returns>
-		public static bool RemoveApp(uint appid, GuildInfo info)
-		{
-			if (!info.IsSubbed(appid))
-				return false;
-
-			using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
-			{
-				context.GuildInformation.RemoveRange(context.AllGuilds.FindAll(guild => guild.ChannelID == info.ChannelID && guild.GuildID == info.GuildID));
-				info.RemoveApp(appid);
-				context.GuildInformation.Add(info);
-				context.SaveChanges();
-			}
-
-			return true;
-		}
-
-		/// <summary>
-		/// Removes multiple subscribed AppIDs from a <see cref="GuildInfo"/>
-		/// </summary>
-		/// <param name="listofapps">Relevant list of AppIDs</param>
-		/// <param name="info">Relevant <see cref="GuildInfo"/></param>
-		/// <returns></returns>
-		public static List<uint> RemoveMultipleApps(List<uint> listOfApps, GuildInfo info)
-		{
-			List<uint> AppsThatHaveBeenRemoved = new List<uint>();
-
-			listOfApps
-				.FindAll(appid => info.IsSubbed(appid))
-				.ForEach(removedApp => AppsThatHaveBeenRemoved.Add(removedApp));
-
-			if (AppsThatHaveBeenRemoved.Count != 0)
-			{
-				using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
-				{
-					context.GuildInformation.RemoveRange(context.AllGuilds.FindAll(guild => guild.ChannelID == info.ChannelID && guild.GuildID == info.GuildID));
-					info.RemoveApps(listOfApps);
-					context.GuildInformation.Add(info);
-					context.SaveChanges();
-				}
-			}
-
-			return AppsThatHaveBeenRemoved;
 		}
 
 		/// <summary>

@@ -4,7 +4,6 @@ using SteamUpdateProject.Steam;
 using System.IO;
 using System.Runtime.ExceptionServices;
 using DSharpPlus;
-using System.Linq;
 using System.Diagnostics;
 using Microsoft.SqlServer.Management.Smo;
 using Microsoft.SqlServer.Management.Common;
@@ -12,8 +11,9 @@ using Microsoft.SqlServer.Management.Common;
 namespace SteamUpdateProject
 {
 	//To-do
-	//Move Sub/Remove app to be apart of GuildInfo
-	//Fuck Linq btw
+
+	//Move backdoor to being a runtime argument
+
 	class SteamUpdateBot
 	{
 		public static DiscordBot DiscordClient;
@@ -68,9 +68,9 @@ namespace SteamUpdateProject
 
 			SteamClient = new SteamBot(args, DiscordClient);
 
-			while (SteamClient.isRunning)
+			while (SteamClient.IsRunning)
 			{
-				SteamClient.manager.RunWaitCallbacks(TimeSpan.FromSeconds(1));
+				SteamClient.Manager.RunWaitCallbacks(TimeSpan.FromSeconds(1));
 			}
 			#endregion
 		}
