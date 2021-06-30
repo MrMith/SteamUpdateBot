@@ -11,6 +11,9 @@ using Microsoft.SqlServer.Management.Common;
 
 namespace SteamUpdateProject
 {
+	//To-do
+	//Move Sub/Remove app to be apart of GuildInfo
+	//Fuck Linq btw
 	class SteamUpdateBot
 	{
 		public static DiscordBot DiscordClient;
@@ -27,8 +30,8 @@ namespace SteamUpdateProject
 		/// Total number of minutes this program as been 
 		public static long MinutesRunning = 0;
 
-		private static SQLDataBase Database;
-		public static bool _firstStartUp = true;
+		private static SQLDataBase _database;
+		public static bool FirstStartUp = true;
 
 		public static string LogPath = Directory.GetCurrentDirectory() + "\\logs\\";
 		public static string ConnectionString = $"Integrated Security=true;";
@@ -41,11 +44,11 @@ namespace SteamUpdateProject
 
 			ConnectionString += $"Database={SMOHandler.SMODatabase.Name}";
 
-			Database = new SQLDataBase(ConnectionString);
+			_database = new SQLDataBase(ConnectionString);
 
 			if (!File.Exists($"{DatabaseDirectory}\\SteamInformation.mdf"))
 			{
-				Database.Database.CreateIfNotExists();
+				_database.Database.CreateIfNotExists();
 			}
 
 			#endregion
@@ -76,45 +79,6 @@ namespace SteamUpdateProject
 		{
 			Exceptions++;
 			LogCancer(e.Exception);
-		}
-
-		/// <summary>
-		///This is basically as much as a shitty hack as a shitty hack could be and 
-		///brings me great shame :) but it works.
-		/// </summary>
-		public static void BackupDatabase()
-		{
-			if (_firstStartUp)
-			{
-				_firstStartUp = false;
-				return;
-			}
-
-			SteamUpdateBot.MinutesRunning += 5;
-
-			Directory.CreateDirectory($"{Directory.GetCurrentDirectory()}//backup");
-
-			if (Environment.OSVersion.Platform == PlatformID.Unix)
-			{
-
-			}
-			else //Windows, fuck MacOS.
-			{
-				using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
-				{
-					context.SaveChanges();
-				}
-
-				Process CopyProcessmdf = new Process();
-				CopyProcessmdf.StartInfo.UseShellExecute = false;
-				CopyProcessmdf.StartInfo.RedirectStandardOutput = true;
-				CopyProcessmdf.StartInfo.FileName = "cmd.exe";
-				CopyProcessmdf.StartInfo.WorkingDirectory = Directory.GetCurrentDirectory();
-				CopyProcessmdf.StartInfo.Arguments = $"/c robocopy \"{Directory.GetCurrentDirectory()}\\database\" \"{Directory.GetCurrentDirectory()}\\backup\" *";
-				CopyProcessmdf.Start();
-				CopyProcessmdf.WaitForExit();
-				CopyProcessmdf.Close();
-			}
 		}
 
 		/// <summary>
@@ -188,7 +152,7 @@ namespace SteamUpdateProject
 		/// <returns>Windows formatted string</returns>
 		public static string GetFormattedDate()
 		{
-			return DateTime.UtcNow.ToString().Replace("/", "_").Replace(":", "-"); //I feel like theres a cleaner way to do this?
+			return DateTime.UtcNow.ToString("yyyy-dd-M--HH-mm-ss");
 		}
 	}
 }

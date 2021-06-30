@@ -9,7 +9,7 @@ namespace SteamUpdateProject
 	/// </summary>
 	public class SubbedApp : IEquatable<SubbedApp>
 	{
-		public SubbedApp()
+		public SubbedApp() //Needed by entity framework.
 		{
 		}
 

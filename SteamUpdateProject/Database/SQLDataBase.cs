@@ -1,5 +1,6 @@
 ﻿using System.Data.Entity;
 using System.Data.Entity.ModelConfiguration.Conventions;
+using System.Collections.Generic;
 
 namespace SteamUpdateProject
 {
@@ -23,6 +24,22 @@ namespace SteamUpdateProject
 			.HasMany(p => p.SubscribedApps)
 			.WithOptional()
 			.WillCascadeOnDelete(true);
+		}
+
+		public List<AppInfo> AllApps
+		{
+			get
+			{
+				return new List<AppInfo>(this.AppInfoData);
+			}
+		}
+		
+		public List<GuildInfo> AllGuilds
+		{
+			get
+			{
+				return new List<GuildInfo>(this.GuildInformation);
+			}
 		}
 	}
 }

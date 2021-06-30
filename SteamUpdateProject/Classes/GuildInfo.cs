@@ -40,12 +40,49 @@ namespace SteamUpdateProject
 		/// <summary>
 		/// List of apps this certain channel is subscribed to.
 		/// </summary>
-		public virtual List<SubbedApp> SubscribedApps { get; set; } = new List<SubbedApp>(); //Why in the living fuck can't I just make a int list? It never populates the list but if I make this shitty class it will load from the database properly. If you know why please yell at me because I don't know what these cocaine fueled coders are doing with this shit
+		public virtual List<SubbedApp> SubscribedApps { get; set; } = new List<SubbedApp>();
+
+		public bool IsSubbed(long appID)
+		{
+			return SubscribedApps.Exists(subbedApp => subbedApp.AppID == appID);
+		}
+
+		public bool IsSubbed(SubbedApp app)
+		{
+			return IsSubbed(app.AppID);
+		}
+
+		public void AddApps(IEnumerable<uint> IEnum)
+		{
+			foreach (var remove in IEnum)
+			{
+				SubscribedApps.Add(new SubbedApp(remove));
+			}
+		}
+
+		public void RemoveApps(IEnumerable<uint> IEnum)
+		{
+			foreach (var remove in IEnum)
+			{
+				SubscribedApps.RemoveAll(subbedApp => subbedApp.AppID == remove);
+			}
+		}
+
+		public void AddApp(uint appID)
+		{
+			SubscribedApps.Add(new SubbedApp(appID));
+		}
+
+		public void RemoveApp(uint appID)
+		{
+			SubscribedApps.RemoveAll(subbedapp => subbedapp.AppID == appID);
+		}
 
 		public override bool Equals(object obj)
 		{
 			return Equals(obj as GuildInfo);
 		}
+
 
 		public bool Equals(GuildInfo other)
 		{

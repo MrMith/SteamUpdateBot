@@ -13,8 +13,8 @@ namespace SteamUpdateProject.Steam
 {
 	class SteamBot
 	{
-		readonly DiscordBot DiscordClient;
-		readonly System.Timers.Timer MainChangeTimer = new System.Timers.Timer(250);
+		readonly DiscordBot _discordClient;
+		readonly System.Timers.Timer _mainChangeTimer = new System.Timers.Timer(250);
 		uint LastChangeNumber = 0;
 
 		readonly SteamClient steamClient;
@@ -29,7 +29,7 @@ namespace SteamUpdateProject.Steam
 
 		public SteamBot(string[] args, DiscordBot bot)
 		{
-			DiscordClient = bot;
+			_discordClient = bot;
 			user = args[0]; //This is a fodder steam account so I snooze
 			pass = args[1];
 			steamClient = new SteamClient();
@@ -98,9 +98,9 @@ namespace SteamUpdateProject.Steam
 
 				//FullProductInfo = GetFullProductInfo(AppsThatUpdated.Key).Result;
 
-				foreach (SteamApps.PICSProductInfoCallback CallBackInfo in FullProductInfo.ProductInfo)
+				foreach (var CallBackInfo in FullProductInfo.ProductInfo)
 				{
-					foreach (KeyValuePair<uint, SteamApps.PICSProductInfoCallback.PICSProductInfo> CallBackInfoApps in CallBackInfo.Apps)
+					foreach (var CallBackInfoApps in CallBackInfo.Apps)
 					{
 						KeyValue depotKV = CallBackInfoApps.Value.KeyValues.Children.Where(c => c.Name == "depots").FirstOrDefault();
 						if (depotKV != null && FullProductInfo.IsPublic)
@@ -151,7 +151,7 @@ namespace SteamUpdateProject.Steam
 
 
 				SteamUpdateBot.Updates++;
-				DiscordClient.AppUpdated(AppUpdate);
+				_discordClient.AppUpdated(AppUpdate);
 			}
 		}
 
@@ -169,7 +169,7 @@ namespace SteamUpdateProject.Steam
 				return CachedInfo.Name;
 			}
 
-			AsyncJobMultiple<SteamApps.PICSProductInfoCallback>.ResultSet ProductInfo = await Apps.PICSGetProductInfo(appid, null);
+			var ProductInfo = await Apps.PICSGetProductInfo(appid, null);
 
 			AppInfo appInfo = new AppInfo()
 			{
@@ -178,9 +178,9 @@ namespace SteamUpdateProject.Steam
 
 			if (ProductInfo.Complete)
 			{
-				foreach (SteamApps.PICSProductInfoCallback CallBackInfo in ProductInfo.Results)
+				foreach (var CallBackInfo in ProductInfo.Results)
 				{
-					foreach (KeyValuePair<uint, SteamApps.PICSProductInfoCallback.PICSProductInfo> CallBackInfoApps in CallBackInfo.Apps)
+					foreach (var CallBackInfoApps in CallBackInfo.Apps)
 					{
 						appInfo.Name = CallBackInfoApps.Value.KeyValues["common"]["name"].AsString();
 
@@ -200,7 +200,7 @@ namespace SteamUpdateProject.Steam
 
 		public async Task<bool> IsSteamDown()
 		{
-			AsyncJobMultiple<SteamApps.PICSProductInfoCallback>.ResultSet ProductInfo = await Apps.PICSGetProductInfo(570, null); //570 is Dota 2.
+			var ProductInfo = await Apps.PICSGetProductInfo(570, null); //570 is Dota 2.
 			if (ProductInfo.Failed)
 			{
 				return false;
@@ -338,10 +338,10 @@ namespace SteamUpdateProject.Steam
 			//Console.WriteLine("Test");
 			Apps = steamClient.GetHandler<SteamApps>();
 
-			MainChangeTimer.Elapsed += (sender, args) => MainChangeTimer_Elapsed(sender, args);
-			MainChangeTimer.AutoReset = true;
-			MainChangeTimer.Interval = 500;
-			MainChangeTimer.Start();
+			_mainChangeTimer.Elapsed += (sender, args) => MainChangeTimer_Elapsed(sender, args);
+			_mainChangeTimer.AutoReset = true;
+			_mainChangeTimer.Interval = 500;
+			_mainChangeTimer.Start();
 		}
 		void OnMachineAuth(SteamUser.UpdateMachineAuthCallback callback)
 		{
