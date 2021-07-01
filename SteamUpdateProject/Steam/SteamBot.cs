@@ -89,7 +89,7 @@ namespace SteamUpdateProject.Steam
 				}
 				catch
 				{
-					Console.WriteLine("ERROR: Steam is down or you need to check your connection. Code 0");
+					SteamUpdateBot.CustomError("0", "Steam");
 					return;
 				}
 
@@ -145,7 +145,6 @@ namespace SteamUpdateProject.Steam
 						}
 					}
 				}
-
 
 				SteamUpdateBot.Updates++;
 				_discordClient.AppUpdated(AppUpdate);
@@ -222,7 +221,7 @@ namespace SteamUpdateProject.Steam
 			}
 			catch
 			{
-				Console.WriteLine("ERROR: Steam is down or you need to check your connection. Code 0");
+				SteamUpdateBot.CustomError("0.1", "Steam");
 				return 0;
 			}
 		}
@@ -244,7 +243,7 @@ namespace SteamUpdateProject.Steam
 				}
 				catch
 				{
-					Console.WriteLine("ERROR: Steam is down or you need to check your connection. Code 1");
+					SteamUpdateBot.CustomError("1.0", "Steam");
 					return null;
 				}
 			}
@@ -259,7 +258,7 @@ namespace SteamUpdateProject.Steam
 				}
 				catch
 				{
-					Console.WriteLine("ERROR: Steam is down or you need to check your connection. Code 2");
+					SteamUpdateBot.CustomError("2.0", "Steam");
 					return null;
 				}
 			}

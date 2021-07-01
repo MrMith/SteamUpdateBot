@@ -64,7 +64,7 @@ namespace SteamUpdateProject
 			{
 				using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
 				{
-					context.GuildInformation.RemoveRange(context.AllGuilds.FindAll(guild => guild.ChannelID == this.ChannelID && guild.GuildID == this.GuildID));
+					context.GuildInformation.RemoveRange(context.AllGuilds.FindAll(guild => guild == this));
 					SubscribedApps.Add(new SubbedApp(appid));
 					context.GuildInformation.Add(this);
 					context.SaveChanges();
@@ -96,7 +96,7 @@ namespace SteamUpdateProject
 			{
 				using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
 				{
-					context.GuildInformation.RemoveRange(context.AllGuilds.FindAll(guild => guild.ChannelID == this.ChannelID && guild.GuildID == this.GuildID));
+					context.GuildInformation.RemoveRange(context.AllGuilds.FindAll(guild => guild == this));
 					foreach (uint app in ListOfAddedApps)
 					{
 						SubscribedApps.Add(new SubbedApp(app));
@@ -121,7 +121,7 @@ namespace SteamUpdateProject
 
 			using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
 			{
-				context.GuildInformation.RemoveRange(context.AllGuilds.FindAll(guild => guild.ChannelID == this.ChannelID && guild.GuildID == this.GuildID));
+				context.GuildInformation.RemoveRange(context.AllGuilds.FindAll(guild => guild == this));
 				SubscribedApps.RemoveAll(SubbedApp => SubbedApp.AppID == appid);
 				context.GuildInformation.Add(this);
 				context.SaveChanges();

@@ -109,10 +109,7 @@ namespace SteamUpdateProject.DiscordLogic
 						}
 						catch (Exception e)
 						{
-							Console.WriteLine("ERROR: Discord is down or you need to check your connection. Code 0.1");
-							Console.WriteLine(e.ToString());
-							Console.WriteLine();
-							Console.WriteLine();
+							SteamUpdateBot.CustomError("0.1", "Discord", e);
 						}
 					}
 					else //Server
@@ -125,10 +122,7 @@ namespace SteamUpdateProject.DiscordLogic
 						}
 						catch (Exception e)
 						{
-							Console.WriteLine("ERROR: Discord is down or you need to check your connection. Code 1.1");
-							Console.WriteLine(e.ToString());
-							Console.WriteLine();
-							Console.WriteLine();
+							SteamUpdateBot.CustomError("1.1", "Discord", e);
 						}
 					}
 				}
@@ -184,8 +178,6 @@ namespace SteamUpdateProject.DiscordLogic
 			long channelid = (long)uchannelid;
 			using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
 			{
-				//GuildInfo = context.GuildInformation.ToList().Where(x => x.GuildID == channelid && guildid == x.GuildID).FirstOrDefault();
-
 				foreach (GuildInfo info in context.AllGuilds)
 				{
 					if (info.GuildID == guildid && info.ChannelID == channelid)
@@ -237,6 +229,9 @@ namespace SteamUpdateProject.DiscordLogic
 		const int DAY = 24 * HOUR;
 		const int MONTH = 30 * DAY;
 
+		/// <summary>
+		/// Just a nice method so instead of "Updated at June 21th 2021 at 5:54 PM" we got "Updated 10 minutes ago". Not mine.
+		/// </summary>
 		public string ElapsedTime(DateTime? nullabledtEvent)
 		{
 			DateTime dtEvent = (DateTime)nullabledtEvent;
