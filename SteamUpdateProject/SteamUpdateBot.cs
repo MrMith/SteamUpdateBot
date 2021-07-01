@@ -150,23 +150,12 @@ namespace SteamUpdateProject
 			}
 			catch
 			{
-				Console.WriteLine(e.InnerException);
-				Console.WriteLine(e.Message);
-				Console.WriteLine();
-				Console.WriteLine();
-				Console.WriteLine(e.StackTrace);
-				Console.WriteLine();
-				Console.WriteLine();
-				Console.WriteLine(e.Source?.ToString());
-				Console.WriteLine(e.TargetSite?.ToString());
-				Console.WriteLine();
-				Console.WriteLine();
+				// You Get Nothing! You Lose! Good Day, Sir! 
 			}
-
 		}
 
 		/// <summary>
-		/// Replaces the : character for a - character and replaces the / character for a _ character so it can be used to represent file names in Windows.
+		/// Formatted date so windows can have the filename include the date.
 		/// </summary>
 		/// <returns>Windows formatted string</returns>
 		public static string GetFormattedDate()

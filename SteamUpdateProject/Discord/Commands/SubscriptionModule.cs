@@ -57,7 +57,7 @@ namespace SteamUpdateProject.DiscordLogic.Commands
 						AppID = app
 					};
 
-					AppInfo.Name = SteamUpdateBot.SteamClient.GetAppName(app).Result;
+					AppInfo.Name = await SteamUpdateBot.SteamClient.GetAppName(app);
 
 					stringBuilder.AppendLine($"{AppInfo.Name} ({AppInfo.AppID})");
 
@@ -85,7 +85,7 @@ namespace SteamUpdateProject.DiscordLogic.Commands
 					AppID = appid
 				};
 
-				AppInfo.Name = SteamUpdateBot.SteamClient.GetAppName(appid).Result;
+				AppInfo.Name = await SteamUpdateBot.SteamClient.GetAppName(appid);
 
 				embedBuilder.Title = "Steam Apps removed:";
 				embedBuilder.AddField("Steam App:", $"{AppInfo.Name} ({appid})");
@@ -141,7 +141,7 @@ namespace SteamUpdateProject.DiscordLogic.Commands
 						AppID = app
 					};
 
-					AppInfo.Name = SteamUpdateBot.SteamClient.GetAppName(app).Result;
+					AppInfo.Name = await SteamUpdateBot.SteamClient.GetAppName(app);
 
 					builderToReturn.AppendLine($"{AppInfo.Name} ({AppInfo.AppID})");
 				}
@@ -194,7 +194,7 @@ namespace SteamUpdateProject.DiscordLogic.Commands
 
 			foreach (SubbedApp SubbedApp in GuildInfo.SubscribedApps)
 			{
-				AppInfo AppInfo = DiscordBot.GetCachedInfo(SubbedApp.AppID);
+				AppInfo AppInfo = DiscordBot.GetCachedAppInfo(SubbedApp.AppID);
 
 				if (AppInfo.Name == null || AppInfo.Name.Length == 0) AppInfo.Name = "Unknown App";
 

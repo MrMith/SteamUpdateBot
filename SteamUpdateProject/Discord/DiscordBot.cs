@@ -135,7 +135,7 @@ namespace SteamUpdateProject.DiscordLogic
 		/// <param name="appid">Relevant Steam AppID</param>
 		/// <param name="QuickSearch">Do we only search Database or check database and nothing is found search info from steam</param>
 		/// <returns></returns>
-		public static AppInfo GetCachedInfo(long appid, bool QuickSearch = false)
+		public static AppInfo GetCachedAppInfo(long appid, bool QuickSearch = false)
 		{
 			using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
 			{
@@ -152,7 +152,7 @@ namespace SteamUpdateProject.DiscordLogic
 				AppInfo AppInfo = new AppInfo()
 				{
 					AppID = appid,
-					Name = SteamUpdateProject.SteamUpdateBot.SteamClient.GetAppName((uint)appid).Result
+					Name = SteamUpdateBot.SteamClient.GetAppName((uint)appid).Result
 				};
 
 				if (AppInfo.Name != null)

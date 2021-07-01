@@ -158,7 +158,7 @@ namespace SteamUpdateProject.Steam
 		/// <returns></returns>
 		public async Task<string> GetAppName(uint appid)
 		{
-			AppInfo CachedInfo = DiscordBot.GetCachedInfo(appid, true);
+			AppInfo CachedInfo = DiscordBot.GetCachedAppInfo(appid, true);
 
 			if (CachedInfo != null)
 			{
