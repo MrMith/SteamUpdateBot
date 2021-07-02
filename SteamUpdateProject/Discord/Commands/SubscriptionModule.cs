@@ -46,7 +46,7 @@ namespace SteamUpdateProject.DiscordLogic.Commands
 
 				if (AppsThatHaveBeenRemoved.Count == 0)
 				{
-					await ctx.RespondAsync("You're not subscribed to those apps!");
+					await ctx.RespondAsync("You're not subscribed to these apps!");
 					return;
 				}
 
@@ -94,7 +94,7 @@ namespace SteamUpdateProject.DiscordLogic.Commands
 				return;
 			}
 
-			await ctx.RespondAsync("ERROR using remove command! Type !help to get help on using this command!");
+			await ctx.RespondAsync("ERROR using remove command! Type `!help` to get help on using this command!");
 		}
 
 		[Command("sub"), Aliases("addapp", "subscribeapp", "add", "subscribe", "subapp"), Description("Subscribe to a Steam Application to see when it updates by appid (Ex: sub 730 or sub 730 530)")]
@@ -111,8 +111,6 @@ namespace SteamUpdateProject.DiscordLogic.Commands
 			DiscordEmbedBuilder embedBuilder = new DiscordEmbedBuilder();
 
 			GuildInfo GuildInfo = GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Guild == null ? ctx.User.Id : ctx.Channel.Id);
-
-			//fix this copy and pasted garbage retard
 			if (objects.Length > 1) //Multiple apps
 			{
 				embedBuilder.Title = "Apps added:";
@@ -171,7 +169,7 @@ namespace SteamUpdateProject.DiscordLogic.Commands
 				await ctx.RespondAsync(embed: embedBuilder.Build());
 				return;
 			}
-			await ctx.RespondAsync("ERROR using add command! Type !help to get help on using this command!");
+			await ctx.RespondAsync("ERROR using add command! Type `!help` to get help on using this command!");
 		}
 
 		[Command("list"), Aliases("apps"), Description("Displays all of the subscribed apps for this channel.")]

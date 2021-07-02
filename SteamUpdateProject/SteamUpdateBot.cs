@@ -6,6 +6,13 @@ using System.Runtime.ExceptionServices;
 
 namespace SteamUpdateProject
 {
+	/*
+	 * To-Do
+	 * 1. Fucking Shards, How Do They Work? 
+	 * 2. Queue system for Steam 
+	 * 3. Queue system for Discord (Might be included in DSharpPlus?)
+	 */
+
 	/// <summary>
 	/// Main logic that handles the steam bot, discord bot and managing the database.
 	/// </summary>
