@@ -89,7 +89,7 @@ namespace SteamUpdateProject.Steam
 				}
 				catch
 				{
-					SteamUpdateBot.CustomError("0", "Steam");
+					SteamUpdateBot.CustomError("0.0", "Steam");
 					return;
 				}
 
@@ -131,7 +131,7 @@ namespace SteamUpdateProject.Steam
 
 						using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
 						{
-							context.AppInfoData.RemoveRange(context.AllApps.FindAll(SubbedApp => SubbedApp.AppID == AppUpdate.AppID));
+							context.AppInfoData.RemoveRange(context.AllApps.FindAll(SubbedApp => SubbedApp == AppUpdate));
 
 							AppInfo appinfo = new AppInfo()
 							{

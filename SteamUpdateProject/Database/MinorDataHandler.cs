@@ -5,13 +5,12 @@ namespace SteamUpdateProject
 	/// <summary>
 	/// This handles small data like <see cref="SteamUpdateBot.Updates"/>, <see cref="SteamUpdateBot.ContentUpdates"/>, <see cref="SteamUpdateBot.Exceptions"/> and finally <see cref="SteamUpdateBot.MinutesRunning"/> so we can keep track of those small things.
 	/// </summary>
-	class INIHandler
+	class MinorDataHandler
 	{
-		private string _operatingPath = Directory.GetCurrentDirectory();
-		private string _operatingFile = Directory.GetCurrentDirectory() + "//SteamData.ini";
+		private string _operatingFile = Directory.GetCurrentDirectory() + "//SteamData.data";
 
 		/// <summary>
-		/// Writes <see cref="SteamUpdateBot.Updates"/>, <see cref="SteamUpdateBot.ContentUpdates"/>, <see cref="SteamUpdateBot.Exceptions"/> and finally <see cref="SteamUpdateBot.MinutesRunning"/> into <see cref="SteamData.ini"/>
+		/// Writes <see cref="SteamUpdateBot.Updates"/>, <see cref="SteamUpdateBot.ContentUpdates"/>, <see cref="SteamUpdateBot.Exceptions"/> and finally <see cref="SteamUpdateBot.MinutesRunning"/> into <see cref="SteamData.data"/>
 		/// </summary>
 		public void WriteData()
 		{
@@ -27,7 +26,7 @@ namespace SteamUpdateProject
 		}
 
 		/// <summary>
-		/// Read contents of SteamData.ini and updates <see cref="SteamUpdateBot.Updates"/>, <see cref="SteamUpdateBot.ContentUpdates"/>, <see cref="SteamUpdateBot.Exceptions"/> and finally <see cref="SteamUpdateBot.MinutesRunning"/>
+		/// Read contents of SteamData.data and updates <see cref="SteamUpdateBot.Updates"/>, <see cref="SteamUpdateBot.ContentUpdates"/>, <see cref="SteamUpdateBot.Exceptions"/> and finally <see cref="SteamUpdateBot.MinutesRunning"/>
 		/// </summary>
 		public void ReadData()
 		{
@@ -35,10 +34,10 @@ namespace SteamUpdateProject
 
 			using (StreamReader reader = new StreamReader(_operatingFile))
 			{
-				string[] INIDataByLine = reader.ReadToEnd().Split("\n");
-				for (int i = 0; i <= INIDataByLine.Length - 1; i++)
+				string[] dataByLine = reader.ReadToEnd().Split("\n");
+				for (int i = 0; i <= dataByLine.Length - 1; i++)
 				{
-					if (long.TryParse(INIDataByLine[i], out long number))
+					if (long.TryParse(dataByLine[i], out long number))
 					{
 						switch(i)
 						{

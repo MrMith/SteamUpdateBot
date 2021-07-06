@@ -9,8 +9,9 @@ namespace SteamUpdateProject
 	/*
 	 * To-Do
 	 * 1. Fucking Shards, How Do They Work? 
-	 * 2. Queue system for Steam 
-	 * 3. Queue system for Discord (Might be included in DSharpPlus?)
+	 * 2. Queue system for Steam ratelimiting
+	 * 3. Queue system for Discord ratelimiting (Might be included in DSharpPlus?)
+	 * 4. Select comp seems pog
 	 */
 
 	/// <summary>
@@ -21,7 +22,7 @@ namespace SteamUpdateProject
 		public static DiscordBot DiscordClient;
 		public static SteamBot SteamClient;
 		public static SMOHandler SMOHandler;
-		public static INIHandler INIHandler;
+		public static MinorDataHandler INIHandler;
 
 		/// Total number of exceptions :)
 		public static long Exceptions = 0;
@@ -66,7 +67,7 @@ namespace SteamUpdateProject
 			#region Bot Starts, Logging and Main While thread.
 			AppDomain.CurrentDomain.FirstChanceException += FirstChanceHandler;
 
-			INIHandler = new INIHandler();
+			INIHandler = new MinorDataHandler();
 			INIHandler.ReadData();
 
 			if (!Directory.Exists(LogPath)) Directory.CreateDirectory(LogPath);
@@ -99,6 +100,14 @@ namespace SteamUpdateProject
 		/// <param name="Type">Steam or Discord</param>
 		public static void CustomError(string Code, string Type, Exception e = null)
 		{
+			/* 1.0 Discord -> DM app update
+			 * 1.1 Discord -> Server app uppate
+			 * 0.0 Steam -> Get app's product info for every update.
+			 * 0.1 Steam -> Get app's access token (for product info)
+			 * 1.0 Steam -> product request without access token
+			 * 2.0 Steam -> product request with access token
+			 */
+
 			Console.WriteLine($"Error {Type} is down or your need to check your connection. Code: {Code}");
 
 			if(e != null)

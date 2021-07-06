@@ -24,7 +24,7 @@ namespace SteamUpdateProject
 				}
 			}
 
-			Console.WriteLine(SMODatabase.Name);
+			//Console.WriteLine(SMODatabase.Name);
 		}
 	}
 }

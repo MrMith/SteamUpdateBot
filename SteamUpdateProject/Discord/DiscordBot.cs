@@ -9,7 +9,7 @@ using SteamUpdateProject.DiscordLogic.Commands;
 namespace SteamUpdateProject.DiscordLogic
 {
 	/// <summary>
-	/// This runs all of the discord bot logic like logging in, sending messages for when an app updates and finally handles subscribing and unsubscribing from apps.
+	/// This runs all of the discord bot logic like logging in and sending messages for when an app updates.
 	/// </summary>
 	class DiscordBot
 	{
@@ -54,8 +54,8 @@ namespace SteamUpdateProject.DiscordLogic
 			{
 				await Client.UpdateStatusAsync(new DiscordActivity($"Total Steam updates: {SteamUpdateBot.Updates}", ActivityType.Playing));
 				Console.WriteLine("Updated Time: " + SteamUpdateBot.Updates);
+				SteamUpdateBot.MinutesRunning += 5;
 				SteamUpdateBot.INIHandler.WriteData();
-
 				_timeForStatusUpdate = DateTime.Now.AddMinutes(5);
 			}
 
@@ -91,25 +91,12 @@ namespace SteamUpdateProject.DiscordLogic
 					{
 						try
 						{
-							DiscordDmChannel DmChannel = null;
-
-							foreach (KeyValuePair<ulong, DiscordGuild> _guildKVP in Client.Guilds)
-							{
-								if (DmChannel != null) continue;
-								foreach (DiscordMember _member in await _guildKVP.Value.GetAllMembersAsync())
-								{
-									if (_member.Id == (ulong)ServerInfo.ChannelID)
-									{
-										DmChannel = await _member.CreateDmChannelAsync();
-										await DmChannel.SendMessageAsync(embed: AppUpdate);
-										continue;
-									}
-								}
-							}
+							DiscordMember DMUser = await GetDiscordMember((ulong)ServerInfo.ChannelID);
+							await DMUser.SendMessageAsync(embed: AppUpdate);
 						}
 						catch (Exception e)
 						{
-							SteamUpdateBot.CustomError("0.1", "Discord", e);
+							SteamUpdateBot.CustomError("1.0", "Discord", e);
 						}
 					}
 					else //Server
@@ -127,6 +114,28 @@ namespace SteamUpdateProject.DiscordLogic
 					}
 				}
 			}
+		}
+
+		#region Utility Methods
+		/// <summary>
+		/// Gets Discord Member by ID.
+		/// </summary>
+		/// <param name="_memberID">User's ID</param>
+		/// <returns>The member with the ID specified</returns>
+		public async Task<DiscordMember> GetDiscordMember(ulong _memberID)
+		{
+			foreach (KeyValuePair<ulong, DiscordGuild> _guildKVP in Client.Guilds)
+			{
+				foreach (DiscordMember _member in await _guildKVP.Value.GetAllMembersAsync())
+				{
+					if (_member.Id == _memberID)
+					{
+						return _member;
+					}
+				}
+			}
+
+			return null;
 		}
 
 		/// <summary>
@@ -230,7 +239,7 @@ namespace SteamUpdateProject.DiscordLogic
 		const int MONTH = 30 * DAY;
 
 		/// <summary>
-		/// Just a nice method so instead of "Updated at June 21th 2021 at 5:54 PM" we got "Updated 10 minutes ago". Not mine.
+		/// Just a nice method so instead of "Updated at June 21th 2025 at 5:54 PM" we got "Updated 10 minutes ago". Not mine.
 		/// </summary>
 		public string ElapsedTime(DateTime? nullabledtEvent)
 		{
@@ -270,5 +279,6 @@ namespace SteamUpdateProject.DiscordLogic
 				return years <= 1 ? "one year ago" : years + " years ago";
 			}
 		}
+		#endregion
 	}
 }
