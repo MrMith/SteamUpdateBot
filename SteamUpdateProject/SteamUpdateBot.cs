@@ -22,7 +22,7 @@ namespace SteamUpdateProject
 		public static DiscordBot DiscordClient;
 		public static SteamBot SteamClient;
 		public static SMOHandler SMOHandler;
-		public static MinorDataHandler INIHandler;
+		public static MinorDataHandler MinorDataHandler;
 
 		/// Total number of exceptions :)
 		public static long Exceptions = 0;
@@ -33,13 +33,13 @@ namespace SteamUpdateProject
 		/// Total number of minutes this program as been 
 		public static long MinutesRunning = 0;
 
-		private static SQLDataBase _database;
+		private static SQLDataBase _dataBase;
 		public static bool FirstStartUp = true;
 
 		public static string LogPath = Directory.GetCurrentDirectory() + "\\logs\\";
 		public static string ConnectionString = $"Integrated Security=true;";
 		public static string DatabaseDirectory = $"{Directory.GetCurrentDirectory()}\\database";
-		public static ulong OverrideDiscordID;
+		public static ulong OverrideDiscordID = 0;
 
 		/// <summary>
 		/// 0 = Steam account username
@@ -55,11 +55,11 @@ namespace SteamUpdateProject
 
 			ConnectionString += $"Database={SMOHandler.SMODatabase.Name}";
 
-			_database = new SQLDataBase(ConnectionString);
+			_dataBase = new SQLDataBase(ConnectionString);
 
 			if (!File.Exists($"{DatabaseDirectory}\\SteamInformation.mdf"))
 			{
-				_database.Database.CreateIfNotExists();
+				_dataBase.Database.CreateIfNotExists();
 			}
 
 			#endregion
@@ -67,8 +67,8 @@ namespace SteamUpdateProject
 			#region Bot Starts, Logging and Main While thread.
 			AppDomain.CurrentDomain.FirstChanceException += FirstChanceHandler;
 
-			INIHandler = new MinorDataHandler();
-			INIHandler.ReadData();
+			MinorDataHandler = new MinorDataHandler();
+			MinorDataHandler.ReadData();
 
 			if (!Directory.Exists(LogPath)) Directory.CreateDirectory(LogPath);
 

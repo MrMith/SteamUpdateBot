@@ -80,13 +80,13 @@ namespace SteamUpdateProject
 		/// </summary>
 		/// <param name="listofapps">List of apps to add.</param>
 		/// <returns>List of AppIDs that were added to the subscribed list of <see cref="GuildInfo"/>.</returns>
-		public List<uint> SubMultipleApps(List<uint> listofapps)
+		public List<uint> SubMultipleApps(List<uint> listOfApps)
 		{
 			List<uint> ListOfAddedApps = new List<uint>();
 
-			foreach (uint appid in listofapps)
+			foreach (uint appid in listOfApps)
 			{
-				if (!SubscribedApps.Exists(x => x.AppID == appid))
+				if (!IsSubbed(appid))
 				{
 					ListOfAddedApps.Add(appid);
 				}
@@ -139,9 +139,13 @@ namespace SteamUpdateProject
 		{
 			List<uint> AppsThatHaveBeenRemoved = new List<uint>();
 
-			listOfApps
-				.FindAll(appid => IsSubbed(appid))
-				.ForEach(removedApp => AppsThatHaveBeenRemoved.Add(removedApp));
+			foreach (uint appid in listOfApps)
+			{
+				if (IsSubbed(appid))
+				{
+					AppsThatHaveBeenRemoved.Add(appid);
+				}
+			}
 
 			if (AppsThatHaveBeenRemoved.Count != 0)
 			{
@@ -157,7 +161,7 @@ namespace SteamUpdateProject
 			return AppsThatHaveBeenRemoved;
 		}
 
-		#region Equal Functions
+		#region Equality Functions
 		public override bool Equals(object obj)
 		{
 			return Equals(obj as GuildInfo);

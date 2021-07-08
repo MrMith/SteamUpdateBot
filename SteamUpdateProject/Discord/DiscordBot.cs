@@ -55,7 +55,7 @@ namespace SteamUpdateProject.DiscordLogic
 				await Client.UpdateStatusAsync(new DiscordActivity($"Total Steam updates: {SteamUpdateBot.Updates}", ActivityType.Playing));
 				Console.WriteLine("Updated Time: " + SteamUpdateBot.Updates);
 				SteamUpdateBot.MinutesRunning += 5;
-				SteamUpdateBot.INIHandler.WriteData();
+				SteamUpdateBot.MinorDataHandler.WriteData();
 				_timeForStatusUpdate = DateTime.Now.AddMinutes(5);
 			}
 

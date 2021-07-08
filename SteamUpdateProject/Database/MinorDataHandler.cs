@@ -14,8 +14,6 @@ namespace SteamUpdateProject
 		/// </summary>
 		public void WriteData()
 		{
-			MakeSureFileExists();
-
 			using (StreamWriter writer = new StreamWriter(_operatingFile))
 			{
 				writer.WriteLine(SteamUpdateBot.Updates);
@@ -30,7 +28,8 @@ namespace SteamUpdateProject
 		/// </summary>
 		public void ReadData()
 		{
-			MakeSureFileExists();
+			if (!File.Exists(_operatingFile))
+				return;
 
 			using (StreamReader reader = new StreamReader(_operatingFile))
 			{
@@ -64,14 +63,6 @@ namespace SteamUpdateProject
 						}
 					}
 				}
-			}
-		}
-
-		private void MakeSureFileExists()
-		{
-			if(!File.Exists(_operatingFile))
-			{
-				File.Create(_operatingFile);
 			}
 		}
 	}
