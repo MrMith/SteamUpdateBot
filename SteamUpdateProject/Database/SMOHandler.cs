@@ -15,16 +15,34 @@ namespace SteamUpdateProject
 		public SMOHandler()
 		{
 			SMOServer = new Server();
+			SMOServer.ConnectionContext.Connect();
 
+			SMODatabase = GetDatabase();
+
+			if(!SMODatabase.IsAccessible)
+			{
+				SMODatabase.Drop();
+				SMODatabase = new Database(SMOServer, "STEAMINFORMATION");
+				SMODatabase.Create(false);
+			}
+		}
+
+		private Database GetDatabase()
+		{
 			foreach (object dataBase in SMOServer.Databases)
 			{
 				if (dataBase.ToString().Contains("STEAMINFORMATION", StringComparison.OrdinalIgnoreCase))
 				{
-					SMODatabase = dataBase as Database;
+					return dataBase as Database;
 				}
 			}
 
-			//Console.WriteLine(SMODatabase.Name);
+			Database NewDB = new Database(SMOServer, "STEAMINFORMATION");
+			
+			NewDB.Create(false);
+
+			return NewDB;
 		}
+
 	}
 }

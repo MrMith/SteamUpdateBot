@@ -55,6 +55,12 @@ namespace SteamUpdateProject.DiscordLogic.Commands
 		{
 			await ctx.TriggerTypingAsync();
 
+			if(await SteamUpdateBot.SteamClient.IsSteamDown())
+			{
+				await ctx.RespondAsync("Steam is down, sucks to suck.");
+				return;
+			}
+
 			DiscordEmbedBuilder embedBuilder = new DiscordEmbedBuilder();
 
 			embedBuilder.Title = $"{await SteamUpdateBot.SteamClient.GetAppName(AppID)} ({AppID})";
@@ -100,6 +106,12 @@ namespace SteamUpdateProject.DiscordLogic.Commands
 		public async Task IDToName(CommandContext ctx, params string[] objects)
 		{
 			await ctx.TriggerTypingAsync();
+
+			if (await SteamUpdateBot.SteamClient.IsSteamDown())
+			{
+				await ctx.RespondAsync("Steam is down, sucks to suck.");
+				return;
+			}
 
 			DiscordEmbedBuilder embedBuilder = new DiscordEmbedBuilder();
 
