@@ -96,7 +96,8 @@ namespace SteamUpdateProject.DiscordLogic
 						}
 						catch (Exception e)
 						{
-							SteamUpdateBot.CustomError("1.0", "Discord", e);
+							if (e is not DSharpPlus.Exceptions.UnauthorizedException) //Bot can get kicked from servers :(
+								SteamUpdateBot.CustomError("1.0", "Discord", e);
 						}
 					}
 					else //Server
@@ -109,7 +110,8 @@ namespace SteamUpdateProject.DiscordLogic
 						}
 						catch (Exception e)
 						{
-							SteamUpdateBot.CustomError("1.1", "Discord", e);
+							if(e is not DSharpPlus.Exceptions.UnauthorizedException) //Bot can get kicked from servers :(
+								SteamUpdateBot.CustomError("1.1", "Discord", e);
 						}
 					}
 				}
@@ -126,11 +128,21 @@ namespace SteamUpdateProject.DiscordLogic
 		{
 			foreach (KeyValuePair<ulong, DiscordGuild> _guildKVP in Client.Guilds)
 			{
-				foreach (DiscordMember _member in await _guildKVP.Value.GetAllMembersAsync())
+				try
 				{
-					if (_member.Id == _memberID)
+					foreach (DiscordMember _member in await _guildKVP.Value.GetAllMembersAsync())
 					{
-						return _member;
+						if (_member.Id == _memberID)
+						{
+							return _member;
+						}
+					}
+				}
+				catch(Exception e)
+				{
+					if (e is DSharpPlus.Exceptions.UnauthorizedException)
+					{
+						Console.WriteLine($"{_guildKVP.Value.Name} is that bastard that doesn't have bot perms set-up correctly.");
 					}
 				}
 			}

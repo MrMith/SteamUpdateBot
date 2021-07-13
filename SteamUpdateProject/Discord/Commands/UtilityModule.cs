@@ -5,6 +5,8 @@ using DSharpPlus.CommandsNext.Attributes;
 using System;
 using System.Collections.Generic;
 using SteamKit2;
+using System.Diagnostics;
+using System.IO;
 
 namespace SteamUpdateProject.DiscordLogic.Commands
 {
@@ -126,10 +128,36 @@ namespace SteamUpdateProject.DiscordLogic.Commands
 			await ctx.RespondAsync(embedBuilder.Build());
 		}
 
+		[Command("forceupdate"), Hidden]
+		public async Task ForceUpdate(CommandContext ctx, params string[] objects)
+		{
+			await ctx.TriggerTypingAsync();
+			
+			if(ctx.User.Id != SteamUpdateBot.OverrideDiscordID)
+			{
+				await ctx.RespondAsync($"You're not authorized to run this command. Die.");
+				return;
+			}
+
+			AppUpdate AppUpdate = new AppUpdate();
+
+			AppUpdate.AppID = 570;
+			AppUpdate.Content = true;
+			AppUpdate.Name = "Dota 2";
+			AppUpdate.DepoName = "public";
+			AppUpdate.ChangeNumber = 0;
+			AppUpdate.LastUpdated = DateTime.UtcNow.AddYears(50);
+
+			SteamUpdateBot.DiscordClient.AppUpdated(AppUpdate);
+
+			await ctx.RespondAsync($"Force updated {AppUpdate.AppID}.");
+		}
+
 		[Command("status"), Description("Shows statistics about updates, if steam is down or ping.")]
 		public async Task Status(CommandContext ctx)
 		{
 			await ctx.TriggerTypingAsync();
+
 			if (SteamUpdateBot.SteamClient == null)
 			{
 				await ctx.RespondAsync($"SteamBot not ready.");
@@ -146,6 +174,28 @@ namespace SteamUpdateProject.DiscordLogic.Commands
 			}
 
 			await ctx.RespondAsync($"Ping: {ctx.Client.Ping}.\nSteam Status: {(steamStatus ? "Online" : "Offline")}.\nTotal updates processed: {SteamUpdateBot.Updates} ({(int)(SteamUpdateBot.Updates / SteamUpdateBot.MinutesRunning)} per minute)\nTotal content updates: {SteamUpdateBot.ContentUpdates}.\nTotal Exceptions: {SteamUpdateBot.Exceptions}\nTotal minutes running: {SteamUpdateBot.MinutesRunning}");
+		}
+
+		[Command("log"), Hidden]
+		public async Task OpenLog(CommandContext ctx)
+		{
+			await ctx.TriggerTypingAsync();
+
+			if (ctx.User.Id != SteamUpdateBot.OverrideDiscordID)
+			{
+				await ctx.RespondAsync($"You're not authorized to run this command. Die.");
+				return;
+			}
+
+			ProcessStartInfo startInfo = new ProcessStartInfo()
+			{
+				Arguments = Directory.GetCurrentDirectory(),
+				FileName = "explorer.exe"
+			};
+
+			Process.Start(startInfo);
+
+			await ctx.RespondAsync("Done.");
 		}
 
 		private List<string> SecretLinks = new List<string>()
