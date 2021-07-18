@@ -9,6 +9,14 @@ namespace SteamUpdateProject
 	{
 		private string _operatingFile = Directory.GetCurrentDirectory() + "//SteamData.data";
 
+		private enum DataEnum
+		{
+			Updates = 0,
+			Content = 1,
+			Exceptions = 2,
+			MinutesRunning = 3
+		}
+
 		/// <summary>
 		/// Writes <see cref="SteamUpdateBot.Updates"/>, <see cref="SteamUpdateBot.ContentUpdates"/>, <see cref="SteamUpdateBot.Exceptions"/> and finally <see cref="SteamUpdateBot.MinutesRunning"/> into <see cref="SteamData.data"/>
 		/// </summary>
@@ -31,37 +39,36 @@ namespace SteamUpdateProject
 			if (!File.Exists(_operatingFile))
 				return;
 
-			using (StreamReader reader = new StreamReader(_operatingFile))
+			using StreamReader reader = new StreamReader(_operatingFile);
+
+			string[] dataByLine = reader.ReadToEnd().Split("\n");
+			for (int i = 0; i <= dataByLine.Length - 1; i++)
 			{
-				string[] dataByLine = reader.ReadToEnd().Split("\n");
-				for (int i = 0; i <= dataByLine.Length - 1; i++)
+				if (!long.TryParse(dataByLine[i], out long number))
+					return;
+
+				switch ((DataEnum)i)
 				{
-					if (long.TryParse(dataByLine[i], out long number))
-					{
-						switch(i)
+					case DataEnum.Updates:
 						{
-							case 0: //Updates
-								{
-									SteamUpdateBot.Updates = number;
-									break;
-								}
-							case 1: //Content Updates
-								{
-									SteamUpdateBot.ContentUpdates = number;
-									break;
-								}
-							case 2: //Exceptions
-								{
-									SteamUpdateBot.Exceptions = number;
-									break;
-								}
-							case 3: //MinutesRunning
-								{
-									SteamUpdateBot.MinutesRunning = number;
-									break;
-								}
+							SteamUpdateBot.Updates = number;
+							break;
 						}
-					}
+					case DataEnum.Content:
+						{
+							SteamUpdateBot.ContentUpdates = number;
+							break;
+						}
+					case DataEnum.Exceptions:
+						{
+							SteamUpdateBot.Exceptions = number;
+							break;
+						}
+					case DataEnum.MinutesRunning:
+						{
+							SteamUpdateBot.MinutesRunning = number;
+							break;
+						}
 				}
 			}
 		}

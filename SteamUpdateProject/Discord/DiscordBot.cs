@@ -68,6 +68,7 @@ namespace SteamUpdateProject.DiscordLogic
 				Title = "Steam App Update!"
 			};
 
+			//If this URL goes down then the bot has more things to worry about than a URL not working.
 			AppEmbed.ImageUrl = app.Name == null ? "https://steamstore-a.akamaihd.net/public/shared/images/header/globalheader_logo.png?t=962016" : "https://steamcdn-a.akamaihd.net/steam/apps/" + app.AppID + "/header.jpg";
 			AppEmbed.AddField("Name", app.Name ?? "Unknown App", true);
 			AppEmbed.AddField("Change Number", app.ChangeNumber == 1 ? "DEBUG TEST UPDATE - IGNORE" : app.ChangeNumber.ToString(), true);

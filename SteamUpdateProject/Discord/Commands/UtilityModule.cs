@@ -23,6 +23,7 @@ namespace SteamUpdateProject.DiscordLogic.Commands
 			if (ctx.User.Id != SteamUpdateBot.OverrideDiscordID)
 			{
 				await ctx.RespondAsync($"You're not authorized to use this command. Only the override user can use this.");
+				return;
 			}
 
 			SteamUpdateBot.DiscordClient.DevOverride = _ov;
@@ -38,6 +39,7 @@ namespace SteamUpdateProject.DiscordLogic.Commands
 			if (ctx.User.Id != SteamUpdateBot.OverrideDiscordID)
 			{
 				await ctx.RespondAsync($"You're not authorized to use this command. Only the override user can use this.");
+				return;
 			}
 
 			await ctx.RespondAsync($"Override is set to {SteamUpdateBot.DiscordClient.DevOverride}.");
