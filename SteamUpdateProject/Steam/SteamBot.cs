@@ -100,30 +100,8 @@ namespace SteamUpdateProject.Steam
 					foreach (var CallBackInfoApps in CallBackInfo.Apps)
 					{
 						KeyValue depotKV = CallBackInfoApps.Value.KeyValues.Children.Find(child => child.Name == "depots");
-						if (depotKV != null && FullProductInfo.IsPublic)
-						{
-							KeyValue allBranchesKV = depotKV["branches"]; //Branches List 
-							if (allBranchesKV != null)
-							{
-								foreach (KeyValue branchKV in allBranchesKV.Children) //One single branch
-								{
-									foreach (KeyValue timeUpdatedKV in branchKV.Children) //Time updated Key value pair (KVP)
-									{
-										if (timeUpdatedKV.Name != "timeupdated")
-											continue;
 
-										TimeSpan t = DateTime.UtcNow - DateTime.UnixEpoch;
-
-										if ((t.TotalSeconds - double.Parse(timeUpdatedKV.Value)) > 10) // Needed because it can take a couple of seconds to go through the steam pipeline.
-											continue;
-
-										AppUpdate.DepoName = branchKV.Name;
-										AppUpdate.Content = true;
-										SteamUpdateBot.ContentUpdates++;
-									}
-								}
-							}
-						}
+						AppUpdate = ParseUpdateInformation(AppUpdate, FullProductInfo.IsPublic, depotKV);
 
 						AppUpdate.LastUpdated = DateTime.UtcNow;
 						AppUpdate.Name = CallBackInfoApps.Value.KeyValues["common"]["name"].AsString();
@@ -149,6 +127,42 @@ namespace SteamUpdateProject.Steam
 				SteamUpdateBot.Updates++;
 				_discordClient.AppUpdated(AppUpdate);
 			}
+		}
+
+		/// <summary>
+		/// See if a KeyValuePair of a steam application update contains information like if its a content update (Aka not store tag updates)
+		/// </summary>
+		/// <param name="AppUpdate">App being updated</param>
+		/// <param name="_isPublic">If this steam application data is public. If false we don't get to know whats happening.</param>
+		/// <param name="_depotKV">Steam application's information</param>
+		/// <returns>AppUpdate with hopefully updated information like which branch updated.</returns>
+		private static AppUpdate ParseUpdateInformation(AppUpdate AppUpdate, bool _isPublic, KeyValue _depotKV)
+		{
+			if (_depotKV == null || !_isPublic)
+				return AppUpdate;
+
+			if (_depotKV["branches"] == null)
+				return AppUpdate;
+
+			foreach (KeyValue branchKV in _depotKV["branches"].Children) //One single branch
+			{
+				foreach (KeyValue timeUpdatedKV in branchKV.Children) //Time updated Key value pair (KVP)
+				{
+					if (timeUpdatedKV.Name != "timeupdated")
+						continue;
+
+					TimeSpan t = DateTime.UtcNow - DateTime.UnixEpoch;
+
+					if ((t.TotalSeconds - double.Parse(timeUpdatedKV.Value)) > 10) // Needed because it can take a couple of seconds to go through the steam pipeline.
+						continue;
+
+					AppUpdate.DepoName = branchKV.Name;
+					AppUpdate.Content = true;
+					SteamUpdateBot.ContentUpdates++;
+				}
+			}
+
+			return AppUpdate;
 		}
 
 		/// <summary>
