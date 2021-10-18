@@ -92,6 +92,27 @@ namespace SteamUpdateProject.DiscordLogic.Commands
 							if (branchData.Name != "timeupdated")
 								continue;
 
+							if(branchKVP.Name == "public")
+							{
+								using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
+								{
+									AppInfo app = context.AllApps.FindLast(SubbedApp => SubbedApp.AppID == AppID);
+
+									var BranchUpdateTime = DateTime.UnixEpoch.AddSeconds(double.Parse(branchData.Value));
+
+									if (app.LastUpdated.Value.Ticks > BranchUpdateTime.Ticks)
+									{
+										app.LastUpdated = BranchUpdateTime;
+
+										context.AppInfoData.RemoveRange(context.AllApps.FindAll(SubbedApp => SubbedApp == app));
+
+
+										context.AppInfoData.Add(app);
+										context.SaveChanges();
+									}
+								}
+							}
+							
 							embedBuilder.AddField($"{branchKVP.Name}", $"Last updated {SteamUpdateBot.DiscordClient.ElapsedTime(DateTime.UnixEpoch.AddSeconds(double.Parse(branchData.Value)))}");
 						}
 					}

@@ -95,6 +95,9 @@ namespace SteamUpdateProject.Steam
 
 				//FullProductInfo = GetFullProductInfo(AppsThatUpdated.Key).Result;
 
+				if (FullProductInfo == null) 
+					continue;
+
 				foreach (var CallBackInfo in FullProductInfo.ProductInfo)
 				{
 					foreach (var CallBackInfoApps in CallBackInfo.Apps)
@@ -207,15 +210,19 @@ namespace SteamUpdateProject.Steam
 			return appInfo.Name;
 		}
 
+		/// <summary>
+		/// If steam is currently working as expected.
+		/// </summary>
+		/// <returns></returns>
 		public async Task<bool> IsSteamDown()
 		{
 			var ProductInfo = await _apps.PICSGetProductInfo(570, null); //570 is Dota 2.
 			if (ProductInfo.Failed)
 			{
-				return false;
+				return true;
 			}
 
-			return ProductInfo.Complete;
+			return !ProductInfo.Complete;
 		}
 
 		public static async Task<ulong> GetAccessToken(uint appid)
@@ -252,7 +259,7 @@ namespace SteamUpdateProject.Steam
 			{
 				try
 				{
-					customProductInfo.ProductInfo = (await SteamUpdateBot.SteamClient._apps.PICSGetProductInfo(appid, null, false, false)).Results;
+					customProductInfo.ProductInfo = (await SteamUpdateBot.SteamClient._apps.PICSGetProductInfo(appid, null, false)).Results;
 					customProductInfo.IsPublic = true;
 				}
 				catch
@@ -266,7 +273,6 @@ namespace SteamUpdateProject.Steam
 				try
 				{
 					request.AccessToken = AccessToken;
-					request.Public = false;
 					customProductInfo.IsPublic = false;
 					customProductInfo.ProductInfo = (await SteamUpdateBot.SteamClient._apps.PICSGetProductInfo(new List<SteamApps.PICSRequest>() { request }, new List<SteamApps.PICSRequest>() { })).Results;
 				}
