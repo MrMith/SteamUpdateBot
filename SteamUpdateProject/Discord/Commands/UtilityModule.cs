@@ -176,7 +176,7 @@ namespace SteamUpdateProject.DiscordLogic.Commands
 			await ctx.RespondAsync($"Force updated {AppUpdate.AppID}.");
 		}
 
-		[Command("status"), Description("Shows statistics about updates, if steam is down or ping.")]
+		[Command("status"), Description("Shows statistics about updates, if steam is down and ping.")]
 		public async Task Status(CommandContext ctx)
 		{
 			await ctx.TriggerTypingAsync();
@@ -185,6 +185,7 @@ namespace SteamUpdateProject.DiscordLogic.Commands
 			{
 				await ctx.RespondAsync($"SteamBot not ready.");
 			}
+
 			bool steamStatus = false;
 
 			try
@@ -196,7 +197,7 @@ namespace SteamUpdateProject.DiscordLogic.Commands
 
 			}
 
-			await ctx.RespondAsync($"Ping: {ctx.Client.Ping}.\nSteam Status: {(steamStatus ? "Online" : "Offline")}.\nTotal updates processed: {SteamUpdateBot.Updates} ({(int)(SteamUpdateBot.Updates / SteamUpdateBot.MinutesRunning)} per minute)\nTotal content updates: {SteamUpdateBot.ContentUpdates}.\nTotal Exceptions: {SteamUpdateBot.Exceptions}\nTotal minutes running: {SteamUpdateBot.MinutesRunning}");
+			await ctx.RespondAsync($"Ping: {ctx.Client.Ping}.\nSteam Status: {(!steamStatus ? "Online" : "Offline")}.\nTotal updates processed: {LoggingAndErrorHandler.Updates} ({(int)(LoggingAndErrorHandler.Updates / LoggingAndErrorHandler.MinutesRunning)} per minute)\nTotal content updates: {LoggingAndErrorHandler.ContentUpdates}.\nTotal Exceptions: {LoggingAndErrorHandler.Exceptions}\nTotal minutes running: {LoggingAndErrorHandler.MinutesRunning}");
 		}
 
 		[Command("log"), Hidden]

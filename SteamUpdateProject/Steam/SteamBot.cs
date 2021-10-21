@@ -89,7 +89,7 @@ namespace SteamUpdateProject.Steam
 				}
 				catch
 				{
-					SteamUpdateBot.CustomError("0.0", "Steam");
+					SteamUpdateBot.LAEH.CustomError(LoggingAndErrorHandler.CustomErrorType.Steam_AppInfoGet, LoggingAndErrorHandler.Platform.Steam);
 					return;
 				}
 
@@ -127,7 +127,7 @@ namespace SteamUpdateProject.Steam
 					}
 				}
 
-				SteamUpdateBot.Updates++;
+				LoggingAndErrorHandler.Updates++;
 				_discordClient.AppUpdated(AppUpdate);
 			}
 		}
@@ -161,7 +161,7 @@ namespace SteamUpdateProject.Steam
 
 					AppUpdate.DepoName = branchKV.Name;
 					AppUpdate.Content = true;
-					SteamUpdateBot.ContentUpdates++;
+					LoggingAndErrorHandler.ContentUpdates++;
 				}
 			}
 
@@ -242,7 +242,7 @@ namespace SteamUpdateProject.Steam
 			}
 			catch
 			{
-				SteamUpdateBot.CustomError("0.1", "Steam");
+				SteamUpdateBot.LAEH.CustomError(LoggingAndErrorHandler.CustomErrorType.Steam_AppInfoToken, LoggingAndErrorHandler.Platform.Steam);
 				return 0;
 			}
 		}
@@ -264,7 +264,7 @@ namespace SteamUpdateProject.Steam
 				}
 				catch
 				{
-					SteamUpdateBot.CustomError("1.0", "Steam");
+					SteamUpdateBot.LAEH.CustomError(LoggingAndErrorHandler.CustomErrorType.Steam_ProductReqNoToken, LoggingAndErrorHandler.Platform.Steam);
 					return null;
 				}
 			}
@@ -278,7 +278,7 @@ namespace SteamUpdateProject.Steam
 				}
 				catch
 				{
-					SteamUpdateBot.CustomError("2.0", "Steam");
+					SteamUpdateBot.LAEH.CustomError(LoggingAndErrorHandler.CustomErrorType.Steam_ProductReqYesToken, LoggingAndErrorHandler.Platform.Steam);
 					return null;
 				}
 			}

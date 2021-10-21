@@ -5,6 +5,7 @@ using DSharpPlus.Entities;
 using DSharpPlus.CommandsNext;
 using System.Collections.Generic;
 using SteamUpdateProject.DiscordLogic.Commands;
+using SteamUpdateProject;
 
 namespace SteamUpdateProject.DiscordLogic
 {
@@ -52,9 +53,9 @@ namespace SteamUpdateProject.DiscordLogic
 
 			if (DateTime.Now > _timeForStatusUpdate)
 			{
-				await Client.UpdateStatusAsync(new DiscordActivity($"Total Steam updates: {SteamUpdateBot.Updates}", ActivityType.Playing));
-				Console.WriteLine("Updated Time: " + SteamUpdateBot.Updates);
-				SteamUpdateBot.MinutesRunning += 5;
+				await Client.UpdateStatusAsync(new DiscordActivity($"Total Steam updates: {LoggingAndErrorHandler.Updates}", ActivityType.Playing));
+				Console.WriteLine("Updated Time: " + LoggingAndErrorHandler.Updates);
+				LoggingAndErrorHandler.MinutesRunning += 5;
 				SteamUpdateBot.MinorDataHandler.WriteData();
 				_timeForStatusUpdate = DateTime.Now.AddMinutes(5);
 			}
@@ -98,7 +99,7 @@ namespace SteamUpdateProject.DiscordLogic
 						catch (Exception e)
 						{
 							if (e is not DSharpPlus.Exceptions.UnauthorizedException) //Bot can get kicked from servers :(
-								SteamUpdateBot.CustomError("1.0", "Discord", e);
+								SteamUpdateBot.LAEH.CustomError(LoggingAndErrorHandler.CustomErrorType.Discord_DM, LoggingAndErrorHandler.Platform.Discord, e);
 						}
 					}
 					else //Server
@@ -112,7 +113,7 @@ namespace SteamUpdateProject.DiscordLogic
 						catch (Exception e)
 						{
 							if(e is not DSharpPlus.Exceptions.UnauthorizedException) //Bot can get kicked from servers :(
-								SteamUpdateBot.CustomError("1.1", "Discord", e);
+								SteamUpdateBot.LAEH.CustomError(LoggingAndErrorHandler.CustomErrorType.Discord_AppUpdate, LoggingAndErrorHandler.Platform.Discord, e);
 						}
 					}
 				}

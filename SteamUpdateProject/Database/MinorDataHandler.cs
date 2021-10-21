@@ -3,7 +3,7 @@
 namespace SteamUpdateProject
 {
 	/// <summary>
-	/// This handles small data like <see cref="SteamUpdateBot.Updates"/>, <see cref="SteamUpdateBot.ContentUpdates"/>, <see cref="SteamUpdateBot.Exceptions"/> and finally <see cref="SteamUpdateBot.MinutesRunning"/> so we can keep track of those small things.
+	/// This handles small data like <see cref="LoggingAndErrorHandler.Updates"/>, <see cref="LoggingAndErrorHandler.ContentUpdates"/>, <see cref="LoggingAndErrorHandler.Exceptions"/> and finally <see cref="LoggingAndErrorHandler.MinutesRunning"/> so we can keep track of those small things.
 	/// </summary>
 	class MinorDataHandler
 	{
@@ -18,21 +18,21 @@ namespace SteamUpdateProject
 		}
 
 		/// <summary>
-		/// Writes <see cref="SteamUpdateBot.Updates"/>, <see cref="SteamUpdateBot.ContentUpdates"/>, <see cref="SteamUpdateBot.Exceptions"/> and finally <see cref="SteamUpdateBot.MinutesRunning"/> into <see cref="SteamData.data"/>
+		/// Writes <see cref="LoggingAndErrorHandler.Updates"/>, <see cref="LoggingAndErrorHandler.ContentUpdates"/>, <see cref="LoggingAndErrorHandler.Exceptions"/> and finally <see cref="LoggingAndErrorHandler.MinutesRunning"/> into <see cref="SteamData.data"/>
 		/// </summary>
 		public void WriteData()
 		{
 			using (StreamWriter writer = new StreamWriter(_operatingFile))
 			{
-				writer.WriteLine(SteamUpdateBot.Updates);
-				writer.WriteLine(SteamUpdateBot.ContentUpdates);
-				writer.WriteLine(SteamUpdateBot.Exceptions);
-				writer.WriteLine(SteamUpdateBot.MinutesRunning);
+				writer.WriteLine(LoggingAndErrorHandler.Updates);
+				writer.WriteLine(LoggingAndErrorHandler.ContentUpdates);
+				writer.WriteLine(LoggingAndErrorHandler.Exceptions);
+				writer.WriteLine(LoggingAndErrorHandler.MinutesRunning);
 			}
 		}
 
 		/// <summary>
-		/// Read contents of SteamData.data and updates <see cref="SteamUpdateBot.Updates"/>, <see cref="SteamUpdateBot.ContentUpdates"/>, <see cref="SteamUpdateBot.Exceptions"/> and finally <see cref="SteamUpdateBot.MinutesRunning"/>
+		/// Read contents of SteamData.data and updates <see cref="LoggingAndErrorHandler.Updates"/>, <see cref="LoggingAndErrorHandler.ContentUpdates"/>, <see cref="LoggingAndErrorHandler.Exceptions"/> and finally <see cref="LoggingAndErrorHandler.MinutesRunning"/>
 		/// </summary>
 		public void ReadData()
 		{
@@ -51,22 +51,22 @@ namespace SteamUpdateProject
 				{
 					case DataEnum.Updates:
 						{
-							SteamUpdateBot.Updates = number;
+							LoggingAndErrorHandler.Updates = number;
 							break;
 						}
 					case DataEnum.Content:
 						{
-							SteamUpdateBot.ContentUpdates = number;
+							LoggingAndErrorHandler.ContentUpdates = number;
 							break;
 						}
 					case DataEnum.Exceptions:
 						{
-							SteamUpdateBot.Exceptions = number;
+							LoggingAndErrorHandler.Exceptions = number;
 							break;
 						}
 					case DataEnum.MinutesRunning:
 						{
-							SteamUpdateBot.MinutesRunning = number;
+							LoggingAndErrorHandler.MinutesRunning = number;
 							break;
 						}
 				}
