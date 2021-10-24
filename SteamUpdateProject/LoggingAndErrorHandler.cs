@@ -44,21 +44,12 @@ namespace SteamUpdateProject
 		/// <param name="e">Exception that makes me cry</param>
 		public void LogCancer(Exception e)
 		{
-			if (e is System.Threading.Tasks.TaskCanceledException || e is System.Net.WebSockets.WebSocketException || e is DSharpPlus.Exceptions.ServerErrorException)
+			if (e is System.Threading.Tasks.TaskCanceledException || e is System.Net.WebSockets.WebSocketException || e is DSharpPlus.Exceptions.ServerErrorException || e is SteamKit2.AsyncJobFailedException)
 				return;
 
 			if (e is IOException)
 			{
-				Console.WriteLine(e.InnerException);
-				Console.WriteLine(e.Message);
-				Console.WriteLine();
-				Console.WriteLine();
 				Console.WriteLine(e.StackTrace);
-				Console.WriteLine();
-				Console.WriteLine();
-				Console.WriteLine(e.Source?.ToString());
-				Console.WriteLine(e.TargetSite?.ToString());
-				Console.WriteLine();
 				Console.WriteLine();
 				return;
 			}
@@ -69,22 +60,11 @@ namespace SteamUpdateProject
 
 				using (StreamWriter sw = new StreamWriter(Directory.GetCurrentDirectory() + $"//logs//log{GetFormattedDate()}.txt"))
 				{
-					sw.WriteLine(e.InnerException);
-					sw.WriteLine(e.Message);
-					sw.WriteLine();
-					sw.WriteLine();
 					sw.WriteLine(e.StackTrace);
 					sw.WriteLine();
-					sw.WriteLine(e.GetBaseException());
-					sw.WriteLine();
-					sw.WriteLine(e.ToString());
-					sw.WriteLine();
-					sw.WriteLine(e.Source?.ToString());
-					sw.WriteLine(e.TargetSite?.ToString());
-					sw.WriteLine();
+					sw.WriteLine((e is DSharpPlus.Exceptions.UnauthorizedException) ? (e as DSharpPlus.Exceptions.UnauthorizedException).JsonMessage : "");
 					sw.WriteLine();
 				}
-
 			}
 			catch
 			{

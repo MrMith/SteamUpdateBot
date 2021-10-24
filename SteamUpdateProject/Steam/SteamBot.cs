@@ -230,11 +230,9 @@ namespace SteamUpdateProject.Steam
 			if (!SteamUpdateBot.DiscordClient.IsAppSubscribed(appid))
 				return 0; //This helps with rate limiting.
 
-			SteamApps.PICSTokensCallback AppTokenInfo;
-
 			try
 			{
-				AppTokenInfo = await SteamUpdateBot.SteamClient._apps.PICSGetAccessTokens(appid, null);
+				SteamApps.PICSTokensCallback AppTokenInfo = await SteamUpdateBot.SteamClient._apps.PICSGetAccessTokens(appid, null);
 
 				if (AppTokenInfo.AppTokensDenied.Contains(appid) || !AppTokenInfo.AppTokens.ContainsKey(appid)) return 0;
 
@@ -286,6 +284,7 @@ namespace SteamUpdateProject.Steam
 		}
 
 		#region CodeThat100PercentIsntFromOtherProjects👀
+		//All code that is either boilerplate or I haven't written myself.
 		void OnConnected(SteamClient.ConnectedCallback callback)
 		{
 			Console.WriteLine("Connected to Steam! Logging in '{0}'...", _user);

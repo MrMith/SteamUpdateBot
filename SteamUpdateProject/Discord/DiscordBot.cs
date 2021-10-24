@@ -100,6 +100,12 @@ namespace SteamUpdateProject.DiscordLogic
 						{
 							if (e is not DSharpPlus.Exceptions.UnauthorizedException) //Bot can get kicked from servers :(
 								SteamUpdateBot.LAEH.CustomError(LoggingAndErrorHandler.CustomErrorType.Discord_DM, LoggingAndErrorHandler.Platform.Discord, e);
+							//else if((e as DSharpPlus.Exceptions.UnauthorizedException).JsonMessage == "Missing Access")
+							//{
+								//context.GuildInformation.RemoveRange(context.AllGuilds.FindAll(guild => guild == ServerInfo));
+								//context.SaveChanges();
+								//SteamUpdateBot.LAEH.LogCancer(e);
+							//}
 						}
 					}
 					else //Server
@@ -112,8 +118,14 @@ namespace SteamUpdateProject.DiscordLogic
 						}
 						catch (Exception e)
 						{
-							if(e is not DSharpPlus.Exceptions.UnauthorizedException) //Bot can get kicked from servers :(
+							if (e is not DSharpPlus.Exceptions.UnauthorizedException) //Bot can get kicked from servers :(
 								SteamUpdateBot.LAEH.CustomError(LoggingAndErrorHandler.CustomErrorType.Discord_AppUpdate, LoggingAndErrorHandler.Platform.Discord, e);
+							else if((e as DSharpPlus.Exceptions.UnauthorizedException).JsonMessage == "Missing Access")
+							{
+								context.GuildInformation.RemoveRange(context.AllGuilds.FindAll(guild => guild == ServerInfo));
+								context.SaveChanges();
+								SteamUpdateBot.LAEH.LogCancer(e);
+							}
 						}
 					}
 				}
