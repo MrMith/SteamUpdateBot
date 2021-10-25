@@ -7,7 +7,7 @@ using DSharpPlus.Entities;
 namespace SteamUpdateProject.DiscordLogic.Commands
 {
 	/// <summary>
-	/// Generic help command from DSharpPlus. To-Do: rewrite to not be hardcoded.
+	/// Generic help command from DSharpPlus. Lists all of the commands.
 	/// </summary>
 	public class CustomHelpFormatter : BaseHelpFormatter
 	{

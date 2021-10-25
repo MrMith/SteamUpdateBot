@@ -26,6 +26,9 @@ namespace SteamUpdateProject
 			.WillCascadeOnDelete(true);
 		}
 
+		/// <summary>
+		/// Returning this as a list seems to help with getting less errors so I think its worth to keep the extra headache.
+		/// </summary>
 		public List<AppInfo> AllApps
 		{
 			get
@@ -33,7 +36,10 @@ namespace SteamUpdateProject
 				return new List<AppInfo>(this.AppInfoData);
 			}
 		}
-		
+
+		/// <summary>
+		/// Returning this as a list seems to help with getting less errors so I think its worth to keep the extra headache.
+		/// </summary>
 		public List<GuildInfo> AllGuilds
 		{
 			get

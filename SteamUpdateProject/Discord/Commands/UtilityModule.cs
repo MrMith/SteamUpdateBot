@@ -168,7 +168,7 @@ namespace SteamUpdateProject.DiscordLogic.Commands
 			AppUpdate.Content = true;
 			AppUpdate.Name = "Dota 2";
 			AppUpdate.DepoName = "public";
-			AppUpdate.ChangeNumber = 0;
+			AppUpdate.ChangeNumber = 1;
 			AppUpdate.LastUpdated = DateTime.UtcNow.AddYears(50);
 
 			SteamUpdateBot.DiscordClient.AppUpdated(AppUpdate);
@@ -194,7 +194,7 @@ namespace SteamUpdateProject.DiscordLogic.Commands
 			}
 			catch
 			{
-
+				//cope and seethe
 			}
 
 			await ctx.RespondAsync($"Ping: {ctx.Client.Ping}.\nSteam Status: {(!steamStatus ? "Online" : "Offline")}.\nTotal updates processed: {LoggingAndErrorHandler.Updates} ({(int)(LoggingAndErrorHandler.Updates / LoggingAndErrorHandler.MinutesRunning)} per minute)\nTotal content updates: {LoggingAndErrorHandler.ContentUpdates}.\nTotal Exceptions: {LoggingAndErrorHandler.Exceptions}\nTotal minutes running: {LoggingAndErrorHandler.MinutesRunning}");

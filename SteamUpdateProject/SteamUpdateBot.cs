@@ -8,7 +8,7 @@ namespace SteamUpdateProject
 {
 	/*
 	 * To-Do
-	 * 1. Fucking Shards, How Do They Work? 
+	 * 1. Add json based config system so I don't have to fuck about with args.
 	 * 2. Queue system for Steam ratelimiting
 	 * 3. Queue system for Discord ratelimiting (Might be included in DSharpPlus?)
 	 * 4. Select comp seems pog
@@ -34,6 +34,7 @@ namespace SteamUpdateProject
 		public static ulong OverrideDiscordID = 0;
 
 		/// <summary>
+		/// arguments are the following based on index:
 		/// 0 = Steam account username
 		/// 1 = Steam account password
 		/// 2 = Discord bot token

@@ -9,6 +9,9 @@ using SteamUpdateProject.DiscordLogic;
 
 namespace SteamUpdateProject.Steam
 {
+	/// <summary>
+	/// This class handles everything related to talking to Steam™ and using SteamKit2™.
+	/// </summary>
 	class SteamBot
 	{
 		private readonly DiscordBot _discordClient;

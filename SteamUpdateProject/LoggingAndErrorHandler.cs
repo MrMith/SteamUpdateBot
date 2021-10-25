@@ -6,6 +6,9 @@ using System.Runtime.ExceptionServices;
 
 namespace SteamUpdateProject
 {
+	/// <summary>
+	/// This class handles any errors and then logging said errors to give a easier time when debugging.
+	/// </summary>
 	class LoggingAndErrorHandler
 	{
 		/// Total number of exceptions :)
@@ -103,5 +106,4 @@ namespace SteamUpdateProject
 			return DateTime.UtcNow.ToString("yyyy-dd-M--HH-mm-ss");
 		}
 	}
-
 }

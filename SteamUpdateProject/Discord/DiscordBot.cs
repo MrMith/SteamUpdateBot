@@ -10,7 +10,7 @@ using SteamUpdateProject;
 namespace SteamUpdateProject.DiscordLogic
 {
 	/// <summary>
-	/// This runs all of the discord bot logic like logging in and sending messages for when an app updates.
+	/// This handles everything related to the discord-side of the bot and some minor utility methods.
 	/// </summary>
 	class DiscordBot
 	{
@@ -51,7 +51,7 @@ namespace SteamUpdateProject.DiscordLogic
 
 			Console.WriteLine($"AppUpdated: {app.AppID} {(app.Content ? "(Content)" : "")}");
 
-			if (DateTime.Now > _timeForStatusUpdate)
+			if (DateTime.Now > _timeForStatusUpdate) ///Update status of bot on discord, update time running and save data relating to <see cref="MinorDataHandler"/>.
 			{
 				await Client.UpdateStatusAsync(new DiscordActivity($"Total Steam updates: {LoggingAndErrorHandler.Updates}", ActivityType.Playing));
 				Console.WriteLine("Updated Time: " + LoggingAndErrorHandler.Updates);
@@ -86,9 +86,9 @@ namespace SteamUpdateProject.DiscordLogic
 			{
 				foreach (GuildInfo ServerInfo in context.AllGuilds)
 				{
-					if (!ServerInfo.SubscribedApps.Exists(ExistingApp => ExistingApp.AppID == app.AppID) && !ServerInfo.DebugMode) continue;
-					if (!app.Content && !ServerInfo.ShowContent && !ServerInfo.DebugMode) continue;
-					if (app.DepoName != null && ServerInfo.PublicDepoOnly && app.DepoName != "public") continue;
+					if (!ServerInfo.SubscribedApps.Exists(ExistingApp => ExistingApp.AppID == app.AppID) && !ServerInfo.DebugMode) continue; //If guild isn't subscribed to given app.
+					if (!app.Content && !ServerInfo.ShowContent && !ServerInfo.DebugMode) continue; //If app has content updates (files changed) and guild has option to show only content updates.
+					if (app.DepoName != null && ServerInfo.PublicDepoOnly && app.DepoName != "public") continue; //If guild has option to show only public (main default steam branch) updates or any update.
 					if (ServerInfo.GuildID == 0) //DMs
 					{
 						try
