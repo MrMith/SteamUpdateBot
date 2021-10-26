@@ -147,7 +147,7 @@ namespace SteamUpdateProject.DiscordLogic.Commands
 					embedBuilder.AddField(AppID.ToString(), await SteamUpdateBot.SteamClient.GetAppName(AppID));
 				}
 			}
-
+			
 			await ctx.RespondAsync(embedBuilder.Build());
 		}
 

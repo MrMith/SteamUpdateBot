@@ -13,6 +13,17 @@ namespace SteamUpdateProject.DiscordLogic.Commands
 	{
 		protected DiscordEmbedBuilder HelpBuilder;
 
+		private Dictionary<string, string> GodHasLeftUs = new Dictionary<string, string>()
+		{
+			{"sub","<AppID> or <AppID1 AppID2> `**`" },
+			{"del","<AppID> or <AppID1 AppID2> `**`" },
+			{"name","<AppID> or <AppID1 AppID2>" },
+			{"branches","<AppID>" },
+			{"showall","<True/False> `**`" },
+			{"debug","<True/False> `**`" },
+			{"public","<True/False> `**`" },
+		};
+
 		public CustomHelpFormatter(CommandContext ctx) : base(ctx)
 		{
 			HelpBuilder = new DiscordEmbedBuilder() { Title = "Help Command" };
@@ -33,10 +44,9 @@ namespace SteamUpdateProject.DiscordLogic.Commands
 				if (cmd.Description == null || cmd.Name == "help") //Help
 					continue;
 
-				HelpBuilder.AddField($"{Context.Prefix}{cmd.Name}", cmd.Description);
+				HelpBuilder.AddField($"{Context.Prefix}{cmd.Name} {(GodHasLeftUs.ContainsKey(cmd.Name) ? GodHasLeftUs[cmd.Name] : "")}", cmd.Description);
 			}
-
-
+			HelpBuilder.AddField("**[NOTICE]**", "Commands with `**` are limited to anyone with Admin, Manage Channels or All permissions.");
 			return this;
 		}
 

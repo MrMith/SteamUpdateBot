@@ -212,7 +212,7 @@ namespace SteamUpdateProject.DiscordLogic.Commands
 			await ctx.RespondAsync(embed: embedBuilder.Build());
 		}
 
-		[Command("showall"), Aliases("all"), Description("Do we show only content changes (Content as in downloadable updates)")]
+		[Command("showall"), Aliases("all"), Description("Do we show only content changes (Content as in file changes for the steam application)")]
 		public async Task ShowContent(CommandContext ctx)
 		{
 			await ctx.TriggerTypingAsync();
