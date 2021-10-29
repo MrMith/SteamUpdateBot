@@ -319,7 +319,7 @@ namespace SteamUpdateProject.DiscordLogic.Commands
 			{
 				using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
 				{
-					context.AllGuilds.FindAll(guild => guild == GuildInfo);
+					context.GuildInformation.RemoveRange(context.AllGuilds.FindAll(guild => guild == GuildInfo));
 					GuildInfo.PublicDepoOnly = Set;
 					context.GuildInformation.Add(GuildInfo);
 					context.SaveChanges();

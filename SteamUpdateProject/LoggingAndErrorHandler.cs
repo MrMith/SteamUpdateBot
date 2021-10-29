@@ -65,6 +65,21 @@ namespace SteamUpdateProject
 				{
 					sw.WriteLine(e.StackTrace);
 					sw.WriteLine();
+					sw.WriteLine();
+					sw.WriteLine(e.InnerException);
+					sw.WriteLine();
+					sw.WriteLine();
+					sw.WriteLine(e.GetBaseException());
+					sw.WriteLine();
+					sw.WriteLine();
+					sw.WriteLine(e.Message);
+					sw.WriteLine();
+					sw.WriteLine();
+					sw.WriteLine(e.Source);
+					sw.WriteLine();
+					sw.WriteLine();
+					sw.WriteLine(e.TargetSite);
+					sw.WriteLine();
 					sw.WriteLine((e is DSharpPlus.Exceptions.UnauthorizedException) ? (e as DSharpPlus.Exceptions.UnauthorizedException).JsonMessage : "");
 					sw.WriteLine();
 				}
