@@ -1,5 +1,4 @@
 ﻿using System;
-using SteamUpdateProject.DiscordLogic;
 using SteamUpdateProject.Steam;
 using System.IO;
 using System.Runtime.ExceptionServices;
@@ -23,7 +22,7 @@ namespace SteamUpdateProject
 		public void FirstChanceHandler(object sender, FirstChanceExceptionEventArgs e)
 		{
 			Exceptions++;
-			LogCancer(e.Exception);
+			BadlyFormattedFunction(e.Exception);
 		}
 
 		/// <summary>
@@ -45,7 +44,7 @@ namespace SteamUpdateProject
 		/// This is my primary logging function to try and understand what breaks and when it does so.
 		/// </summary>
 		/// <param name="e">Exception that makes me cry</param>
-		public void LogCancer(Exception e)
+		public void BadlyFormattedFunction(Exception e)
 		{
 			if (e is System.Threading.Tasks.TaskCanceledException || e is System.Net.WebSockets.WebSocketException || e is DSharpPlus.Exceptions.ServerErrorException || e is SteamKit2.AsyncJobFailedException)
 				return;

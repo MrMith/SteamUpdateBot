@@ -1,12 +1,12 @@
 ﻿using System;
-using SteamUpdateProject.DiscordLogic;
 using SteamUpdateProject.Steam;
 using System.IO;
 using System.Runtime.ExceptionServices;
+using SteamUpdateProject.Discord;
 
 namespace SteamUpdateProject
 {
-	/*
+    /*
 	 * To-Do
 	 * 1. Add json based config system so I don't have to fuck about with args.
 	 * 2. Queue system for Steam ratelimiting
@@ -14,15 +14,21 @@ namespace SteamUpdateProject
 	 * 4. Select comp seems pog
 	 */
 
-	/// <summary>
-	/// Main logic that handles the steam bot, discord bot and managing the database.
-	/// </summary>
-	class SteamUpdateBot
+    /// <summary>
+    /// Main logic that handles the steam bot, discord bot and managing the database.
+    /// </summary>
+    class SteamUpdateBot
 	{
 		public static DiscordBot DiscordClient;
 		public static SteamBot SteamClient;
+		/// <summary>
+		/// SQL Server Management Objects Handler.
+		/// </summary>
 		public static SMOHandler SMOHandler;
 		public static MinorDataHandler MinorDataHandler;
+		/// <summary>
+		/// Logging and Error Handler.
+		/// </summary>
 		public static LoggingAndErrorHandler LAEH;
 
 		private static SQLDataBase _dataBase;
@@ -64,7 +70,8 @@ namespace SteamUpdateProject
 			MinorDataHandler = new MinorDataHandler();
 			MinorDataHandler.ReadData();
 
-			if (!Directory.Exists(LogPath)) Directory.CreateDirectory(LogPath);
+			if (!Directory.Exists(LogPath))
+				Directory.CreateDirectory(LogPath);
 
 			DiscordClient = new DiscordBot();
 			DiscordClient.StartDiscordBot(args[2]).GetAwaiter().GetResult();
