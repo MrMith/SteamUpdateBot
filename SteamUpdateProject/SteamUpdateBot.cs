@@ -7,7 +7,6 @@ namespace SteamUpdateProject
 {
 	/*
 	 * To-Do
-	 * 1. Add json based config system
 	 * 2. Queue system for Steam ratelimiting
 	 * 3. Queue system for Discord ratelimiting (Might be included in DSharpPlus?)
 	 */
@@ -65,11 +64,7 @@ namespace SteamUpdateProject
 		private static SQLDataBase _dataBase;
 
 		/// <summary>
-		/// arguments are the following based on index:
-		/// 0 = Steam account username
-		/// 1 = Steam account password
-		/// 2 = Discord bot token
-		/// 3 = Override discord user ID (Not required)
+        /// Main entry for the program. It all goes downhill.
 		/// </summary>
 		public static void Main()
 		{
@@ -88,11 +83,13 @@ namespace SteamUpdateProject
 			#endregion
 
 			#region Bot Starts, Logging and Main While thread.
+
 			LAEH = new LoggingAndErrorHandler();
 			AppDomain.CurrentDomain.FirstChanceException += LAEH.FirstChanceHandler;
 
 			MinorDataHandler = new MinorDataHandler();
 			MinorDataHandler.ReadData();
+
 			var Config = MinorDataHandler.GetConfig();
 
 			if (!Directory.Exists(LogPath))

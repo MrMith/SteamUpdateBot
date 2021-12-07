@@ -103,26 +103,25 @@ namespace SteamUpdateProject.Steam
                     return;
                 }
 
-                //FullProductInfo = GetFullProductInfo(AppsThatUpdated.Key).Result;
-
                 if (FullProductInfo == null)
                     continue;
 
+                //Go through steam applications information that we've gathered.
                 foreach (var CallBackInfo in FullProductInfo.ProductInfo)
                 {
+                    //Goes through the apps in the product info (This is because you can go through packages which could contain multiple apps but in this case we typically dont)
                     foreach (var CallBackInfoApps in CallBackInfo.Apps)
                     {
+                        //Get Depos (Where the downloadable content is)
                         KeyValue depotKV = CallBackInfoApps.Value.KeyValues.Children.Find(child => child.Name == "depots");
 
                         AppUpdate = ParseUpdateInformation(AppUpdate, FullProductInfo.IsPublic, depotKV);
 
                         AppUpdate.LastUpdated = DateTime.UtcNow;
                         AppUpdate.Name = CallBackInfoApps.Value.KeyValues["common"]["name"].AsString();
-                        //Console.WriteLine(AppUpdate.Content ? "Content Update for " + AppUpdate.AppID : "Update for " + AppUpdate.AppID);
 
                         using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
                         {
-
                             context.AppInfoData.RemoveRange(context.AllApps.FindAll(SubbedApp => SubbedApp == AppUpdate));
 
                             AppInfo appinfo = new AppInfo()
@@ -152,7 +151,6 @@ namespace SteamUpdateProject.Steam
         /// <returns>AppUpdate with hopefully updated information like which branch updated.</returns>
         private static AppUpdate ParseUpdateInformation(AppUpdate AppUpdate, bool _isPublic, KeyValue _depotKV)
         {
-
             if (_depotKV == null || !_isPublic)
                 return AppUpdate;
 
@@ -187,7 +185,6 @@ namespace SteamUpdateProject.Steam
         /// <returns>Steam Application's name for given appid.</returns>
         public async Task<string> GetAppName(uint appid)
         {
-
             AppInfo CachedInfo = DiscordBot.GetCachedAppInfo(appid, true);
 
             if (CachedInfo != null)
