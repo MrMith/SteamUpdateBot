@@ -28,11 +28,11 @@ namespace SteamUpdateProject.Steam
         public CallbackManager Manager;
         public bool IsRunning;
 
-        public SteamBot(string[] args, DiscordBot bot)
+        public SteamBot(string Name, string Password, DiscordBot bot)
         {
             _discordClient = bot;
-            _user = args[0];
-            _pass = args[1];
+            _user = Name;
+            _pass = Password;
             _steamClient = new SteamClient();
 
             _steamUser = _steamClient.GetHandler<SteamUser>();

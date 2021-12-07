@@ -1,4 +1,7 @@
 ﻿using System.IO;
+using Newtonsoft.Json;
+using Newtonsoft;
+using System.Text;
 
 namespace SteamUpdateProject
 {
@@ -71,6 +74,41 @@ namespace SteamUpdateProject
                         }
                 }
             }
+        }
+
+        public ConfigJson GetConfig()
+        {
+            var ConfigJson = "";
+
+            using (var fs = File.OpenRead("config.json"))
+
+            using (var sr = new StreamReader(fs, new UTF8Encoding(false)))
+                ConfigJson = sr.ReadToEnd();
+
+            ConfigJson cfgjson = JsonConvert.DeserializeObject<ConfigJson>(ConfigJson);
+
+            if (cfgjson.DevOverride == null)
+                cfgjson.DevOverride = "0";
+
+            return cfgjson;
+        }
+
+        public struct ConfigJson
+        {
+            [JsonProperty("token")]
+            public string Token { get; private set; }
+
+            [JsonProperty("prefix")]
+            public string CommandPrefix { get; private set; }
+
+            [JsonProperty("steamname")]
+            public string SteamName { get; private set; }
+
+            [JsonProperty("steampw")]
+            public string SteamPassword { get; private set; }
+
+            [JsonProperty("override")]
+            public string DevOverride { get; set; }
         }
     }
 }

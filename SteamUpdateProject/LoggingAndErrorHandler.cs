@@ -11,11 +11,11 @@ namespace SteamUpdateProject
     {
         /// Total number of exceptions
         public static long Exceptions = 0;
-        /// Total number of apps with detectable content filled updates (Basically if its not a store tag change and its public.)
+        /// Total number of apps with detectable content changes.
         public static long ContentUpdates = 0;
-        /// Total number of app updates
+        /// Total number of app updates.
         public static long Updates = 0;
-        /// Total number of minutes this program as been 
+        /// Total number of minutes this program as been running.
         public static long MinutesRunning = 0;
 
         public void FirstChanceHandler(object sender, FirstChanceExceptionEventArgs e)
@@ -63,18 +63,13 @@ namespace SteamUpdateProject
                 {
                     sw.WriteLine(e.StackTrace);
                     sw.WriteLine();
-                    sw.WriteLine();
                     sw.WriteLine(e.InnerException);
-                    sw.WriteLine();
                     sw.WriteLine();
                     sw.WriteLine(e.GetBaseException());
                     sw.WriteLine();
-                    sw.WriteLine();
                     sw.WriteLine(e.Message);
                     sw.WriteLine();
-                    sw.WriteLine();
                     sw.WriteLine(e.Source);
-                    sw.WriteLine();
                     sw.WriteLine();
                     sw.WriteLine(e.TargetSite);
                     sw.WriteLine();
