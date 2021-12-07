@@ -1,5 +1,5 @@
-﻿using System;
-using Microsoft.SqlServer.Management.Smo;
+﻿using Microsoft.SqlServer.Management.Smo;
+using System;
 
 namespace SteamUpdateProject
 {
@@ -7,9 +7,16 @@ namespace SteamUpdateProject
     /// This handles everything related to SMO aka SQL Server Management Objects.
     /// See this for more reading -> https://docs.microsoft.com/en-us/sql/relational-databases/server-management-objects-smo/overview-smo?view=sql-server-ver15
     /// </summary>
-    class SMOHandler
+    internal class SMOHandler
     {
+        /// <summary>
+        /// Current Server Management Object Database.
+        /// </summary>
         public Database SMODatabase;
+
+        /// <summary>
+        /// The main SQL Server Management Object.
+        /// </summary>
         public Server SMOServer;
 
         public SMOHandler()

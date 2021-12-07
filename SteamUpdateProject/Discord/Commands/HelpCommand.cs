@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
-using DSharpPlus.CommandsNext;
+﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Converters;
 using DSharpPlus.CommandsNext.Entities;
 using DSharpPlus.Entities;
+using System.Collections.Generic;
 
 namespace SteamUpdateProject.Discord.Commands
 {
@@ -13,7 +13,7 @@ namespace SteamUpdateProject.Discord.Commands
     {
         protected DiscordEmbedBuilder HelpBuilder;
 
-        private Dictionary<string, string> GodHasLeftUs = new Dictionary<string, string>()
+        private readonly Dictionary<string, string> GodHasLeftUs = new Dictionary<string, string>()
         {
             {"sub","<AppID> or <AppID1 AppID2> `**`" },
             {"del","<AppID> or <AppID1 AppID2> `**`" },

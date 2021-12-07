@@ -9,12 +9,28 @@ namespace SteamUpdateProject.Entities
     /// </summary>
     public class AppInfo : IEquatable<AppInfo>
     {
+        /// <summary>
+        /// Key used by the Database, don't touch!
+        /// </summary>
         [Key]
         public int Key { get; set; }
+
+        /// <summary>
+        /// Steam Application ID.
+        /// </summary>
         public long AppID { get; set; }
+
+        /// <summary>
+        /// Steam Application Name.
+        /// </summary>
         public string Name { get; set; }
+
+        /// <summary>
+        /// Last time (In Seattle time since that where Valve HQ is at) this app was updated.
+        /// </summary>
         public DateTime? LastUpdated { get; set; }
 
+        #region Equality Methods.
         public override bool Equals(object obj)
         {
             return Equals(obj as AppInfo);
@@ -40,5 +56,6 @@ namespace SteamUpdateProject.Entities
         {
             return !(left == right);
         }
+        #endregion
     }
 }

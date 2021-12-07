@@ -1,21 +1,21 @@
-﻿using System.Threading.Tasks;
-using DSharpPlus.Entities;
-using DSharpPlus.CommandsNext;
+﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
+using DSharpPlus.Entities;
+using SteamKit2;
+using SteamUpdateProject.Entities;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using SteamKit2;
 using System.Diagnostics;
 using System.IO;
-using SteamUpdateProject.Entities;
+using System.Threading.Tasks;
 
 namespace SteamUpdateProject.Discord.Commands
 {
     /// <summary>
     /// This Module contains commands that are just extra utility like a steam app's name or their branches and when they updated.
     /// </summary>
-    class UtilityModule : BaseCommandModule
+    internal class UtilityModule : BaseCommandModule
     {
         [Command("devoverride"), Hidden]
         public async Task Devoverride(CommandContext ctx, bool _ov)

@@ -5,9 +5,9 @@ namespace SteamUpdateProject
     /// <summary>
     /// This handles small data like <see cref="LoggingAndErrorHandler.Updates"/>, <see cref="LoggingAndErrorHandler.ContentUpdates"/>, <see cref="LoggingAndErrorHandler.Exceptions"/> and finally <see cref="LoggingAndErrorHandler.MinutesRunning"/> so we can keep track of those small things.
     /// </summary>
-    class MinorDataHandler
+    internal class MinorDataHandler
     {
-        private string _operatingFile = Directory.GetCurrentDirectory() + "//SteamData.data";
+        private readonly string _operatingFile = Directory.GetCurrentDirectory() + "//SteamData.data";
 
         private enum DataEnum
         {

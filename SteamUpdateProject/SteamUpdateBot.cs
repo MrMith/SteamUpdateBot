@@ -1,91 +1,115 @@
-﻿using System;
+﻿using SteamUpdateProject.Discord;
 using SteamUpdateProject.Steam;
+using System;
 using System.IO;
-using System.Runtime.ExceptionServices;
-using SteamUpdateProject.Discord;
 
 namespace SteamUpdateProject
 {
     /*
 	 * To-Do
-	 * 1. Add json based config system so I don't have to fuck about with args.
+	 * 1. Add json based config system
 	 * 2. Queue system for Steam ratelimiting
 	 * 3. Queue system for Discord ratelimiting (Might be included in DSharpPlus?)
-	 * 4. Select comp seems pog
 	 */
 
     /// <summary>
     /// Main logic that handles the steam bot, discord bot and managing the database.
     /// </summary>
-    class SteamUpdateBot
-	{
+    internal class SteamUpdateBot
+    {
+        /// <summary>
+        /// Main discord bot that we can talk to.
+        /// </summary>
 		public static DiscordBot DiscordClient;
+
+        /// <summary>
+        /// Main Steam bot that we talk to and listen for any updates on.
+        /// </summary>
 		public static SteamBot SteamClient;
-		/// <summary>
-		/// SQL Server Management Objects Handler.
-		/// </summary>
-		public static SMOHandler SMOHandler;
+
+        /// <summary>
+        /// SQL Server Management Objects Handler.
+        /// </summary>
+        public static SMOHandler SMOHandler;
+
+        /// <summary>
+        /// Handles minor data for the bot overall like total updates, time running ect.
+        /// </summary>
 		public static MinorDataHandler MinorDataHandler;
-		/// <summary>
-		/// Logging and Error Handler.
-		/// </summary>
-		public static LoggingAndErrorHandler LAEH;
 
-		private static SQLDataBase _dataBase;
-		public static bool FirstStartUp = true;
+        /// <summary>
+        /// Logging and Error Handler.
+        /// </summary>
+        public static LoggingAndErrorHandler LAEH;
 
+        /// <summary>
+        /// Main path to logs.
+        /// </summary>
 		public static string LogPath = Directory.GetCurrentDirectory() + "\\logs\\";
+
+        /// <summary>
+        /// Connection String for our database.
+        /// </summary>
 		public static string ConnectionString = $"Integrated Security=true;";
-		public static string DatabaseDirectory = $"{Directory.GetCurrentDirectory()}\\database";
-		public static ulong OverrideDiscordID = 0;
 
-		/// <summary>
-		/// arguments are the following based on index:
-		/// 0 = Steam account username
-		/// 1 = Steam account password
-		/// 2 = Discord bot token
-		/// 3 = Override discord user ID (Not required)
-		/// </summary>
-		/// <param name="args"></param>
-		public static void Main(string[] args)
-		{
-			#region Database start
-			SMOHandler = new SMOHandler();
+        /// <summary>
+        /// Where the Database is located at on the drive.
+        /// </summary>
+        public static string DatabaseDirectory = $"{Directory.GetCurrentDirectory()}\\database";
 
-			ConnectionString += $"Database={SMOHandler.SMODatabase.Name}";
+        /// <summary>
+        /// Discord User ID that we use to override any channel permissions, needs <see cref="DiscordBot.DevOverride"/> to be true before it will check this.
+        /// </summary>
+        public static ulong OverrideDiscordID = 0;
 
-			_dataBase = new SQLDataBase(ConnectionString);
+        private static SQLDataBase _dataBase;
 
-			if (!File.Exists($"{DatabaseDirectory}\\SteamInformation.mdf"))
-			{
-				_dataBase.Database.CreateIfNotExists();
-			}
+        /// <summary>
+        /// arguments are the following based on index:
+        /// 0 = Steam account username
+        /// 1 = Steam account password
+        /// 2 = Discord bot token
+        /// 3 = Override discord user ID (Not required)
+        /// </summary>
+        public static void Main(string[] args)
+        {
+            #region Database start
+            SMOHandler = new SMOHandler();
 
-			#endregion
+            ConnectionString += $"Database={SMOHandler.SMODatabase.Name}";
 
-			#region Bot Starts, Logging and Main While thread.
-			LAEH = new LoggingAndErrorHandler();
-			AppDomain.CurrentDomain.FirstChanceException += LAEH.FirstChanceHandler;
+            _dataBase = new SQLDataBase(ConnectionString);
 
-			MinorDataHandler = new MinorDataHandler();
-			MinorDataHandler.ReadData();
+            if (!File.Exists($"{DatabaseDirectory}\\SteamInformation.mdf"))
+            {
+                _dataBase.Database.CreateIfNotExists();
+            }
 
-			if (!Directory.Exists(LogPath))
-				Directory.CreateDirectory(LogPath);
+            #endregion
 
-			DiscordClient = new DiscordBot();
-			DiscordClient.StartDiscordBot(args[2]).GetAwaiter().GetResult();
+            #region Bot Starts, Logging and Main While thread.
+            LAEH = new LoggingAndErrorHandler();
+            AppDomain.CurrentDomain.FirstChanceException += LAEH.FirstChanceHandler;
 
-			if (args.Length > 2 && ulong.TryParse(args[3], out var discordID))
-				OverrideDiscordID = discordID;
+            MinorDataHandler = new MinorDataHandler();
+            MinorDataHandler.ReadData();
 
-			SteamClient = new SteamBot(args, DiscordClient);
+            if (!Directory.Exists(LogPath))
+                Directory.CreateDirectory(LogPath);
 
-			while (SteamClient.IsRunning)
-			{
-				SteamClient.Manager.RunWaitCallbacks(TimeSpan.FromSeconds(1));
-			}
-			#endregion
-		}
-	}
+            DiscordClient = new DiscordBot();
+            DiscordClient.StartDiscordBot(args[2]).GetAwaiter().GetResult();
+
+            if (args.Length > 2 && ulong.TryParse(args[3], out var discordID))
+                OverrideDiscordID = discordID;
+
+            SteamClient = new SteamBot(args, DiscordClient);
+
+            while (SteamClient.IsRunning)
+            {
+                SteamClient.Manager.RunWaitCallbacks(TimeSpan.FromSeconds(1));
+            }
+            #endregion
+        }
+    }
 }

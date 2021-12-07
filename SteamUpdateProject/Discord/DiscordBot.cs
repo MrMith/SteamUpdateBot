@@ -1,25 +1,37 @@
-﻿using System;
-using System.Threading.Tasks;
-using DSharpPlus;
-using DSharpPlus.Entities;
+﻿using DSharpPlus;
 using DSharpPlus.CommandsNext;
-using System.Collections.Generic;
-using SteamUpdateProject.Entities;
+using DSharpPlus.Entities;
 using SteamUpdateProject.Discord.Commands;
+using SteamUpdateProject.Entities;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace SteamUpdateProject.Discord
 {
     /// <summary>
     /// This handles everything related to the discord-side of the bot and some minor utility methods.
     /// </summary>
-    class DiscordBot
+    internal class DiscordBot
     {
+        /// <summary>
+        /// The bot <see cref="DiscordClient"/> that we talk to..
+        /// </summary>
         public DiscordClient Client;
+
+        /// <summary>
+        /// If we have a dev override for any commands needing certain channel permissions, uses <see cref="SteamUpdateBot.OverrideDiscordID"/> when checking permission if this is true.
+        /// </summary>
         public bool DevOverride = false;
+
         private readonly Random _rand = new Random();
         private DateTime _timeForStatusUpdate = DateTime.Now;
         private bool _botReady = false;
 
+        /// <summary>
+        /// Starts discord bot and setups the commands.
+        /// </summary>
+        /// <param name="token">Discord Bot Token</param>
         public async Task StartDiscordBot(string token)
         {
             Client = new DiscordClient(new DiscordConfiguration()
@@ -253,11 +265,11 @@ namespace SteamUpdateProject.Discord
             }
         }
 
-        const int SECOND = 1;
-        const int MINUTE = 60 * SECOND;
-        const int HOUR = 60 * MINUTE;
-        const int DAY = 24 * HOUR;
-        const int MONTH = 30 * DAY;
+        private const int SECOND = 1;
+        private const int MINUTE = 60 * SECOND;
+        private const int HOUR = 60 * MINUTE;
+        private const int DAY = 24 * HOUR;
+        private const int MONTH = 30 * DAY;
 
         /// <summary>
         /// Just a nice method so instead of "Updated at June 21th 2025 at 5:54 PM" we got "Updated 10 minutes ago". Not mine.

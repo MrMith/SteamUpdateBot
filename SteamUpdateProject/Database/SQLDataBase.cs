@@ -1,12 +1,12 @@
-﻿using System.Data.Entity;
-using System.Data.Entity.ModelConfiguration.Conventions;
+﻿using SteamUpdateProject.Entities;
 using System.Collections.Generic;
-using SteamUpdateProject.Entities;
+using System.Data.Entity;
+using System.Data.Entity.ModelConfiguration.Conventions;
 
 namespace SteamUpdateProject
 {
     /// <summary>
-    /// The main <see cref="DbContext"/> class, I have very little knowledge of how/why this works. Help.
+    /// The main <see cref="DbContext"/> class that we get/set any information related to <see cref="AppInfo"/> or <see cref="GuildInfo"/>.
     /// </summary>
     public class SQLDataBase : DbContext
     {
@@ -30,23 +30,11 @@ namespace SteamUpdateProject
         /// <summary>
         /// Returning this as a list seems to help with getting less errors so I think its worth to keep the extra headache.
         /// </summary>
-        public List<AppInfo> AllApps
-        {
-            get
-            {
-                return new List<AppInfo>(AppInfoData);
-            }
-        }
+        public List<AppInfo> AllApps => new List<AppInfo>(AppInfoData);
 
         /// <summary>
         /// Returning this as a list seems to help with getting less errors so I think its worth to keep the extra headache.
         /// </summary>
-        public List<GuildInfo> AllGuilds
-        {
-            get
-            {
-                return new List<GuildInfo>(GuildInformation);
-            }
-        }
+        public List<GuildInfo> AllGuilds => new List<GuildInfo>(GuildInformation);
     }
 }

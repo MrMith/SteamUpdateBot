@@ -9,15 +9,39 @@ namespace SteamUpdateProject.Entities
     /// </summary>
     public class AppUpdate : IEquatable<AppUpdate>
     {
+        /// <summary>
+        /// Steam Application Name.
+        /// </summary>
         public string Name { get; set; }
+
+        /// <summary>
+        /// Steam Application ID.
+        /// </summary>
         public uint AppID { get; set; }
+
+        /// <summary>
+        /// Steam overall number used for indexing their changes <br/>
+        /// Change #10000000 might be that app named "Neon Abyss" updated and changed their experimental steam branchs contents<br/>
+        /// While Change #10000036 might be an app named "Hexteria" will have its app and multiple packages with changes.
+        /// </summary>
         public uint ChangeNumber { get; set; }
+
+        /// <summary>
+        /// If this update has depo content updates.
+        /// </summary>
         public bool Content { get; set; }
+
+        /// <summary>
+        /// Last time (In Seattle time since that where Valve HQ is at) this app was updated.
+        /// </summary>
         public DateTime LastUpdated { get; set; }
+
+        /// <summary>
+        /// Depo (Depo being the part of the application that holds the physical game data) that was changed.
+        /// </summary>
         public string DepoName { get; set; }
 
         #region Equality checks
-
         public override bool Equals(object obj)
         {
             return Equals(obj as AppUpdate);

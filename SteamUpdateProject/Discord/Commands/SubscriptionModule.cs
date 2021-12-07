@@ -1,12 +1,12 @@
 ﻿using DSharpPlus;
-using System.Threading.Tasks;
-using DSharpPlus.Entities;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
+using DSharpPlus.Entities;
+using SteamUpdateProject.Entities;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using SteamUpdateProject.Entities;
+using System.Threading.Tasks;
 
 namespace SteamUpdateProject.Discord.Commands
 {

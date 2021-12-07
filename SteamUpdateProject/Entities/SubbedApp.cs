@@ -30,7 +30,6 @@ namespace SteamUpdateProject.Entities
         public bool Equals(SubbedApp other)
         {
             return other != null &&
-                   Key == other.Key &&
                    AppID == other.AppID;
         }
 

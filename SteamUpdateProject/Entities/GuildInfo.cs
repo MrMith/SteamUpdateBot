@@ -9,6 +9,9 @@ namespace SteamUpdateProject.Entities
     /// </summary>
     public class GuildInfo : IEquatable<GuildInfo>
     {
+        /// <summary>
+        /// Key used by the database, don't touch.
+        /// </summary>
         [Key]
         public int Key { get; set; }
 
