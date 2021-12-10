@@ -1,3 +1,12 @@
+<p align="center">
+    <a href="https://discord.com/oauth2/authorize?client_id=634251158617063424&permissions=2048&scope=bot">
+        <img src="https://img.shields.io/badge/-Invite%20Bot!-blue?style=for-the-badge&logo=appveyor?link=http://left&link=https://tinyurl.com/SteamUpdateBot"
+            alt="Invite bot to your server!"></a>
+    <a href="https://github.com/MrMith/SteamUpdateBot/blob/main/LICENSE">
+        <img src="https://img.shields.io/badge/license-MIT-%23373737"
+            alt="Click to view License."></a>
+</p>
+
 # SteamUpdateBot
 
 This is a discord bot that connects to steam (Via SteamKit2) and listens for any steam application updates so a Text Channel/DM message can be sent to notify people through discord.
