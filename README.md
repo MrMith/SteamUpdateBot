@@ -17,6 +17,7 @@ This is a discord bot that connects to steam (Via SteamKit2) and listens for any
 | Commands Option        | Value Type      | Description       | Alias |
 |   :---:                |     :---:       |    :---:    |    :---:    |
 | help                   | N/A             | Help command that will return these commands | N/A |
+| feedback                   | N/A             | Provide Feedback to the bot developer! | N/A |
 | status                 | N/A             | Shows some small data about the bot like if steam is down, ping and total updates processed.      | N/A|
 | sub**                    | Integer         | Add a Steam Application to the notify list | addapp, subscribeapp, add, subscribe, subapp              |
 | del**                    | Integer         | Removes a Steam Application from the notify list | removeapp, delapp, deleteapp, remove, unsubscribe              |
