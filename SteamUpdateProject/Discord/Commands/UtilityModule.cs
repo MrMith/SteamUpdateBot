@@ -9,6 +9,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
+using System.Text;
 
 namespace SteamUpdateProject.Discord.Commands
 {
@@ -215,6 +216,35 @@ namespace SteamUpdateProject.Discord.Commands
             Process.Start(startInfo);
 
             await ctx.RespondAsync("Done.");
+        }
+
+        [Command("feedback"), Description("Provide Feedback to the bot developer!")]
+        public async Task UserFeedBack(CommandContext ctx)
+        {
+            await ctx.TriggerTypingAsync();
+
+            await ctx.RespondAsync("Do `!feedback <User Input>`!");
+        }
+
+        [Command("feedback")]
+        public async Task UserFeedBack(CommandContext ctx, params string[] objects)
+        {
+            await ctx.TriggerTypingAsync();
+
+            StringBuilder stringBuilder = new StringBuilder();
+
+            foreach (var obj in objects)
+                stringBuilder.Append(obj + " ");
+
+
+            FeedbackHandler.AddFeedback(stringBuilder.ToString(), $"{ctx.User.Username}#{ctx.User.Discriminator}: " );
+
+            var dev = await SteamUpdateBot.DiscordClient.GetDiscordMember(SteamUpdateBot.OverrideDiscordID);
+
+            if (dev != null)
+                await dev.SendMessageAsync($"{ctx.User.Username}#{ctx.User.Discriminator}: " + stringBuilder.ToString());
+
+            await ctx.RespondAsync("Sent to the developer!");
         }
     }
 }

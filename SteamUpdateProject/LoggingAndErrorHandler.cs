@@ -4,6 +4,7 @@ using System.Runtime.ExceptionServices;
 
 namespace SteamUpdateProject
 {
+    //To-do -> use microsoft's logging system and not this garbo.
 	/// <summary>
 	/// This class handles any errors and then logging said errors to give a easier time when debugging.
 	/// </summary>
