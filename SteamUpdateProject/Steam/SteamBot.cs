@@ -192,7 +192,7 @@ namespace SteamUpdateProject.Steam
                 return CachedInfo.Name;
             }
 
-            var ProductInfo = await Apps.PICSGetProductInfo(appid, null);
+            var ProductInfo = await Apps.PICSGetProductInfo(new SteamApps.PICSRequest(appid), null);
 
             AppInfo appInfo = new AppInfo()
             {
@@ -227,7 +227,7 @@ namespace SteamUpdateProject.Steam
         public async Task<bool> IsSteamDown()
         {
 
-            AsyncJobMultiple<SteamApps.PICSProductInfoCallback>.ResultSet ProductInfo = await Apps.PICSGetProductInfo(570, null); //570 is Dota 2.
+            AsyncJobMultiple<SteamApps.PICSProductInfoCallback>.ResultSet ProductInfo = await Apps.PICSGetProductInfo(new SteamApps.PICSRequest(570), null); //570 is Dota 2.
 
             if (ProductInfo.Failed)
             {
@@ -280,7 +280,7 @@ namespace SteamUpdateProject.Steam
             {
                 try
                 {
-                    customProductInfo.ProductInfo = (await SteamUpdateBot.SteamClient.Apps.PICSGetProductInfo(appid, null, false)).Results;
+                    customProductInfo.ProductInfo = (await SteamUpdateBot.SteamClient.Apps.PICSGetProductInfo(new SteamApps.PICSRequest(appid), null, false)).Results;
                     customProductInfo.IsPublic = true;
                 }
                 catch
