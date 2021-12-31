@@ -351,7 +351,7 @@ namespace SteamUpdateProject.Discord.Commands
 
 				if (ctx.Guild != null)
 				{
-                    foreach (var guildInfo in context.GuildInformation.Where(x => (ulong)x.GuildID == ctx.Guild.Id))
+                    foreach (var guildInfo in context.GuildInformation.Where(x => x.GuildID == (long)ctx.Guild.Id))
                     {
                         foreach(var app in guildInfo.SubscribedApps)
                         {
@@ -368,7 +368,7 @@ namespace SteamUpdateProject.Discord.Commands
                 }
 				else
 				{
-                    foreach (var guildInfo in context.GuildInformation.Where(x => (ulong)x.ChannelID == ctx.User.Id && ctx.Guild == null))
+                    foreach (var guildInfo in context.GuildInformation.Where(x => x.ChannelID == (long)ctx.User.Id && ctx.Guild == null))
                     {
                         foreach (var app in guildInfo.SubscribedApps)
                         {
