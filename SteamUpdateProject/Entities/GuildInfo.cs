@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 
 namespace SteamUpdateProject.Entities
 {
@@ -67,7 +68,7 @@ namespace SteamUpdateProject.Entities
             {
                 using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
                 {
-                    context.GuildInformation.RemoveRange(context.AllGuilds.FindAll(guild => guild == this));
+                    context.GuildInformation.RemoveRange(context.GuildInformation.Where(guild => guild.GuildID == this.GuildID && guild.ChannelID == this.ChannelID));
                     SubscribedApps.Add(new SubbedApp(appid));
                     context.GuildInformation.Add(this);
                     context.SaveChanges();
@@ -99,7 +100,7 @@ namespace SteamUpdateProject.Entities
             {
                 using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
                 {
-                    context.GuildInformation.RemoveRange(context.AllGuilds.FindAll(guild => guild == this));
+                    context.GuildInformation.RemoveRange(context.GuildInformation.Where(guild => guild.GuildID == this.GuildID && guild.ChannelID == this.ChannelID));
                     foreach (uint app in ListOfAddedApps)
                     {
                         SubscribedApps.Add(new SubbedApp(app));
@@ -124,7 +125,7 @@ namespace SteamUpdateProject.Entities
 
             using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
             {
-                context.GuildInformation.RemoveRange(context.AllGuilds.FindAll(guild => guild == this));
+                context.GuildInformation.RemoveRange(context.GuildInformation.Where(guild => guild.GuildID == this.GuildID && guild.ChannelID == this.ChannelID));
                 SubscribedApps.RemoveAll(SubbedApp => SubbedApp.AppID == appid);
                 context.GuildInformation.Add(this);
                 context.SaveChanges();
@@ -154,7 +155,7 @@ namespace SteamUpdateProject.Entities
             {
                 using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
                 {
-                    context.GuildInformation.RemoveRange(context.AllGuilds.FindAll(guild => guild == this));
+                    context.GuildInformation.RemoveRange(context.GuildInformation.Where(guild => guild.GuildID == this.GuildID && guild.ChannelID == this.ChannelID));
                     SubscribedApps.RemoveAll(SubbedApp => AppsThatHaveBeenRemoved.Contains((uint)SubbedApp.AppID));
                     context.GuildInformation.Add(this);
                     context.SaveChanges();

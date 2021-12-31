@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using System.Text;
+using System.Linq;
 
 namespace SteamUpdateProject.Discord.Commands
 {
@@ -101,7 +102,7 @@ namespace SteamUpdateProject.Discord.Commands
                             {
                                 using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
                                 {
-                                    AppInfo app = context.AllApps.FindLast(SubbedApp => SubbedApp.AppID == AppID);
+                                    AppInfo app = context.AppInfoData.Where(SubbedApp => SubbedApp.AppID == AppID).Last();
 
                                     var BranchUpdateTime = DateTime.UnixEpoch.AddSeconds(double.Parse(branchData.Value));
 
@@ -109,8 +110,7 @@ namespace SteamUpdateProject.Discord.Commands
                                     {
                                         app.LastUpdated = BranchUpdateTime;
 
-                                        context.AppInfoData.RemoveRange(context.AllApps.FindAll(SubbedApp => SubbedApp == app));
-
+                                        context.AppInfoData.RemoveRange(context.AppInfoData.Where(SubbedApp => SubbedApp.AppID == app.AppID));
 
                                         context.AppInfoData.Add(app);
                                         context.SaveChanges();

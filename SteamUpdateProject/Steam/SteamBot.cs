@@ -7,6 +7,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace SteamUpdateProject.Steam
 {
@@ -122,7 +123,7 @@ namespace SteamUpdateProject.Steam
 
                         using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
                         {
-                            context.AppInfoData.RemoveRange(context.AllApps.FindAll(SubbedApp => SubbedApp == AppUpdate));
+                            context.AppInfoData.RemoveRange(context.AppInfoData.Where(SubbedApp => SubbedApp.AppID == AppUpdate.AppID));
 
                             AppInfo appinfo = new AppInfo()
                             {

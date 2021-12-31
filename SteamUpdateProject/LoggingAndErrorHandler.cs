@@ -49,6 +49,7 @@ namespace SteamUpdateProject
 		/// <param name="e">Exception that makes me cry</param>
 		public void BadlyFormattedFunction(Exception e)
 		{
+            Console.WriteLine(e);
 		    //To-do: Implement Microsoft's logging system.
 		}
 

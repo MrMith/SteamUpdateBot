@@ -6,6 +6,7 @@ using SteamUpdateProject.Entities;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace SteamUpdateProject.Discord
 {
@@ -96,7 +97,7 @@ namespace SteamUpdateProject.Discord
 
             using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
             {
-                foreach (GuildInfo ServerInfo in context.AllGuilds)
+                foreach (GuildInfo ServerInfo in context.GuildInformation.Where(x => x.SubscribedApps.Any(x => x.AppID == app.AppID)))
                 {
                     if (!ServerInfo.SubscribedApps.Exists(ExistingApp => ExistingApp.AppID == app.AppID) && !ServerInfo.DebugMode) continue; //If guild isn't subscribed to given app.
                     if (!app.Content && !ServerInfo.ShowContent && !ServerInfo.DebugMode) continue; //If app has content updates (files changed) and guild has option to show only content updates.
@@ -128,7 +129,7 @@ namespace SteamUpdateProject.Discord
                                 SteamUpdateBot.LAEH.CustomError(LoggingAndErrorHandler.CustomErrorType.Discord_AppUpdate, LoggingAndErrorHandler.Platform.Discord, e);
                             else if ((e as DSharpPlus.Exceptions.UnauthorizedException).JsonMessage == "Missing Access")
                             {
-                                context.GuildInformation.RemoveRange(context.AllGuilds.FindAll(guild => guild == ServerInfo));
+                                context.GuildInformation.RemoveRange(context.GuildInformation.Where(guild => guild.ChannelID == ServerInfo.ChannelID && guild.GuildID == ServerInfo.ChannelID));
                                 context.SaveChanges();
                                 SteamUpdateBot.LAEH.BadlyFormattedFunction(e);
                             }
@@ -180,12 +181,11 @@ namespace SteamUpdateProject.Discord
         {
             using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
             {
-                foreach (AppInfo DBAppInfo in context.AllApps)
+                IQueryable<AppInfo> temp = context.AppInfoData.Where(x => x.AppID == appid);
+
+                if(temp.Count() > 0)
                 {
-                    if (DBAppInfo.AppID == appid)
-                    {
-                        return DBAppInfo;
-                    }
+                    return temp.First();
                 }
 
                 if (QuickSearch)
@@ -220,20 +220,17 @@ namespace SteamUpdateProject.Discord
             long channelid = (long)uchannelid;
             using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
             {
-                foreach (GuildInfo info in context.AllGuilds)
+                foreach (GuildInfo info in context.GuildInformation.Where(x => x.GuildID == guildid && x.ChannelID == channelid))
                 {
-                    if (info.GuildID == guildid && info.ChannelID == channelid)
+                    return new GuildInfo()
                     {
-                        return new GuildInfo()
-                        {
-                            GuildID = info.GuildID,
-                            ChannelID = info.ChannelID,
-                            SubscribedApps = info.SubscribedApps,
-                            ShowContent = info.ShowContent,
-                            DebugMode = info.DebugMode,
-                            PublicDepoOnly = info.PublicDepoOnly
-                        };
-                    }
+                        GuildID = info.GuildID,
+                        ChannelID = info.ChannelID,
+                        SubscribedApps = info.SubscribedApps,
+                        ShowContent = info.ShowContent,
+                        DebugMode = info.DebugMode,
+                        PublicDepoOnly = info.PublicDepoOnly
+                    };
                 }
             }
 
@@ -261,7 +258,7 @@ namespace SteamUpdateProject.Discord
         {
             using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
             {
-                return context.AllGuilds.Exists(guild => guild.SubscribedApps.Exists(subbedApp => subbedApp.AppID == appid));
+                return context.GuildInformation.Any(guild => guild.SubscribedApps.Any(subbedApp => subbedApp.AppID == appid));
             }
         }
 

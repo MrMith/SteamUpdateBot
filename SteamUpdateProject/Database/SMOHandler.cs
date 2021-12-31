@@ -1,5 +1,6 @@
 ﻿using Microsoft.SqlServer.Management.Smo;
 using System;
+using System.Data.Common;
 
 namespace SteamUpdateProject
 {
@@ -21,6 +22,8 @@ namespace SteamUpdateProject
 
         public SMOHandler()
         {
+            DbProviderFactories.RegisterFactory("System.Data.SqlClient", System.Data.SqlClient.SqlClientFactory.Instance);
+
             SMOServer = new Server();
             SMOServer.ConnectionContext.Connect();
 

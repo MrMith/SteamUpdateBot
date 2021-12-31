@@ -49,7 +49,7 @@ namespace SteamUpdateProject
 		/// <summary>
 		/// Connection String for our database.
 		/// </summary>
-		public static string ConnectionString = $"Integrated Security=true;";
+		public static string ConnectionString = $"Integrated Security=true;MultipleActiveResultSets=True;";
 
 		/// <summary>
 		/// Where the Database is located at on the drive.
