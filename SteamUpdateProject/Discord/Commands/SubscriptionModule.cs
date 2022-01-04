@@ -2,6 +2,9 @@
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using DSharpPlus.Interactivity;
+using DSharpPlus.Interactivity.EventHandling;
+using DSharpPlus.Interactivity.Extensions;
 using SteamUpdateProject.Entities;
 using System;
 using System.Collections.Generic;
@@ -69,9 +72,21 @@ namespace SteamUpdateProject.Discord.Commands
 					}
 				}
 
-				embedBuilder.Title = "Apps removed:";
-				embedBuilder.AddField("Apps", stringBuilder.ToString(), true);
+				if (stringBuilder.Length > 800)
+				{
+					//We're over the limit of 1024 characters (Short by 224 to make sure title and stuff can fit) and we need to use pages to display our data.
+					var interactivity = ctx.Client.GetInteractivity();
+
+					var list_pages = interactivity.GeneratePagesInEmbed(stringBuilder.ToString(), DSharpPlus.Interactivity.Enums.SplitType.Line, embedBuilder);
+
+					await interactivity.SendPaginatedMessageAsync(ctx.Channel, ctx.User, list_pages, DSharpPlus.Interactivity.Enums.PaginationBehaviour.WrapAround, DSharpPlus.Interactivity.Enums.ButtonPaginationBehavior.DeleteButtons);
+					return;
+				}
+
+				embedBuilder.AddField("Apps", stringBuilder.ToString());
+
 				await ctx.RespondAsync(embed: embedBuilder.Build());
+
 				return;
 			}
 			else if (uint.TryParse(objects[0], out uint appid)) //Single
@@ -146,7 +161,19 @@ namespace SteamUpdateProject.Discord.Commands
 					builderToReturn.AppendLine($"{AppInfo.Name} ({AppInfo.AppID})");
 				}
 
-				embedBuilder.AddField("Apps:", builderToReturn.ToString());
+				if (builderToReturn.Length > 800)
+				{
+					//We're over the limit of 1024 characters (Short by 224 to make sure title and stuff can fit) and we need to use pages to display our data.
+					var interactivity = ctx.Client.GetInteractivity();
+
+					var list_pages = interactivity.GeneratePagesInEmbed(builderToReturn.ToString(), DSharpPlus.Interactivity.Enums.SplitType.Line, embedBuilder);
+
+					await interactivity.SendPaginatedMessageAsync(ctx.Channel, ctx.User, list_pages, DSharpPlus.Interactivity.Enums.PaginationBehaviour.WrapAround, DSharpPlus.Interactivity.Enums.ButtonPaginationBehavior.DeleteButtons);
+					return;
+				}
+
+				embedBuilder.AddField("Apps", builderToReturn.ToString());
+
 				await ctx.RespondAsync(embed: embedBuilder.Build());
 				return;
 			}
@@ -209,6 +236,17 @@ namespace SteamUpdateProject.Discord.Commands
 				}
 			}
 
+			if(builderToReturn.Length > 800)
+			{
+				//We're over the limit of 1024 characters (Short by 224 to make sure title and stuff can fit) and we need to use pages to display our data.
+				var interactivity = ctx.Client.GetInteractivity();
+
+				var list_pages = interactivity.GeneratePagesInEmbed(builderToReturn.ToString(), DSharpPlus.Interactivity.Enums.SplitType.Line, embedBuilder);
+
+				await interactivity.SendPaginatedMessageAsync(ctx.Channel, ctx.User, list_pages, DSharpPlus.Interactivity.Enums.PaginationBehaviour.WrapAround, DSharpPlus.Interactivity.Enums.ButtonPaginationBehavior.DeleteButtons);
+				return;
+			}
+
 			embedBuilder.AddField("Apps", builderToReturn.ToString());
 
 			await ctx.RespondAsync(embed: embedBuilder.Build());
@@ -244,7 +282,7 @@ namespace SteamUpdateProject.Discord.Commands
 
 			if (GuildInfo != null)
 			{
-				using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
+				using (SQLDataBase context = new(SteamUpdateBot.ConnectionString))
 				{
 					context.GuildInformation.RemoveRange(context.GuildInformation.Where(guild => guild.GuildID == GuildInfo.GuildID && GuildInfo.ChannelID == guild.ChannelID));
 					GuildInfo.ShowContent = Set;
@@ -281,7 +319,7 @@ namespace SteamUpdateProject.Discord.Commands
 
 			if (GuildInfo != null)
 			{
-				using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
+				using (SQLDataBase context = new(SteamUpdateBot.ConnectionString))
 				{
 					context.GuildInformation.RemoveRange(context.GuildInformation.Where(guild => guild.ChannelID == GuildInfo.ChannelID && guild.GuildID == GuildInfo.ChannelID));
 					GuildInfo.DebugMode = Set;
@@ -319,7 +357,7 @@ namespace SteamUpdateProject.Discord.Commands
 
 			if (GuildInfo != null)
 			{
-				using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
+				using (SQLDataBase context = new(SteamUpdateBot.ConnectionString))
 				{
 					context.GuildInformation.RemoveRange(context.GuildInformation.Where(guild => guild.ChannelID == GuildInfo.ChannelID && guild.GuildID == GuildInfo.ChannelID));
 					GuildInfo.PublicDepoOnly = Set;
@@ -346,36 +384,47 @@ namespace SteamUpdateProject.Discord.Commands
 
 			StringBuilder stringBuilder = new StringBuilder();
 
-			using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
+			using (SQLDataBase context = new(SteamUpdateBot.ConnectionString))
 			{
-
 				if (ctx.Guild != null)
 				{
-                    foreach (var guildInfo in context.GuildInformation.Where(x => x.GuildID == (long)ctx.Guild.Id))
-                    {
-                        foreach(var app in guildInfo.SubscribedApps)
-                        {
-                            var channel = ctx.Guild.GetChannel((ulong)guildInfo.ChannelID);
+					foreach (var guildInfo in context.GuildInformation.Where(x => x.GuildID == (long)ctx.Guild.Id))
+					{
+						foreach (var app in guildInfo.SubscribedApps)
+						{
+							var channel = ctx.Guild.GetChannel((ulong)guildInfo.ChannelID);
 
-                            if (channel != null)
-                                stringBuilder.AppendLine($"{await SteamUpdateBot.SteamClient.GetAppName((uint)app.AppID)} ({app.AppID}) in {channel.Name}");
-                            else
-                            {
-                                stringBuilder.AppendLine($"{await SteamUpdateBot.SteamClient.GetAppName((uint)app.AppID)} ({app.AppID})");
-                            }
-                        }
-                    }
-                }
+							stringBuilder.AppendLine($"{await SteamUpdateBot.SteamClient.GetAppName((uint)app.AppID)} ({app.AppID}) {(channel != null ? $"in {channel.Name}" : "")}");
+						}
+					}
+				}
 				else
 				{
-                    foreach (var guildInfo in context.GuildInformation.Where(x => x.ChannelID == (long)ctx.User.Id && ctx.Guild == null))
-                    {
-                        foreach (var app in guildInfo.SubscribedApps)
-                        {
-                            stringBuilder.AppendLine($"{await SteamUpdateBot.SteamClient.GetAppName((uint)app.AppID)} ({app.AppID})");
-                        }
-                    }
-                }
+					foreach (var guildInfo in context.GuildInformation.Where(x => x.ChannelID == (long)ctx.User.Id && ctx.Guild == null))
+					{
+						foreach (var app in guildInfo.SubscribedApps)
+						{
+							stringBuilder.AppendLine($"{await SteamUpdateBot.SteamClient.GetAppName((uint)app.AppID)} ({app.AppID})");
+						}
+					}
+				}
+			}
+
+			if (stringBuilder.Length > 800)
+			{
+				//We're over the limit of 1024 characters (Short by 224 to make sure title and stuff can fit) and we need to use pages to display our data.
+				var interactivity = ctx.Client.GetInteractivity();
+
+				var list_pages = interactivity.GeneratePagesInEmbed(stringBuilder.ToString(), DSharpPlus.Interactivity.Enums.SplitType.Line, embedBuilder);
+
+				await interactivity.SendPaginatedMessageAsync(ctx.Channel, ctx.User, list_pages, DSharpPlus.Interactivity.Enums.PaginationBehaviour.WrapAround, DSharpPlus.Interactivity.Enums.ButtonPaginationBehavior.DeleteButtons);
+				return;
+			}
+
+			if (stringBuilder.Length == 0)
+			{
+				await ctx.RespondAsync("Nothing found!");
+				return;
 			}
 
 			embedBuilder.AddField("Apps", stringBuilder.ToString());
@@ -388,11 +437,11 @@ namespace SteamUpdateProject.Discord.Commands
 		/// <param name="u">User</param>
 		/// <param name="c">Channel</param>
 		/// <returns>If the user has Admin, Manage Channel or All permission for the given channel.</returns>
-		public bool HasPermission(DiscordMember u, DiscordChannel c)
+		public static bool HasPermission(DiscordMember u, DiscordChannel c)
 		{
 			if (u.Id == SteamUpdateBot.OverrideDiscordID && SteamUpdateBot.DiscordClient.DevOverride)
 				return true;
-            
+
 			return u.PermissionsIn(c).HasPermission(Permissions.Administrator) || u.PermissionsIn(c).HasPermission(Permissions.ManageChannels) || u.PermissionsIn(c).HasPermission(Permissions.All);
 		}
 
@@ -400,7 +449,7 @@ namespace SteamUpdateProject.Discord.Commands
 		/// I didn't wanna type <see cref="DiscordBot.GetGuildInfo"/> every time I wanted it.
 		/// </summary>
 		/// <returns><see cref="DiscordBot.GetGuildInfo"/></returns>
-		public GuildInfo GetGuildInfo(ulong GuildID, ulong ChannelID)
+		public static GuildInfo GetGuildInfo(ulong GuildID, ulong ChannelID)
 		{
 			return DiscordBot.GetGuildInfo(GuildID, ChannelID);
 		}

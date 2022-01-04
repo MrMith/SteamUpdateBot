@@ -5,16 +5,20 @@ using System.IO;
 
 namespace SteamUpdateProject
 {
-	/*
-	 * To-Do
-	 * 2. Queue system for Steam ratelimiting
-	 * 3. Queue system for Discord ratelimiting (Might be included in DSharpPlus?)
+    /* To-Do
+     * 
+	 *  Long Term
+	 *  1. Queue system for Steam ratelimiting
+	 *  2. Queue system for Discord ratelimiting (Might be included in DSharpPlus?)
+	 * 
+	 *  Short Term
+	 *  
 	 */
 
-	/// <summary>
-	/// Main logic that handles the steam bot, discord bot and managing the database.
-	/// </summary>
-	internal class SteamUpdateBot
+    /// <summary>
+    /// Main logic that handles the steam bot, discord bot and managing the database.
+    /// </summary>
+    internal class SteamUpdateBot
 	{
 		/// <summary>
 		/// Main discord bot that we can talk to.

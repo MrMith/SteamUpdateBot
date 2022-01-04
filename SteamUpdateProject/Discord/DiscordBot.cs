@@ -1,6 +1,9 @@
 ﻿using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
+using DSharpPlus.Interactivity;
+using DSharpPlus.Interactivity.Enums;
+using DSharpPlus.Interactivity.Extensions;
 using SteamUpdateProject.Discord.Commands;
 using SteamUpdateProject.Entities;
 using System;
@@ -39,26 +42,53 @@ namespace SteamUpdateProject.Discord
             {
                 Token = token,
                 TokenType = TokenType.Bot,
-                Intents = DiscordIntents.AllUnprivileged
+                Intents = DiscordIntents.AllUnprivileged,
             });
 
             CommandsNextExtension commands = Client.UseCommandsNext(new CommandsNextConfiguration()
             {
-                StringPrefixes = new[] { "!" }
+                StringPrefixes = new[] { "!" },
+                EnableDms = true,
+                EnableMentionPrefix = true,
             });
+
             commands.RegisterCommands<SubscriptionModule>();
             commands.RegisterCommands<UtilityModule>();
             commands.SetHelpFormatter<CustomHelpFormatter>();
+
+            this.Client.UseInteractivity(new InteractivityConfiguration
+            {
+                PaginationBehaviour = PaginationBehaviour.WrapAround,
+                Timeout = TimeSpan.FromMinutes(4),
+				AckPaginationButtons = true,
+            });
+
+			commands.CommandExecuted += Commands_CommandExecuted;
+			commands.CommandErrored += Commands_CommandErrored;
 
             await Client.ConnectAsync();
             _botReady = true;
         }
 
-        /// <summary>
-        /// This will take an <see cref="AppUpdate"/> and take that information and send discord messages to <see cref="GuildInfo"/> that have those Apps subscribed.
-        /// </summary>
-        /// <param name="app"><see cref="AppUpdate"/> that has information like the Steam AppID, if its a content update and the Depo name.</param>
-        public async void AppUpdated(AppUpdate app)
+		private Task Commands_CommandErrored(CommandsNextExtension sender, CommandErrorEventArgs e)
+		{
+			var ExceptionToSend = new Exception($"{e.Command} Was Executed: {e.Exception.StackTrace}");
+
+			SteamUpdateBot.LAEH.BadlyFormattedFunction(ExceptionToSend);
+			return Task.CompletedTask;
+		}
+
+		private Task Commands_CommandExecuted(CommandsNextExtension sender, CommandExecutionEventArgs e)
+		{
+			//To-do add logging to prevent abuse.
+			return Task.CompletedTask;
+		}
+
+		/// <summary>
+		/// This will take an <see cref="AppUpdate"/> and take that information and send discord messages to <see cref="GuildInfo"/> that have those Apps subscribed.
+		/// </summary>
+		/// <param name="app"><see cref="AppUpdate"/> that has information like the Steam AppID, if its a content update and the Depo name.</param>
+		public async void AppUpdated(AppUpdate app)
         {
             if (!_botReady) return;
 
@@ -95,7 +125,7 @@ namespace SteamUpdateProject.Discord
 
             DiscordEmbed AppUpdate = AppEmbed.Build();
 
-            using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
+            using (SQLDataBase context = new(SteamUpdateBot.ConnectionString))
             {
                 foreach (GuildInfo ServerInfo in context.GuildInformation.Where(x => x.SubscribedApps.Any(x => x.AppID == app.AppID)))
                 {
@@ -179,7 +209,7 @@ namespace SteamUpdateProject.Discord
         /// <returns><see cref="AppInfo"/> for the given appID.</returns>
         public static AppInfo GetCachedAppInfo(long appid, bool QuickSearch = false)
         {
-            using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
+            using (SQLDataBase context = new(SteamUpdateBot.ConnectionString))
             {
                 IQueryable<AppInfo> temp = context.AppInfoData.Where(x => x.AppID == appid);
 
@@ -218,7 +248,7 @@ namespace SteamUpdateProject.Discord
         {
             long guildid = (long)uguildid;
             long channelid = (long)uchannelid;
-            using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
+            using (SQLDataBase context = new(SteamUpdateBot.ConnectionString))
             {
                 foreach (GuildInfo info in context.GuildInformation.Where(x => x.GuildID == guildid && x.ChannelID == channelid))
                 {
@@ -240,7 +270,7 @@ namespace SteamUpdateProject.Discord
                 GuildID = guildid
             };
 
-            using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
+            using (SQLDataBase context = new(SteamUpdateBot.ConnectionString))
             {
                 context.GuildInformation.Add(GuildInfo);
                 context.SaveChanges();
@@ -256,11 +286,9 @@ namespace SteamUpdateProject.Discord
         /// <returns>If this steam AppID has a server that is subscribed to it.</returns>
         public bool IsAppSubscribed(uint appid)
         {
-            using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
-            {
-                return context.GuildInformation.Any(guild => guild.SubscribedApps.Any(subbedApp => subbedApp.AppID == appid));
-            }
-        }
+			using SQLDataBase context = new(SteamUpdateBot.ConnectionString);
+				return context.GuildInformation.Any(guild => guild.SubscribedApps.Any(subbedApp => subbedApp.AppID == appid));
+		}
 
         private const int SECOND = 1;
         private const int MINUTE = 60 * SECOND;

@@ -100,7 +100,7 @@ namespace SteamUpdateProject.Discord.Commands
 
                             if (branchKVP.Name == "public")
                             {
-                                using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
+                                using (SQLDataBase context = new(SteamUpdateBot.ConnectionString))
                                 {
                                     AppInfo app = context.AppInfoData.Where(SubbedApp => SubbedApp.AppID == AppID).Last();
 
@@ -159,7 +159,6 @@ namespace SteamUpdateProject.Discord.Commands
         [Command("forceupdate"), Hidden]
         public async Task ForceUpdate(CommandContext ctx, params string[] objects)
         {
-
             await ctx.TriggerTypingAsync();
 
             if (ctx.User.Id != SteamUpdateBot.OverrideDiscordID)

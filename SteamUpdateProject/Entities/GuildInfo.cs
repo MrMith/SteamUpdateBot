@@ -66,7 +66,7 @@ namespace SteamUpdateProject.Entities
         {
             if (!IsSubbed(appid))
             {
-                using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
+                using (SQLDataBase context = new(SteamUpdateBot.ConnectionString))
                 {
                     context.GuildInformation.RemoveRange(context.GuildInformation.Where(guild => guild.GuildID == this.GuildID && guild.ChannelID == this.ChannelID));
                     SubscribedApps.Add(new SubbedApp(appid));
@@ -98,7 +98,7 @@ namespace SteamUpdateProject.Entities
 
             if (ListOfAddedApps.Count != 0)
             {
-                using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
+                using (SQLDataBase context = new(SteamUpdateBot.ConnectionString))
                 {
                     context.GuildInformation.RemoveRange(context.GuildInformation.Where(guild => guild.GuildID == this.GuildID && guild.ChannelID == this.ChannelID));
                     foreach (uint app in ListOfAddedApps)
@@ -123,7 +123,7 @@ namespace SteamUpdateProject.Entities
             if (!IsSubbed(appid))
                 return false;
 
-            using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
+            using (SQLDataBase context = new(SteamUpdateBot.ConnectionString))
             {
                 context.GuildInformation.RemoveRange(context.GuildInformation.Where(guild => guild.GuildID == this.GuildID && guild.ChannelID == this.ChannelID));
                 SubscribedApps.RemoveAll(SubbedApp => SubbedApp.AppID == appid);
@@ -153,7 +153,7 @@ namespace SteamUpdateProject.Entities
 
             if (AppsThatHaveBeenRemoved.Count != 0)
             {
-                using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
+                using (SQLDataBase context = new(SteamUpdateBot.ConnectionString))
                 {
                     context.GuildInformation.RemoveRange(context.GuildInformation.Where(guild => guild.GuildID == this.GuildID && guild.ChannelID == this.ChannelID));
                     SubscribedApps.RemoveAll(SubbedApp => AppsThatHaveBeenRemoved.Contains((uint)SubbedApp.AppID));

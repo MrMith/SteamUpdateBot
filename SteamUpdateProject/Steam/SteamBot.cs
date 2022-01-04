@@ -121,7 +121,7 @@ namespace SteamUpdateProject.Steam
                         AppUpdate.LastUpdated = DateTime.UtcNow;
                         AppUpdate.Name = CallBackInfoApps.Value.KeyValues["common"]["name"].AsString();
 
-                        using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
+                        using (SQLDataBase context = new(SteamUpdateBot.ConnectionString))
                         {
                             context.AppInfoData.RemoveRange(context.AppInfoData.Where(SubbedApp => SubbedApp.AppID == AppUpdate.AppID));
 
@@ -210,7 +210,7 @@ namespace SteamUpdateProject.Steam
                 {
                     appInfo.Name = CallBackInfoApps.Value.KeyValues["common"]["name"].AsString();
 
-                    using (SQLDataBase context = new SQLDataBase(SteamUpdateBot.ConnectionString))
+                    using (SQLDataBase context = new(SteamUpdateBot.ConnectionString))
                     {
                         context.AppInfoData.Add(appInfo);
                         context.SaveChanges();
