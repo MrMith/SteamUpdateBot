@@ -1,4 +1,8 @@
 ﻿using DSharpPlus.CommandsNext;
+using DSharpPlus.Interactivity;
+using DSharpPlus.Interactivity.Enums;
+using DSharpPlus.Interactivity.EventHandling;
+using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using SteamKit2;
@@ -244,5 +248,38 @@ namespace SteamUpdateProject.Discord.Commands
 
             await ctx.RespondAsync("Sent to the developer!");
         }
-    }
+
+		private string[] AllPatchNotes = new string[]
+		{
+			"Jan 5th 2022\nAdded Patchnotes command.",
+			"Jan 4th 2022\nFilter out logging related to unknown commands because I do not want to spy on other people's bot useage.",
+			"Jan 3rd 2022\nSwapped over to using interactive pages (this type of embed) when it is useful to do so and switched to using tabs over spaces.",
+			"Dec 30th 2021\nFixed bug related saving data to the database.",
+			"Dec 30th 2021\nOptimized the useage of the bot by reducing the amount of times I am an idiot.",
+			"Dec 22nd 2021\nSwapped over to .NET 6.0 and changed some of the code to reflect using those new features.",
+			"Dec 13th 2021\nAdded a new **feedback** command so you can more easily leave feedback for me :D"
+		};
+
+		[Command("patchnotes"), Aliases("pn", "changes", "updates", "update", "patchnote"), Description("Shows changes made to the bot.")]
+		public async Task PatchNotes(CommandContext ctx)
+		{
+			List<Page> PagesToShow = new List<Page>();
+
+			foreach(var Note in AllPatchNotes)
+			{
+				string[] Notes = Note.Split("\n");
+
+				DiscordEmbedBuilder DiscordEmbed = new DiscordEmbedBuilder();
+				DiscordEmbed.Title = "Patch Notes";
+				DiscordEmbed.AddField(Notes[0], Notes[1]);
+
+				PagesToShow.Add(new Page("", DiscordEmbed));
+			}
+
+
+			var interactivity = ctx.Client.GetInteractivity();
+
+			await interactivity.SendPaginatedMessageAsync(ctx.Channel, ctx.User, PagesToShow, DSharpPlus.Interactivity.Enums.PaginationBehaviour.WrapAround, DSharpPlus.Interactivity.Enums.ButtonPaginationBehavior.DeleteButtons);
+		}
+	}
 }
