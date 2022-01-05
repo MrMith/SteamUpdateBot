@@ -227,7 +227,6 @@ namespace SteamUpdateProject.Steam
         /// <returns>True if Steam is currenly experiencing issues and False if everything is working as intended.</returns>
         public async Task<bool> IsSteamDown()
         {
-
             AsyncJobMultiple<SteamApps.PICSProductInfoCallback>.ResultSet ProductInfo = await Apps.PICSGetProductInfo(new SteamApps.PICSRequest(570), null); //570 is Dota 2.
 
             if (ProductInfo.Failed)
@@ -245,7 +244,6 @@ namespace SteamUpdateProject.Steam
         /// <returns>Token for <see cref="SteamKit2.SteamApps.PICSGetProductInfo"/> request.</returns>
         public static async Task<ulong> GetAccessToken(uint appid)
         {
-
             if (!SteamUpdateBot.DiscordClient.IsAppSubscribed(appid))
                 return 0; //This helps with rate limiting.
 

@@ -72,7 +72,10 @@ namespace SteamUpdateProject.Discord
 
 		private Task Commands_CommandErrored(CommandsNextExtension sender, CommandErrorEventArgs e)
 		{
-			var ExceptionToSend = new Exception($"{e.Command} Was Executed: {e.Exception.StackTrace}");
+			if (e.Exception is DSharpPlus.CommandsNext.Exceptions.CommandNotFoundException) //I do not want to spy on people.
+				return Task.CompletedTask;
+
+			var ExceptionToSend = new Exception($"{e.Command} Was Executed: {e.Exception.ToString()}");
 
 			SteamUpdateBot.LAEH.BadlyFormattedFunction(ExceptionToSend);
 			return Task.CompletedTask;

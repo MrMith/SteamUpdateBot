@@ -235,7 +235,6 @@ namespace SteamUpdateProject.Discord.Commands
             foreach (var obj in objects)
                 stringBuilder.Append(obj + " ");
 
-
             FeedbackHandler.AddFeedback(stringBuilder.ToString(), $"{ctx.User.Username}#{ctx.User.Discriminator}: " );
 
             var dev = await SteamUpdateBot.DiscordClient.GetDiscordMember(SteamUpdateBot.OverrideDiscordID);
