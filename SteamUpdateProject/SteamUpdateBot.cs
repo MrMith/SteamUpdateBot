@@ -83,7 +83,6 @@ namespace SteamUpdateProject
 			{
 				_dataBase.Database.CreateIfNotExists();
 			}
-
 			#endregion
 
 			#region Bot Starts, Logging and Main While thread.
@@ -94,17 +93,17 @@ namespace SteamUpdateProject
 			MinorDataHandler = new MinorDataHandler();
 			MinorDataHandler.ReadData();
 
-			var Config = MinorDataHandler.GetConfig();
+			var Config = new ConfigHandler();
 
 			if (!Directory.Exists(LogPath))
 				Directory.CreateDirectory(LogPath);
 
 			DiscordClient = new DiscordBot();
-			DiscordClient.StartDiscordBot(Config.Token).GetAwaiter().GetResult();
+			DiscordClient.StartDiscordBot(Config.BotToken).GetAwaiter().GetResult();
 
-            OverrideDiscordID = ulong.Parse(Config.DevOverride);
+            OverrideDiscordID = ulong.Parse(Config.DiscordID);
 
-			SteamClient = new SteamBot(Config.SteamName, Config.SteamPassword, DiscordClient);
+			SteamClient = new SteamBot(Config.SteamName, Config.SteamPW, DiscordClient);
 
 			while (SteamClient.IsRunning)
 			{

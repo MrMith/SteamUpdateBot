@@ -251,6 +251,7 @@ namespace SteamUpdateProject.Discord.Commands
 
 		private string[] AllPatchNotes = new string[]
 		{
+			"Jan 5th 2022\nAdded config addition for when people try to clone the project.",
 			"Jan 5th 2022\nAdded Patchnotes command.",
 			"Jan 4th 2022\nFilter out logging related to unknown commands because I do not want to spy on other people's bot useage.",
 			"Jan 3rd 2022\nSwapped over to using interactive pages (this type of embed) when it is useful to do so and switched to using tabs over spaces.",
@@ -263,6 +264,8 @@ namespace SteamUpdateProject.Discord.Commands
 		[Command("patchnotes"), Aliases("pn", "changes", "updates", "update", "patchnote"), Description("Shows changes made to the bot.")]
 		public async Task PatchNotes(CommandContext ctx)
 		{
+			await ctx.TriggerTypingAsync();
+
 			List<Page> PagesToShow = new List<Page>();
 
 			foreach(var Note in AllPatchNotes)
@@ -275,7 +278,6 @@ namespace SteamUpdateProject.Discord.Commands
 
 				PagesToShow.Add(new Page("", DiscordEmbed));
 			}
-
 
 			var interactivity = ctx.Client.GetInteractivity();
 
