@@ -251,7 +251,7 @@ namespace SteamUpdateProject.Discord.Commands
 
 		private string[] AllPatchNotes = new string[]
 		{
-			"Jan 5th 2022\nAdded config addition for when people try to clone the project.",
+			"Jan 10th 2022\nAdded config verification for when people try to clone the project so they get a input instead of a spam of errors.",
 			"Jan 5th 2022\nAdded Patchnotes command.",
 			"Jan 4th 2022\nFilter out logging related to unknown commands because I do not want to spy on other people's bot useage.",
 			"Jan 3rd 2022\nSwapped over to using interactive pages (this type of embed) when it is useful to do so and switched to using tabs over spaces.",
