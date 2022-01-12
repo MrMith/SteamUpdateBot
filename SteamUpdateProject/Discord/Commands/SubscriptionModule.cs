@@ -19,7 +19,7 @@ namespace SteamUpdateProject.Discord.Commands
 	/// </summary>
 	public class SubscriptionModule : BaseCommandModule
 	{
-		[Command("del"), Aliases("removeapp", "delapp", "deleteapp", "remove", "unsubscribe"), Description("Remove a subscription to a Steam Application so you no longer see when it updates by appid (Ex: del 730 or del 730 530)")]
+		[Command("del"), Aliases("removeapp", "delapp", "deleteapp", "remove", "unsubscribe", "delete"), Description("Remove a subscription to a Steam Application so you no longer see when it updates by appid (Ex: del 730 or del 730 530)")]
 		public async Task RemoveAppAsync(CommandContext ctx, params string[] objects)
 		{
 			await ctx.TriggerTypingAsync();
@@ -36,7 +36,7 @@ namespace SteamUpdateProject.Discord.Commands
 
 			StringBuilder stringBuilder = new StringBuilder();
 
-			if (objects.Length > 1) //Multiple
+			if (objects.Length > 1 || (objects.Length == 1 && objects[0] == "*")) //Multiple
 			{
 				List<uint> ListOfAppIDS = new List<uint>();
 				foreach (string StringAppID in objects)
@@ -47,7 +47,29 @@ namespace SteamUpdateProject.Discord.Commands
 					}
 				}
 
-				List<uint> AppsThatHaveBeenRemoved = GuildInfo.RemoveMultipleApps(ListOfAppIDS);
+				List<uint> AppsThatHaveBeenRemoved = null;
+
+				if(objects[0] == "*")
+				{
+					await ctx.RespondAsync("Are you sure? Yes/No.");
+					var interact = ctx.Client.GetInteractivity();
+					var msg = await interact.WaitForMessageAsync(x => x != null);
+
+					if (msg.Result.Content.Contains("Yes", StringComparison.OrdinalIgnoreCase))
+					{
+						await ctx.RespondAsync($"Continuing mass {ctx.Command.Name}.");
+						await ctx.TriggerTypingAsync();
+					}
+					else if (msg.Result.Content.Contains("No", StringComparison.OrdinalIgnoreCase))
+					{
+						await ctx.RespondAsync($"Cancelled mass {ctx.Command.Name}.");
+						return;
+					}
+
+					AppsThatHaveBeenRemoved = GuildInfo.RemoveMultipleApps(GuildInfo.SubscribedApps);
+				}
+				else
+					AppsThatHaveBeenRemoved = GuildInfo.RemoveMultipleApps(ListOfAppIDS);
 
 				if (AppsThatHaveBeenRemoved.Count == 0)
 				{
@@ -71,6 +93,8 @@ namespace SteamUpdateProject.Discord.Commands
 						stringBuilder.Append($". Last updated {AppInfo.LastUpdated?.ToLongDateString()}.");
 					}
 				}
+
+				embedBuilder.Title = "Steam Apps removed:";
 
 				if (stringBuilder.Length > 800)
 				{

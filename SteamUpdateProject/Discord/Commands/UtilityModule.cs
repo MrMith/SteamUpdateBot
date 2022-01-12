@@ -106,9 +106,9 @@ namespace SteamUpdateProject.Discord.Commands
                             {
                                 using (SQLDataBase context = new(SteamUpdateBot.ConnectionString))
                                 {
-                                    AppInfo app = context.AppInfoData.Where(SubbedApp => SubbedApp.AppID == AppID).Last();
+									AppInfo app = context.AppInfoData.OrderByDescending(SubbedApp => SubbedApp.AppID == AppID).First();
 
-                                    var BranchUpdateTime = DateTime.UnixEpoch.AddSeconds(double.Parse(branchData.Value));
+									var BranchUpdateTime = DateTime.UnixEpoch.AddSeconds(double.Parse(branchData.Value));
 
                                     if (app.LastUpdated.Value.Ticks > BranchUpdateTime.Ticks)
                                     {
@@ -197,7 +197,23 @@ namespace SteamUpdateProject.Discord.Commands
 
             bool steamStatus = await SteamUpdateBot.SteamClient.IsSteamDown();
 
-            await ctx.RespondAsync($"Ping: {ctx.Client.Ping}.\nSteam Status: {(!steamStatus ? "Online" : "Offline")}.\nTotal updates processed: {LoggingAndErrorHandler.Updates} ({(int)(LoggingAndErrorHandler.Updates / LoggingAndErrorHandler.MinutesRunning)} per minute)\nTotal content updates: {LoggingAndErrorHandler.ContentUpdates}.\nTotal Exceptions: {LoggingAndErrorHandler.Exceptions}\nTotal minutes running: {LoggingAndErrorHandler.MinutesRunning}");
+			Process currentProcess = Process.GetCurrentProcess();
+
+			DiscordEmbedBuilder builder = new DiscordEmbedBuilder();
+			builder.Title = "Status";
+			builder.AddField("Ping:", ctx.Client.Ping.ToString(), true);
+			builder.AddField("Steam Status:", (!steamStatus ? "Online" : "Offline"), false);
+			builder.AddField("Total updates processed:", $"{LoggingAndErrorHandler.Updates} ({(int)(LoggingAndErrorHandler.Updates / LoggingAndErrorHandler.MinutesRunning)} per minute)", true);
+			builder.AddField("Total content updates:", LoggingAndErrorHandler.ContentUpdates.ToString());
+			builder.AddField("Total Exceptions:", LoggingAndErrorHandler.Exceptions.ToString());
+			builder.AddField("Total minutes running:", LoggingAndErrorHandler.MinutesRunning.ToString());
+
+			if(currentProcess != null)
+			{
+				builder.AddField("Memory Used:", $"{(currentProcess.WorkingSet64 / 1048576)} MB");
+				builder.AddField("Peak Memory:", $"{currentProcess.PeakWorkingSet64 / 1048576} MB");
+			}
+            await ctx.RespondAsync(builder.Build());
         }
 
         [Command("log"), Hidden]
@@ -251,6 +267,7 @@ namespace SteamUpdateProject.Discord.Commands
 
 		private string[] AllPatchNotes = new string[]
 		{
+			"Jan 11th 2022\nAdded mass delete and to use just do the removeapp command with * (Ex: !remove *) and follow the prompt, fixed the branch command not working and fixed some error spams when Steam is down (Thanks Maintenance day)",
 			"Jan 10th 2022\nAdded config verification for when people try to clone the project so they get a input instead of a spam of errors.",
 			"Jan 5th 2022\nAdded Patchnotes command.",
 			"Jan 4th 2022\nFilter out logging related to unknown commands because I do not want to spy on other people's bot useage.",

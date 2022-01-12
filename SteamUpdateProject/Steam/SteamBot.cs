@@ -227,6 +227,9 @@ namespace SteamUpdateProject.Steam
         /// <returns>True if Steam is currenly experiencing issues and False if everything is working as intended.</returns>
         public async Task<bool> IsSteamDown()
         {
+			if (Apps == null)
+				return true;
+
             AsyncJobMultiple<SteamApps.PICSProductInfoCallback>.ResultSet ProductInfo = await Apps.PICSGetProductInfo(new SteamApps.PICSRequest(570), null); //570 is Dota 2.
 
             if (ProductInfo.Failed)

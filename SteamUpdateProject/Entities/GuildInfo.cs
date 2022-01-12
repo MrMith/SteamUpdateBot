@@ -165,8 +165,20 @@ namespace SteamUpdateProject.Entities
             return AppsThatHaveBeenRemoved;
         }
 
-        #region Equality Functions
-        public override bool Equals(object obj)
+		public List<uint> RemoveMultipleApps(List<SubbedApp> listOfApps)
+		{
+			List<uint> ListToReturn = new List<uint>();
+
+			foreach(var app in listOfApps)
+			{
+				ListToReturn.Add((uint)app.AppID);
+			}
+
+			return RemoveMultipleApps(ListToReturn);
+		}
+
+		#region Equality Functions
+		public override bool Equals(object obj)
         {
             return Equals(obj as GuildInfo);
         }
