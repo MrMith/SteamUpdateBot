@@ -345,15 +345,19 @@ namespace SteamUpdateProject.Discord.Commands
 			{
 				using (SQLDataBase context = new(SteamUpdateBot.ConnectionString))
 				{
-					context.GuildInformation.RemoveRange(context.GuildInformation.Where(guild => guild.ChannelID == GuildInfo.ChannelID && guild.GuildID == GuildInfo.ChannelID));
+					context.GuildInformation.RemoveRange(context.GuildInformation.Where(guild => guild.ChannelID == GuildInfo.ChannelID && guild.GuildID == GuildInfo.GuildID));
 					GuildInfo.DebugMode = Set;
 					context.GuildInformation.Add(GuildInfo);
 					context.SaveChanges();
 				}
 			}
+			else
+			{
+				await ctx.RespondAsync($"Error: Could not find GuildInfo!");
+				return;
+			}
 
 			await ctx.RespondAsync($"Debug mode set to {Set}.");
-
 		}
 
 		[Command("public"), Description("Should we only notify this channel if the update is on the default public branch.")]

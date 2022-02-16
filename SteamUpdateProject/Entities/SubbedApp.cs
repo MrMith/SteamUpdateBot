@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 namespace SteamUpdateProject.Entities
 {
     /// <summary>
-    /// this is a dummy class that the database uses because I can't make a int list.
+    /// This is a dummy class that the database uses because I can't make a int list.
     /// </summary>
     public class SubbedApp : IEquatable<SubbedApp>
     {

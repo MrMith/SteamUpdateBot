@@ -6,7 +6,7 @@ using System.Linq;
 namespace SteamUpdateProject.Entities
 {
     /// <summary>
-    /// This is the dummy class that is stored in the database.
+    /// This is the class that is stored in the database and handles all of the logic related to adding/removing subscriptions from a given discord guild.
     /// </summary>
     public class GuildInfo : IEquatable<GuildInfo>
     {

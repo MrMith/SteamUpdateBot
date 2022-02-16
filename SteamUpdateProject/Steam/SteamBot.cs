@@ -227,17 +227,25 @@ namespace SteamUpdateProject.Steam
         /// <returns>True if Steam is currenly experiencing issues and False if everything is working as intended.</returns>
         public async Task<bool> IsSteamDown()
         {
-			if (Apps == null)
+			try
+			{
+				if (Apps == null)
+					return true;
+
+				//570 is Dota 2.
+				AsyncJobMultiple<SteamApps.PICSProductInfoCallback>.ResultSet ProductInfo = await Apps.PICSGetProductInfo(new SteamApps.PICSRequest(570), null);
+
+				if (ProductInfo.Failed)
+				{
+					return true;
+				}
+
+				return !ProductInfo.Complete;
+			}
+			catch
+			{
 				return true;
-
-            AsyncJobMultiple<SteamApps.PICSProductInfoCallback>.ResultSet ProductInfo = await Apps.PICSGetProductInfo(new SteamApps.PICSRequest(570), null); //570 is Dota 2.
-
-            if (ProductInfo.Failed)
-            {
-                return true;
-            }
-
-            return !ProductInfo.Complete;
+			}
         }
 
         /// <summary>
@@ -252,6 +260,7 @@ namespace SteamUpdateProject.Steam
 
             try
             {
+				//This randomly errors and has cost me sleep so therefor slap a try-catch on it.
                 SteamApps.PICSTokensCallback AppTokenInfo = await SteamUpdateBot.SteamClient.Apps.PICSGetAccessTokens(appid, null);
 
                 if (AppTokenInfo.AppTokensDenied.Contains(appid) || !AppTokenInfo.AppTokens.ContainsKey(appid)) return 0;
@@ -278,7 +287,9 @@ namespace SteamUpdateProject.Steam
 
             ulong AccessToken = await GetAccessToken(appid);
 
-            if (AccessToken == 0)
+			//If the accesstoken is 0 then we don't have a token to get more detailed information so we get the publicly available information
+			//Also randomly errors and that causes me physical pain.
+			if (AccessToken == 0)
             {
                 try
                 {

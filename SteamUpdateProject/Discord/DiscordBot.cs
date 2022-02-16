@@ -121,6 +121,9 @@ namespace SteamUpdateProject.Discord
             AppEmbed.AddField("Change Number", app.ChangeNumber == 1 ? "DEBUG TEST UPDATE - IGNORE" : app.ChangeNumber.ToString(), true);
             AppEmbed.AddField("AppID", app.AppID.ToString());
 
+			//Hope this is okay XPaw :sweat:
+			AppEmbed.Url = $"https://steamdb.info/changelist/{app.ChangeNumber}/";
+
             if (app.DepoName != null)
             {
                 AppEmbed.AddField("Depo Changed", app.DepoName, true);
@@ -130,7 +133,7 @@ namespace SteamUpdateProject.Discord
 
             using (SQLDataBase context = new(SteamUpdateBot.ConnectionString))
             {
-                foreach (GuildInfo ServerInfo in context.GuildInformation.Where(x => x.SubscribedApps.Any(x => x.AppID == app.AppID)))
+                foreach (GuildInfo ServerInfo in context.GuildInformation.Where(x => x.SubscribedApps.Any(x => x.AppID == app.AppID) || x.DebugMode))
                 {
                     if (!ServerInfo.SubscribedApps.Exists(ExistingApp => ExistingApp.AppID == app.AppID) && !ServerInfo.DebugMode) continue; //If guild isn't subscribed to given app.
                     if (!app.Content && !ServerInfo.ShowContent && !ServerInfo.DebugMode) continue; //If app has content updates (files changed) and guild has option to show only content updates.
