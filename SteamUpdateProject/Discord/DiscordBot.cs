@@ -93,20 +93,15 @@ namespace SteamUpdateProject.Discord
 		/// <param name="app"><see cref="AppUpdate"/> that has information like the Steam AppID, if its a content update and the Depo name.</param>
 		public async void AppUpdated(AppUpdate app)
         {
-            if (!_botReady) return;
+            if (!_botReady)
+				return;
 
             Console.WriteLine($"AppUpdated: {app.AppID} {(app.Content ? "(Content)" : "")}");
 
-            if (DateTime.Now > _timeForStatusUpdate) ///Update status of bot on discord, update time running and save data relating to <see cref="MinorDataHandler"/>.
-			{
-                await Client.UpdateStatusAsync(new DiscordActivity($"Total Steam updates: {LoggingAndErrorHandler.Updates}", ActivityType.Playing));
-                Console.WriteLine("Updated Time: " + LoggingAndErrorHandler.Updates);
-                LoggingAndErrorHandler.MinutesRunning += 5;
-                SteamUpdateBot.MinorDataHandler.WriteData();
-                _timeForStatusUpdate = DateTime.Now.AddMinutes(5);
-            }
+            if (DateTime.Now > _timeForStatusUpdate)
+				UpdateStatus();
 
-            DiscordColor Color = new DiscordColor((float)_rand.Next(1, 100) / 100, (float)_rand.Next(1, 100) / 100, (float)_rand.Next(1, 100) / 100);
+			DiscordColor Color = new DiscordColor((float)_rand.Next(1, 100) / 100, (float)_rand.Next(1, 100) / 100, (float)_rand.Next(1, 100) / 100);
 
             DiscordEmbedBuilder AppEmbed = new DiscordEmbedBuilder
             {
@@ -125,36 +120,55 @@ namespace SteamUpdateProject.Discord
 			AppEmbed.Url = $"https://steamdb.info/changelist/{app.ChangeNumber}/";
 
             if (app.DepoName != null)
-            {
-                AppEmbed.AddField("Depo Changed", app.DepoName, true);
-            }
+				AppEmbed.AddField("Depo Changed", app.DepoName, true);
 
-            DiscordEmbed AppUpdate = AppEmbed.Build();
+			DiscordEmbed AppUpdate = AppEmbed.Build();
+
+			List<GuildInfo> ServersBotWasKickedFrom = new List<GuildInfo>();
 
             using (SQLDataBase context = new(SteamUpdateBot.ConnectionString))
             {
                 foreach (GuildInfo ServerInfo in context.GuildInformation.Where(x => x.SubscribedApps.Any(x => x.AppID == app.AppID) || x.DebugMode))
                 {
-                    if (!ServerInfo.SubscribedApps.Exists(ExistingApp => ExistingApp.AppID == app.AppID) && !ServerInfo.DebugMode) continue; //If guild isn't subscribed to given app.
-                    if (!app.Content && !ServerInfo.ShowContent && !ServerInfo.DebugMode) continue; //If app has content updates (files changed) and guild has option to show only content updates.
-                    if (app.DepoName != null && ServerInfo.PublicDepoOnly && app.DepoName != "public") continue; //If guild has option to show only public (main default steam branch) updates or any update.
+					//If guild isn't subscribed to given app.
+					if (!ServerInfo.SubscribedApps.Exists(ExistingApp => ExistingApp.AppID == app.AppID) && !ServerInfo.DebugMode) 
+						continue;
+
+					//If app has content updates (files changed) and guild has option to show only content updates.
+					if (!app.Content && !ServerInfo.ShowContent && !ServerInfo.DebugMode) 
+						continue;
+
+					//If guild has option to show only public (main default steam branch) updates or any update.
+					if (app.DepoName != null && ServerInfo.PublicDepoOnly && app.DepoName != "public") 
+						continue; 
+
                     if (ServerInfo.GuildID == 0) //DMs
                     {
                         try
                         {
                             DiscordMember DMUser = await GetDiscordMember((ulong)ServerInfo.ChannelID);
+
+							//If we cannot find the user (we're not in the same server) then we continue on because discord will block DMs.
+							if (DMUser == null)
+								continue;
+
                             await DMUser.SendMessageAsync(embed: AppUpdate);
                         }
                         catch (Exception e)
                         {
-                            if (e is not DSharpPlus.Exceptions.UnauthorizedException) //Bot can get kicked from servers :(
-                                SteamUpdateBot.LAEH.CustomError(LoggingAndErrorHandler.CustomErrorType.Discord_DM, LoggingAndErrorHandler.Platform.Discord, e);
-                        }
-                    }
+                            if (e is not DSharpPlus.Exceptions.UnauthorizedException) 
+								SteamUpdateBot.LAEH.CustomError(LoggingAndErrorHandler.CustomErrorType.Discord_DM, LoggingAndErrorHandler.Platform.Discord, e);
+
+							//Bot can get kicked from servers :(
+							//I've been thinking about it and I think we should keep user data within DMs (we're storing their discord ID and subbed apps) because...
+							//...they might not have control over the bot being kicked.
+						}
+					}
                     else //Server
                     {
                         try
                         {
+							//This is only seperated for debugging.
                             DiscordGuild _1st = await Client.GetGuildAsync((ulong)ServerInfo.GuildID);
                             DiscordChannel _2nd = _1st.GetChannel((ulong)ServerInfo.ChannelID);
                             await _2nd.SendMessageAsync(embed: AppUpdate);
@@ -165,22 +179,39 @@ namespace SteamUpdateProject.Discord
                                 SteamUpdateBot.LAEH.CustomError(LoggingAndErrorHandler.CustomErrorType.Discord_AppUpdate, LoggingAndErrorHandler.Platform.Discord, e);
                             else if ((e as DSharpPlus.Exceptions.UnauthorizedException).JsonMessage == "Missing Access")
                             {
-                                context.GuildInformation.RemoveRange(context.GuildInformation.Where(guild => guild.ChannelID == ServerInfo.ChannelID && guild.GuildID == ServerInfo.ChannelID));
-                                context.SaveChanges();
-                                SteamUpdateBot.LAEH.BadlyFormattedFunction(e);
+								ServersBotWasKickedFrom.Add(ServerInfo);
+								Console.WriteLine("Missing Permissions, removing server's data from bot.");
                             }
                         }
                     }
                 }
+
+				if(ServersBotWasKickedFrom.Count != 0)
+				{
+					context.GuildInformation.RemoveRange(ServersBotWasKickedFrom);
+					context.SaveChanges();
+				}
             }
         }
 
+		/// <summary>
+		///  Update status of bot on discord, update time running and save data relating to <see cref="MinorDataHandler"/>.
+		/// </summary>
+		private async void UpdateStatus()
+		{
+			await Client.UpdateStatusAsync(new DiscordActivity($"Total Steam updates: {LoggingAndErrorHandler.Updates}", ActivityType.Playing));
+			Console.WriteLine("Updated Time: " + LoggingAndErrorHandler.Updates);
+			LoggingAndErrorHandler.MinutesRunning += 5;
+			SteamUpdateBot.MinorDataHandler.WriteData();
+			_timeForStatusUpdate = DateTime.Now.AddMinutes(5);
+		}
+
         #region Utility Methods
         /// <summary>
-        /// Gets Discord Member by ID.
+        /// Gets <see cref="DiscordMember"/> by <see cref="CommandContext.User.Id"/>
         /// </summary>
         /// <param name="_memberID">User's ID</param>
-        /// <returns>The member with the ID specified</returns>
+        /// <returns>The <see cref="DiscordMember"/> with the ID specified</returns>
         public async Task<DiscordMember> GetDiscordMember(ulong _memberID)
         {
             foreach (KeyValuePair<ulong, DiscordGuild> _guildKVP in Client.Guilds)
@@ -258,6 +289,7 @@ namespace SteamUpdateProject.Discord
             {
                 foreach (GuildInfo info in context.GuildInformation.Where(x => x.GuildID == guildid && x.ChannelID == channelid))
                 {
+					//Why am I doing this? To be honest I don't remember so its gonna be this way.
                     return new GuildInfo()
                     {
                         GuildID = info.GuildID,
