@@ -318,9 +318,12 @@ namespace SteamUpdateProject.Discord.Commands
 			await ctx.RespondAsync($"Set show all to {Set}.");
 		}
 
-		[Command("debug"), Description("***WARNING*** *EVERY* steam update goes through as if you were subscribed to it.")]
+		[Command("debug"), Description("***WARNING*** *EVERY* steam update goes through as if you were subscribed to it."), Hidden]
 		public async Task DebugBool(CommandContext ctx)
 		{
+			if (!IsDev(ctx.Member))
+				return;
+
 			await ctx.TriggerTypingAsync();
 
 			GuildInfo GuildInfo = GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Guild == null ? ctx.User.Id : ctx.Channel.Id);
@@ -328,9 +331,12 @@ namespace SteamUpdateProject.Discord.Commands
 			await ctx.RespondAsync($"Debug mode is currently set to {GuildInfo.DebugMode}.");
 		}
 
-		[Command("debug"), Description("***WARNING*** *EVERY* steam update goes through as if you were subscribed to it.")]
+		[Command("debug"), Description("***WARNING*** *EVERY* steam update goes through as if you were subscribed to it."), Hidden]
 		public async Task DebugBool(CommandContext ctx, bool Set)
 		{
+			if(!IsDev(ctx.Member))
+				return;
+
 			await ctx.TriggerTypingAsync();
 
 			if (ctx.Guild != null && !HasPermission(ctx.Member, ctx.Channel))
@@ -387,11 +393,16 @@ namespace SteamUpdateProject.Discord.Commands
 			{
 				using (SQLDataBase context = new(SteamUpdateBot.ConnectionString))
 				{
-					context.GuildInformation.RemoveRange(context.GuildInformation.Where(guild => guild.ChannelID == GuildInfo.ChannelID && guild.GuildID == GuildInfo.ChannelID));
+					context.GuildInformation.RemoveRange(context.GuildInformation.Where(guild => guild.ChannelID == GuildInfo.ChannelID && guild.GuildID == GuildInfo.GuildID));
 					GuildInfo.PublicDepoOnly = Set;
 					context.GuildInformation.Add(GuildInfo);
 					context.SaveChanges();
 				}
+			}
+			else
+			{
+				await ctx.RespondAsync($"Error: Could not find GuildInfo!");
+				return;
 			}
 
 			await ctx.RespondAsync($"Public mode set to {Set}.");
@@ -471,6 +482,19 @@ namespace SteamUpdateProject.Discord.Commands
 				return true;
 
 			return u.PermissionsIn(c).HasPermission(Permissions.Administrator) || u.PermissionsIn(c).HasPermission(Permissions.ManageChannels) || u.PermissionsIn(c).HasPermission(Permissions.All);
+		}
+
+		/// <summary>
+		/// Checks if the <see cref="DiscordMember"/>'s ID is equal to <see cref="SteamUpdateBot.OverrideDiscordID"/>
+		/// </summary>
+		/// <param name="u">Meme</param>
+		/// <returns>If the UserID is the same as the provided Dev ID</returns>
+		public static bool IsDev(DiscordMember u)
+		{
+			if (u.Id == SteamUpdateBot.OverrideDiscordID)
+				return true;
+
+			return false;
 		}
 
 		/// <summary>

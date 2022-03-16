@@ -49,6 +49,9 @@ namespace SteamUpdateProject
 		/// <param name="e">Exception that makes me cry</param>
 		public void BadlyFormattedFunction(Exception e)
 		{
+			if (e is System.Net.Sockets.SocketException)
+				return; //What the hell even is this, no line numbers or anything. Just a meaningless error.
+
             Console.WriteLine(e);
 		    //To-do: Implement Microsoft's logging system.
 		}
