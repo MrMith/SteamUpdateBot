@@ -17,12 +17,6 @@ namespace SteamUpdateProject.Entities
 		public static string DBName = "AppInfo";
 
         /// <summary>
-        /// Key used by the Database, don't touch!
-        /// </summary>
-        [Key]
-        public int Key { get; set; }
-
-        /// <summary>
         /// Steam Application ID.
         /// </summary>
         public long AppID { get; set; }

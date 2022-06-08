@@ -11,7 +11,7 @@
 
 This is a discord bot that connects to steam (Via SteamKit2) and listens for any steam application updates so a Text Channel/DM message can be sent to notify people through discord.
 
-##### First time using DSharpPlus, SQL Databases and EF. I'm super open to code quality issues or suggestions if you want to make an issue or DM me on discord (Mith#7575)
+##### I'm super open to code quality issues or suggestions if you want to make an issue or DM me on discord (Mith#7575)
 
 ## All Commands.
 | Commands Option        | Value Type      | Description       | Alias |
