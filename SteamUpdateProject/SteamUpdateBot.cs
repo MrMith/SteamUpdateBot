@@ -31,11 +31,6 @@ namespace SteamUpdateProject
 		public static SteamBot SteamClient;
 
 		/// <summary>
-		/// SQL Server Management Objects Handler.
-		/// </summary>
-		public static SMOHandler SMOHandler;
-
-		/// <summary>
 		/// Handles minor data for the bot overall like total updates, time running ect.
 		/// </summary>
 		public static MinorDataHandler MinorDataHandler;
@@ -46,26 +41,24 @@ namespace SteamUpdateProject
 		public static LoggingAndErrorHandler LAEH;
 
 		/// <summary>
+		/// Name of mongoDB database. This is so I can't mispell the database name.
+		/// </summary>
+		public static string DatabaseName = "SteamInformation";
+
+		/// <summary>
 		/// Main path to logs.
 		/// </summary>
 		public static string LogPath = Directory.GetCurrentDirectory() + "\\logs\\";
-
-		/// <summary>
-		/// Connection String for our database.
-		/// </summary>
-		public static string ConnectionString = $"Integrated Security=true;MultipleActiveResultSets=True;";
-
-		/// <summary>
-		/// Where the Database is located at on the drive.
-		/// </summary>
-		public static string DatabaseDirectory = $"{Directory.GetCurrentDirectory()}\\database";
 
 		/// <summary>
 		/// Discord User ID that we use to override any channel permissions, needs <see cref="DiscordBot.DevOverride"/> to be true before it will check this.
 		/// </summary>
 		public static ulong OverrideDiscordID = 0;
 
-		private static SQLDataBase _dataBase;
+		/// <summary>
+		/// This contains the client we connect to the database with.
+		/// </summary>
+		public static DataBaseHandler DB;
 
 		/// <summary>
         /// Main entry for the program. It all goes downhill.
@@ -73,16 +66,8 @@ namespace SteamUpdateProject
 		public static void Main()
 		{
 			#region Database start
-			SMOHandler = new SMOHandler();
 
-			ConnectionString += $"Database={SMOHandler.SMODatabase.Name}";
-
-			_dataBase = new SQLDataBase(ConnectionString);
-
-			if (!File.Exists($"{DatabaseDirectory}\\SteamInformation.mdf"))
-			{
-				_dataBase.Database.CreateIfNotExists();
-			}
+			DB = new DataBaseHandler();
 			#endregion
 
 			#region Bot Starts, Logging and Main While thread.

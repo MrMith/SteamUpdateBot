@@ -1,7 +1,5 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.Interactivity;
-using DSharpPlus.Interactivity.Enums;
-using DSharpPlus.Interactivity.EventHandling;
 using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
@@ -15,6 +13,8 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Text;
 using System.Linq;
+using MongoDB.Bson;
+using MongoDB.Driver;
 
 namespace SteamUpdateProject.Discord.Commands
 {
@@ -104,23 +104,22 @@ namespace SteamUpdateProject.Discord.Commands
 
                             if (branchKVP.Name == "public")
                             {
-                                using (SQLDataBase context = new(SteamUpdateBot.ConnectionString))
-                                {
-									AppInfo app = context.AppInfoData.OrderByDescending(SubbedApp => SubbedApp.AppID == AppID).First();
+								var db = SteamUpdateBot.DB.Client.GetDatabase(SteamUpdateBot.DatabaseName);
 
-									var BranchUpdateTime = DateTime.UnixEpoch.AddSeconds(double.Parse(branchData.Value));
+								var AI_Collection = db.GetCollection<AppInfo>(AppInfo.DBName);
 
-                                    if (app.LastUpdated.Value.Ticks > BranchUpdateTime.Ticks)
-                                    {
-                                        app.LastUpdated = BranchUpdateTime;
+								var AI_Filter = Builders<AppInfo>.Filter.Eq("AppID", AppID);
 
-                                        context.AppInfoData.RemoveRange(context.AppInfoData.Where(SubbedApp => SubbedApp.AppID == app.AppID));
+								var app = AI_Collection.Find(AI_Filter).Limit(1).SingleOrDefault();
 
-                                        context.AppInfoData.Add(app);
-                                        context.SaveChanges();
-                                    }
-                                }
-                            }
+								var BranchUpdateTime = DateTime.UnixEpoch.AddSeconds(double.Parse(branchData.Value));
+
+								if (app.LastUpdated.Value.Ticks > BranchUpdateTime.Ticks)
+								{
+									app.LastUpdated = BranchUpdateTime;
+									AI_Collection.InsertOne(app);
+								}
+							}
 
                             embedBuilder.AddField($"{branchKVP.Name}", $"Last updated {SteamUpdateBot.DiscordClient.ElapsedTime(DateTime.UnixEpoch.AddSeconds(double.Parse(branchData.Value)))}");
                         }

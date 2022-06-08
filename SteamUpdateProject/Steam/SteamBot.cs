@@ -8,6 +8,9 @@ using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Linq;
+using MongoDB;
+using MongoDB.Bson;
+using MongoDB.Driver;
 
 namespace SteamUpdateProject.Steam
 {
@@ -121,20 +124,22 @@ namespace SteamUpdateProject.Steam
                         AppUpdate.LastUpdated = DateTime.UtcNow;
                         AppUpdate.Name = CallBackInfoApps.Value.KeyValues["common"]["name"].AsString();
 
-                        using (SQLDataBase context = new(SteamUpdateBot.ConnectionString))
-                        {
-                            context.AppInfoData.RemoveRange(context.AppInfoData.Where(SubbedApp => SubbedApp.AppID == AppUpdate.AppID));
+						var db = SteamUpdateBot.DB.Client.GetDatabase(SteamUpdateBot.DatabaseName);
 
-                            AppInfo appinfo = new AppInfo()
-                            {
-                                AppID = AppUpdate.AppID,
-                                Name = AppUpdate.Name,
-                                LastUpdated = AppUpdate.LastUpdated
-                            };
+						var AI_Collection = db.GetCollection<AppInfo>(AppInfo.DBName);
 
-                            context.AppInfoData.Add(appinfo);
-                            context.SaveChanges();
-                        }
+						var AI_Filter = Builders<AppInfo>.Filter.Eq("AppID", AppUpdate.AppID);
+
+						AI_Collection.DeleteMany(AI_Filter);
+
+						AppInfo appinfo = new AppInfo()
+						{
+							AppID = AppUpdate.AppID,
+							Name = AppUpdate.Name,
+							LastUpdated = AppUpdate.LastUpdated
+						};
+
+						AI_Collection.InsertOne(appinfo);
                     }
                 }
 
@@ -210,12 +215,16 @@ namespace SteamUpdateProject.Steam
                 {
                     appInfo.Name = CallBackInfoApps.Value.KeyValues["common"]["name"].AsString();
 
-                    using (SQLDataBase context = new(SteamUpdateBot.ConnectionString))
-                    {
-                        context.AppInfoData.Add(appInfo);
-                        context.SaveChanges();
-                    }
-                }
+					var db = SteamUpdateBot.DB.Client.GetDatabase(SteamUpdateBot.DatabaseName);
+
+					var AI_Collection = db.GetCollection<AppInfo>(AppInfo.DBName);
+
+					var AI_Filter = Builders<AppInfo>.Filter.Eq("AppID", appid);
+
+					AI_Collection.DeleteMany(AI_Filter);
+
+					AI_Collection.InsertOne(appInfo);
+				}
             }
 
             return appInfo.Name;

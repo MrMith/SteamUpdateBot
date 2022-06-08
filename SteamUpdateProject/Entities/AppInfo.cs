@@ -1,14 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace SteamUpdateProject.Entities
 {
-    /// <summary>
-    /// Dummy class that is used to pass information (Like AppID and Name) from one area to another (Ex: SteamBot to DiscordBot)
-    /// </summary>
-    public class AppInfo : IEquatable<AppInfo>
+	/// <summary>
+	/// Dummy class that is used to pass information (Like AppID and Name) from one area to another (Ex: SteamBot to DiscordBot)
+	/// </summary>
+	[BsonIgnoreExtraElements]
+	public class AppInfo : IEquatable<AppInfo>
     {
+		/// <summary>
+		/// Name in MongoDB.
+		/// </summary>
+		public static string DBName = "AppInfo";
+
         /// <summary>
         /// Key used by the Database, don't touch!
         /// </summary>

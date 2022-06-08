@@ -9,14 +9,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DSharpPlus" Version="4.2.0-nightly-01106" />
-    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.2.0-nightly-01106" />
-    <PackageReference Include="DSharpPlus.Interactivity" Version="4.2.0-nightly-01106" />
-    <PackageReference Include="EntityFramework" Version="6.4.4" />
-    <PackageReference Include="Microsoft.Data.Sqlite" Version="7.0.0-preview.2.22153.1" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="7.0.0-preview.2.22153.1" />
-    <PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" Version="161.47008.0" />
+    <PackageReference Include="DSharpPlus" Version="4.3.0-nightly-01140" />
+    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.3.0-nightly-01140" />
+    <PackageReference Include="DSharpPlus.Interactivity" Version="4.3.0-nightly-01140" />
+    <PackageReference Include="MongoDB.Bson" Version="2.15.1" />
+    <PackageReference Include="MongoDB.Driver" Version="2.15.1" />
+    <PackageReference Include="MongoDB.Driver.Core" Version="2.15.1" />
     <PackageReference Include="SteamKit2" Version="2.4.1" />
-    <PackageReference Include="System.Data.SqlClient" Version="4.8.3" />
   </ItemGroup>
 </Project>

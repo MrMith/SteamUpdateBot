@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using System.Linq;
+using MongoDB.Driver;
 
 namespace SteamUpdateProject.Discord.Commands
 {
@@ -49,7 +50,7 @@ namespace SteamUpdateProject.Discord.Commands
 
 				List<uint> AppsThatHaveBeenRemoved = null;
 
-				if(objects[0] == "*")
+				if (objects[0] == "*")
 				{
 					await ctx.RespondAsync("Are you sure? Yes/No.");
 					var interact = ctx.Client.GetInteractivity();
@@ -158,7 +159,7 @@ namespace SteamUpdateProject.Discord.Commands
 				List<uint> ListOfAppIDS = new List<uint>();
 				foreach (string StringAppID in objects)
 				{
-					if (uint.TryParse(StringAppID, out uint appid))
+					if (uint.TryParse(StringAppID, out uint appid) && !ListOfAppIDS.Contains(appid))
 					{
 						ListOfAppIDS.Add(appid);
 					}
@@ -260,7 +261,7 @@ namespace SteamUpdateProject.Discord.Commands
 				}
 			}
 
-			if(builderToReturn.Length > 800)
+			if (builderToReturn.Length > 800)
 			{
 				//We're over the limit of 1024 characters (Short by 224 to make sure title and stuff can fit) and we need to use pages to display our data.
 				var interactivity = ctx.Client.GetInteractivity();
@@ -306,13 +307,17 @@ namespace SteamUpdateProject.Discord.Commands
 
 			if (GuildInfo != null)
 			{
-				using (SQLDataBase context = new(SteamUpdateBot.ConnectionString))
-				{
-					context.GuildInformation.RemoveRange(context.GuildInformation.Where(guild => guild.GuildID == GuildInfo.GuildID && GuildInfo.ChannelID == guild.ChannelID));
-					GuildInfo.ShowContent = Set;
-					context.GuildInformation.Add(GuildInfo);
-					context.SaveChanges();
-				}
+				GuildInfo.ShowContent = Set;
+
+				var db = SteamUpdateBot.DB.Client.GetDatabase(SteamUpdateBot.DatabaseName);
+
+				var GI_Filter = Builders<GuildInfo>.Filter.And(
+								Builders<GuildInfo>.Filter.Eq("ChannelID", GuildInfo.ChannelID),
+								Builders<GuildInfo>.Filter.Eq("GuildID", GuildInfo.GuildID));
+
+				var GIcollection = db.GetCollection<GuildInfo>(GuildInfo.DBName);
+
+				GIcollection.ReplaceOne(GI_Filter, GuildInfo);
 			}
 
 			await ctx.RespondAsync($"Set show all to {Set}.");
@@ -321,7 +326,7 @@ namespace SteamUpdateProject.Discord.Commands
 		[Command("debug"), Description("***WARNING*** *EVERY* steam update goes through as if you were subscribed to it."), Hidden]
 		public async Task DebugBool(CommandContext ctx)
 		{
-			if (!IsDev(ctx.Member))
+			if (!IsDev(ctx.User))
 				return;
 
 			await ctx.TriggerTypingAsync();
@@ -334,7 +339,7 @@ namespace SteamUpdateProject.Discord.Commands
 		[Command("debug"), Description("***WARNING*** *EVERY* steam update goes through as if you were subscribed to it."), Hidden]
 		public async Task DebugBool(CommandContext ctx, bool Set)
 		{
-			if(!IsDev(ctx.Member))
+			if (!IsDev(ctx.User))
 				return;
 
 			await ctx.TriggerTypingAsync();
@@ -349,13 +354,17 @@ namespace SteamUpdateProject.Discord.Commands
 
 			if (GuildInfo != null)
 			{
-				using (SQLDataBase context = new(SteamUpdateBot.ConnectionString))
-				{
-					context.GuildInformation.RemoveRange(context.GuildInformation.Where(guild => guild.ChannelID == GuildInfo.ChannelID && guild.GuildID == GuildInfo.GuildID));
-					GuildInfo.DebugMode = Set;
-					context.GuildInformation.Add(GuildInfo);
-					context.SaveChanges();
-				}
+				GuildInfo.DebugMode = Set;
+
+				var db = SteamUpdateBot.DB.Client.GetDatabase(SteamUpdateBot.DatabaseName);
+
+				var GI_Filter = Builders<GuildInfo>.Filter.And(
+								Builders<GuildInfo>.Filter.Eq("ChannelID", GuildInfo.ChannelID),
+								Builders<GuildInfo>.Filter.Eq("GuildID", GuildInfo.GuildID));
+
+				var GIcollection = db.GetCollection<GuildInfo>(GuildInfo.DBName);
+
+				GIcollection.ReplaceOne(GI_Filter, GuildInfo);
 			}
 			else
 			{
@@ -391,13 +400,17 @@ namespace SteamUpdateProject.Discord.Commands
 
 			if (GuildInfo != null)
 			{
-				using (SQLDataBase context = new(SteamUpdateBot.ConnectionString))
-				{
-					context.GuildInformation.RemoveRange(context.GuildInformation.Where(guild => guild.ChannelID == GuildInfo.ChannelID && guild.GuildID == GuildInfo.GuildID));
-					GuildInfo.PublicDepoOnly = Set;
-					context.GuildInformation.Add(GuildInfo);
-					context.SaveChanges();
-				}
+				GuildInfo.PublicDepoOnly = Set;
+
+				var db = SteamUpdateBot.DB.Client.GetDatabase(SteamUpdateBot.DatabaseName);
+
+				var GI_Filter = Builders<GuildInfo>.Filter.And(
+								Builders<GuildInfo>.Filter.Eq("ChannelID", GuildInfo.ChannelID),
+								Builders<GuildInfo>.Filter.Eq("GuildID", GuildInfo.GuildID));
+
+				var GIcollection = db.GetCollection<GuildInfo>(GuildInfo.DBName);
+
+				GIcollection.ReplaceOne(GI_Filter, GuildInfo);
 			}
 			else
 			{
@@ -423,29 +436,30 @@ namespace SteamUpdateProject.Discord.Commands
 
 			StringBuilder stringBuilder = new StringBuilder();
 
-			using (SQLDataBase context = new(SteamUpdateBot.ConnectionString))
-			{
-				if (ctx.Guild != null)
-				{
-					foreach (var guildInfo in context.GuildInformation.Where(x => x.GuildID == (long)ctx.Guild.Id))
-					{
-						foreach (var app in guildInfo.SubscribedApps)
-						{
-							var channel = ctx.Guild.GetChannel((ulong)guildInfo.ChannelID);
+			var db = SteamUpdateBot.DB.Client.GetDatabase(SteamUpdateBot.DatabaseName);
 
-							stringBuilder.AppendLine($"{await SteamUpdateBot.SteamClient.GetAppName((uint)app.AppID)} ({app.AppID}) {(channel != null ? $"in {channel.Name}" : "")}");
-						}
-					}
-				}
-				else
+			var GI_Filter = Builders<GuildInfo>.Filter.And(
+							Builders<GuildInfo>.Filter.Eq("ChannelID", ctx.Channel.Id),
+							Builders<GuildInfo>.Filter.Eq("GuildID", ctx.Guild == null ? 0 : ctx.Guild.Id));
+
+			var GIcollection = db.GetCollection<GuildInfo>(GuildInfo.DBName);
+
+			var Local_GI = GIcollection.Find(GI_Filter).Limit(1).SingleOrDefault();
+
+			if (ctx.Guild != null)
+			{
+				foreach (var app in Local_GI.SubscribedApps)
 				{
-					foreach (var guildInfo in context.GuildInformation.Where(x => x.ChannelID == (long)ctx.User.Id && ctx.Guild == null))
-					{
-						foreach (var app in guildInfo.SubscribedApps)
-						{
-							stringBuilder.AppendLine($"{await SteamUpdateBot.SteamClient.GetAppName((uint)app.AppID)} ({app.AppID})");
-						}
-					}
+					var channel = ctx.Guild.GetChannel((ulong)Local_GI.ChannelID);
+
+					stringBuilder.AppendLine($"{await SteamUpdateBot.SteamClient.GetAppName((uint)app.AppID)} ({app.AppID}) {(channel != null ? $"in {channel.Name}" : "")}");
+				}
+			}
+			else
+			{
+				foreach (var app in Local_GI.SubscribedApps)
+				{
+					stringBuilder.AppendLine($"{await SteamUpdateBot.SteamClient.GetAppName((uint)app.AppID)} ({app.AppID})");
 				}
 			}
 
@@ -489,7 +503,7 @@ namespace SteamUpdateProject.Discord.Commands
 		/// </summary>
 		/// <param name="u">Meme</param>
 		/// <returns>If the UserID is the same as the provided Dev ID</returns>
-		public static bool IsDev(DiscordMember u)
+		public static bool IsDev(DiscordUser u)
 		{
 			if (u.Id == SteamUpdateBot.OverrideDiscordID)
 				return true;
