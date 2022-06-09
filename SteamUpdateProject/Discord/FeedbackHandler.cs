@@ -21,7 +21,7 @@ namespace SteamUpdateProject.Discord
                 Directory.CreateDirectory(FeedbackDir);
             }
 
-            using (StreamWriter fw = new(FeedbackDir + $"{discordID}.txt"))
+            using (StreamWriter fw = new(FeedbackDir + $"{discordID.Replace(":","").Replace(" ","")}.txt"))
             {
                 fw.WriteLine(feedback);
             }
