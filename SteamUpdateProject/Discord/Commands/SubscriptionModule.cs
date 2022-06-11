@@ -439,7 +439,7 @@ namespace SteamUpdateProject.Discord.Commands
 			var db = SteamUpdateBot.DB.Client.GetDatabase(SteamUpdateBot.DatabaseName);
 
 			var GI_Filter = Builders<GuildInfo>.Filter.And(
-							Builders<GuildInfo>.Filter.Eq("ChannelID", ctx.Channel.Id),
+							Builders<GuildInfo>.Filter.Eq("ChannelID", ctx.Guild == null ? ctx.User.Id : ctx.Channel.Id),
 							Builders<GuildInfo>.Filter.Eq("GuildID", ctx.Guild == null ? 0 : ctx.Guild.Id));
 
 			var GIcollection = db.GetCollection<GuildInfo>(GuildInfo.DBName);
