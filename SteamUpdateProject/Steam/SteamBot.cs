@@ -136,7 +136,8 @@ namespace SteamUpdateProject.Steam
 						{
 							AppID = AppUpdate.AppID,
 							Name = AppUpdate.Name,
-							LastUpdated = AppUpdate.LastUpdated
+aaaaaaaaaaa							LastUpdated = AppUpdate.LastUpdated,
+							DepoName = AppUpdate.DepoName
 						};
 
 						AI_Collection.InsertOne(appinfo);
@@ -219,9 +220,9 @@ namespace SteamUpdateProject.Steam
 
 					var AI_Collection = db.GetCollection<AppInfo>(AppInfo.DBName);
 
-					var AI_Filter = Builders<AppInfo>.Filter.Eq("AppID", appid);
+					//var AI_Filter = Builders<AppInfo>.Filter.Eq("AppID", appid);
 
-					AI_Collection.DeleteMany(AI_Filter);
+					//AI_Collection.DeleteMany(AI_Filter);
 
 					AI_Collection.InsertOne(appInfo);
 				}
@@ -245,9 +246,7 @@ namespace SteamUpdateProject.Steam
 				AsyncJobMultiple<SteamApps.PICSProductInfoCallback>.ResultSet ProductInfo = await Apps.PICSGetProductInfo(new SteamApps.PICSRequest(570), null);
 
 				if (ProductInfo.Failed)
-				{
 					return true;
-				}
 
 				return !ProductInfo.Complete;
 			}

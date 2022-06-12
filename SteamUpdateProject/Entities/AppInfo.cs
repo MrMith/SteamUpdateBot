@@ -31,6 +31,11 @@ namespace SteamUpdateProject.Entities
         /// </summary>
         public DateTime? LastUpdated { get; set; }
 
+		/// <summary>
+		/// Name of depo when this was updated.
+		/// </summary>
+		public string DepoName { get; set; }
+
         #region Equality Methods.
         public override bool Equals(object obj)
         {

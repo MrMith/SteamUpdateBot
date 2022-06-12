@@ -192,6 +192,7 @@ namespace SteamUpdateProject.Discord.Commands
             if (SteamUpdateBot.SteamClient == null)
             {
                 await ctx.RespondAsync($"SteamBot not ready.");
+				return;
             }
 
             bool steamStatus = await SteamUpdateBot.SteamClient.IsSteamDown();
@@ -218,12 +219,10 @@ namespace SteamUpdateProject.Discord.Commands
         [Command("log"), Hidden]
         public async Task OpenLog(CommandContext ctx)
         {
-            if (ctx.User.Id != SteamUpdateBot.OverrideDiscordID)
-            {
-                return;
-            }
+            if (!SubscriptionModule.IsDev(ctx.User))
+				return;
 
-            await ctx.TriggerTypingAsync();
+			await ctx.TriggerTypingAsync();
 
             ProcessStartInfo startInfo = new ProcessStartInfo()
             {
@@ -266,6 +265,9 @@ namespace SteamUpdateProject.Discord.Commands
 
 		private string[] AllPatchNotes = new string[]
 		{
+			"June 12th 2022\nAdded **history** command *(Ex: !history 570)* which allows you to list all of the updates of an app in the database.",
+			"June 11th 2022\nDatabase no longer deletes every entry from the database when an app updates.",
+			"June 10th 2022\nSwapped the backend database from Entity Framework to MongoDB because its just much easier to work with on a small scale project.",
 			"Jan 11th 2022\nAdded mass delete and to use just do the removeapp command with * (Ex: !remove *) and follow the prompt, fixed the branch command not working and fixed some error spams when Steam is down (Thanks Maintenance day)",
 			"Jan 10th 2022\nAdded config verification for when people try to clone the project so they get a input instead of a spam of errors.",
 			"Jan 5th 2022\nAdded Patchnotes command.",
@@ -274,7 +276,7 @@ namespace SteamUpdateProject.Discord.Commands
 			"Dec 30th 2021\nFixed bug related saving data to the database.",
 			"Dec 30th 2021\nOptimized the useage of the bot by reducing the amount of times I am an idiot.",
 			"Dec 22nd 2021\nSwapped over to .NET 6.0 and changed some of the code to reflect using those new features.",
-			"Dec 13th 2021\nAdded a new **feedback** command so you can more easily leave feedback for me :D"
+			"Dec 13th 2021\nAdded a new **feedback** command so you can more easily leave feedback for me."
 		};
 
 		[Command("patchnotes"), Aliases("pn", "changes", "updates", "update", "patchnote"), Description("Shows changes made to the bot.")]
@@ -298,6 +300,61 @@ namespace SteamUpdateProject.Discord.Commands
 			var interactivity = ctx.Client.GetInteractivity();
 
 			await interactivity.SendPaginatedMessageAsync(ctx.Channel, ctx.User, PagesToShow, DSharpPlus.Interactivity.Enums.PaginationBehaviour.WrapAround, DSharpPlus.Interactivity.Enums.ButtonPaginationBehavior.DeleteButtons);
+		}
+
+		[Command("history"), Description("Lists all of updates in located within the database of this project.")]
+		//[Aliases("history")]
+		public async Task History(CommandContext ctx)
+		{
+			await ctx.TriggerTypingAsync();
+
+			await ctx.RespondAsync("Useage: branches <AppID>");
+		}
+
+		[Command("history"), Description("Lists all of updates in located within the database of this project.")]
+		public async Task History(CommandContext ctx, uint AppID)
+		{
+			await ctx.TriggerTypingAsync();
+
+			if (await SteamUpdateBot.SteamClient.IsSteamDown())
+			{
+				await ctx.RespondAsync("Steam seems to be down at the moment, see https://steamstat.us/ for more information!");
+				return;
+			}
+
+			DiscordEmbedBuilder embedBuilder = new DiscordEmbedBuilder();
+
+			StringBuilder builderToReturn = new StringBuilder();
+
+			embedBuilder.Title = $"{await SteamUpdateBot.SteamClient.GetAppName(AppID)} ({AppID})";
+
+			var db = SteamUpdateBot.DB.Client.GetDatabase(SteamUpdateBot.DatabaseName);
+
+			var AI_Filter = Builders<AppInfo>.Filter.Eq("AppID", AppID);
+
+			var AI_Collection = db.GetCollection<AppInfo>(AppInfo.DBName);
+
+			var Local_AI_List = AI_Collection.Find(AI_Filter).SortBy(x => x.LastUpdated).ToList();
+
+			foreach(var AI in Local_AI_List)
+			{
+				if (AI.LastUpdated == null || string.IsNullOrEmpty(AI.DepoName))
+					continue;
+
+				builderToReturn.AppendLine($"{AI.DepoName} was updated {SteamUpdateBot.DiscordClient.ElapsedTime(AI.LastUpdated)}.");
+			}
+
+			if (builderToReturn.Length == 0)
+			{
+				await ctx.RespondAsync("Unable to find anything for this AppID!");
+				return;
+			}
+
+			var interactivity = ctx.Client.GetInteractivity();
+
+			var list_pages = interactivity.GeneratePagesInEmbed(builderToReturn.ToString(), DSharpPlus.Interactivity.Enums.SplitType.Line, embedBuilder);
+
+			await interactivity.SendPaginatedMessageAsync(ctx.Channel, ctx.User, list_pages, DSharpPlus.Interactivity.Enums.PaginationBehaviour.WrapAround, DSharpPlus.Interactivity.Enums.ButtonPaginationBehavior.DeleteButtons);
 		}
 	}
 }

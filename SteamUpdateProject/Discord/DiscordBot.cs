@@ -137,7 +137,7 @@ namespace SteamUpdateProject.Discord
 
 			var filterDebug = Builders<GuildInfo>.Filter.Eq("DebugMode", true);
 
-			res.AddRange(await GIcollection.Find(filterDebug).ToListAsync());
+			res.AddRange(GIcollection.Find(filterDebug).ToList());
 
 			foreach (GuildInfo ServerInfo in res)
 			{

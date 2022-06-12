@@ -35,6 +35,12 @@ namespace SteamUpdateProject.Discord.Commands
 
 			GuildInfo GuildInfo = GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Guild == null ? ctx.User.Id : ctx.Channel.Id);
 
+			if (GuildInfo.SubscribedApps.Count == 0)
+			{
+				await ctx.RespondAsync("No Steam Application subscriptions in the database for this channel.");
+				return;
+			}
+
 			StringBuilder stringBuilder = new StringBuilder();
 
 			if (objects.Length > 1 || (objects.Length == 1 && objects[0] == "*")) //Multiple
@@ -499,10 +505,10 @@ namespace SteamUpdateProject.Discord.Commands
 		}
 
 		/// <summary>
-		/// Checks if the <see cref="DiscordMember"/>'s ID is equal to <see cref="SteamUpdateBot.OverrideDiscordID"/>
+		/// Checks if the <see cref="DiscordUser"/>'s Id is equal to <see cref="SteamUpdateBot.OverrideDiscordID"/>
 		/// </summary>
-		/// <param name="u">Meme</param>
-		/// <returns>If the UserID is the same as the provided Dev ID</returns>
+		/// <param name="u">User running the command</param>
+		/// <returns>If the DiscordUser.Id is the same as the provided OverrideDiscordID</returns>
 		public static bool IsDev(DiscordUser u)
 		{
 			if (u.Id == SteamUpdateBot.OverrideDiscordID)
