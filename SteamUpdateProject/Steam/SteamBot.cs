@@ -130,7 +130,7 @@ namespace SteamUpdateProject.Steam
 
 						var AI_Filter = Builders<AppInfo>.Filter.Eq("AppID", AppUpdate.AppID);
 
-						AI_Collection.DeleteMany(AI_Filter);
+						//AI_Collection.DeleteMany(AI_Filter);
 
 						AppInfo appinfo = new AppInfo()
 						{
