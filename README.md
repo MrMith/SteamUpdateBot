@@ -27,6 +27,7 @@ This is a Discord bot ([DSharp+](https://github.com/DSharpPlus/DSharpPlus)) that
 | public**                 | Boolean         | Should we only show updates that are pushed to the default public branches (Default False) | N/A | !public true |
 | branch                 | Integer         | Displays all branches for a steam application and when they were last updated.       | N/A | !branch 570 |
 | name                   | Integer         | Gets the steam application name from the steam application ID      | N/A | !branch 570 |
+| history                   | Integer         | Lists all of updates in located within the database of this project.     | N/A | !history 570 |
  > Commands denoted with `**` are reserved to anyone with Admin, Manage Channels or All permissions.
 
 ## License
