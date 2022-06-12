@@ -22,6 +22,7 @@ namespace SteamUpdateProject.Discord.Commands
             {"showall","<True/False> `**`" },
             {"debug","<True/False> `**`" },
             {"public","<True/False> `**`" },
+            {"history","<AppID>"},
         };
 
         public CustomHelpFormatter(CommandContext ctx) : base(ctx)

@@ -136,7 +136,7 @@ namespace SteamUpdateProject.Steam
 						{
 							AppID = AppUpdate.AppID,
 							Name = AppUpdate.Name,
-aaaaaaaaaaa							LastUpdated = AppUpdate.LastUpdated,
+							LastUpdated = AppUpdate.LastUpdated,
 							DepoName = AppUpdate.DepoName
 						};
 
