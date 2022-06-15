@@ -26,15 +26,12 @@ namespace SteamUpdateProject.Discord.Commands
         [Command("devoverride"), Hidden]
         public async Task Devoverride(CommandContext ctx, bool _ov)
         {
-            await ctx.TriggerTypingAsync();
+			if (SubscriptionModule.IsDev(ctx.User))
+				return;
 
-            if (ctx.User.Id != SteamUpdateBot.OverrideDiscordID)
-            {
-                await ctx.RespondAsync($"You're not authorized to use this command. Only the override user can use this.");
-                return;
-            }
+			await ctx.TriggerTypingAsync();
 
-            SteamUpdateBot.DiscordClient.DevOverride = _ov;
+			SteamUpdateBot.DiscordClient.DevOverride = _ov;
 
             await ctx.RespondAsync($"Set override to {SteamUpdateBot.DiscordClient.DevOverride}.");
         }
@@ -42,15 +39,12 @@ namespace SteamUpdateProject.Discord.Commands
         [Command("devoverride"), Hidden]
         public async Task Devoverride(CommandContext ctx)
         {
-            await ctx.TriggerTypingAsync();
+			if (SubscriptionModule.IsDev(ctx.User))
+				return;
 
-            if (ctx.User.Id != SteamUpdateBot.OverrideDiscordID)
-            {
-                await ctx.RespondAsync($"You're not authorized to use this command. Only the override user can use this.");
-                return;
-            }
+			await ctx.TriggerTypingAsync();
 
-            await ctx.RespondAsync($"Override is set to {SteamUpdateBot.DiscordClient.DevOverride}.");
+			await ctx.RespondAsync($"Override is set to {SteamUpdateBot.DiscordClient.DevOverride}.");
         }
 
         [Command("branches"), Description("Lists all of the branches for a certain steam app.")]
@@ -104,15 +98,15 @@ namespace SteamUpdateProject.Discord.Commands
 
                             if (branchKVP.Name == "public")
                             {
-								var db = SteamUpdateBot.DB.Client.GetDatabase(SteamUpdateBot.DatabaseName);
+								IMongoDatabase db = SteamUpdateBot.DB.Client.GetDatabase(SteamUpdateBot.DatabaseName);
 
-								var AI_Collection = db.GetCollection<AppInfo>(AppInfo.DBName);
+								IMongoCollection<AppInfo> AI_Collection = db.GetCollection<AppInfo>(AppInfo.DBName);
 
-								var AI_Filter = Builders<AppInfo>.Filter.Eq("AppID", AppID);
+								FilterDefinition<AppInfo> AI_Filter = Builders<AppInfo>.Filter.Eq("AppID", AppID);
 
-								var app = AI_Collection.Find(AI_Filter).Limit(1).SingleOrDefault();
+								AppInfo app = AI_Collection.Find(AI_Filter).Limit(1).SingleOrDefault();
 
-								var BranchUpdateTime = DateTime.UnixEpoch.AddSeconds(double.Parse(branchData.Value));
+								DateTime BranchUpdateTime = DateTime.UnixEpoch.AddSeconds(double.Parse(branchData.Value));
 
 								if (app.LastUpdated.Value.Ticks > BranchUpdateTime.Ticks)
 								{
@@ -164,13 +158,10 @@ namespace SteamUpdateProject.Discord.Commands
         {
             await ctx.TriggerTypingAsync();
 
-            if (ctx.User.Id != SteamUpdateBot.OverrideDiscordID)
-            {
-                await ctx.RespondAsync($"You're not authorized to run this command. Die.");
-                return;
-            }
+            if (SubscriptionModule.IsDev(ctx.User))
+				return;
 
-            AppUpdate AppUpdate = new AppUpdate();
+			AppUpdate AppUpdate = new AppUpdate();
 
             AppUpdate.AppID = 570;
             AppUpdate.Content = true;
@@ -250,12 +241,12 @@ namespace SteamUpdateProject.Discord.Commands
 
             StringBuilder stringBuilder = new StringBuilder();
 
-            foreach (var obj in objects)
+            foreach (string obj in objects)
                 stringBuilder.Append(obj + " ");
 
             FeedbackHandler.AddFeedback(stringBuilder.ToString(), $"{ctx.User.Username}#{ctx.User.Discriminator}: " );
 
-            var dev = await SteamUpdateBot.DiscordClient.GetDiscordMember(SteamUpdateBot.OverrideDiscordID);
+			DiscordMember dev = await SteamUpdateBot.DiscordClient.GetDiscordMember(SteamUpdateBot.OverrideDiscordID);
 
             if (dev != null)
                 await dev.SendMessageAsync($"{ctx.User.Username}#{ctx.User.Discriminator}: " + stringBuilder.ToString());
@@ -263,6 +254,8 @@ namespace SteamUpdateProject.Discord.Commands
             await ctx.RespondAsync("Sent to the developer!");
         }
 
+		///Not the best way to do it since its hard-coded 
+		///But I like the pain.
 		private string[] AllPatchNotes = new string[]
 		{
 			"June 12th 2022\nAdded **history** command *(Ex: !history 570)* which allows you to list all of the updates of an app in the database.",
@@ -286,7 +279,7 @@ namespace SteamUpdateProject.Discord.Commands
 
 			List<Page> PagesToShow = new List<Page>();
 
-			foreach(var Note in AllPatchNotes)
+			foreach(string Note in AllPatchNotes)
 			{
 				string[] Notes = Note.Split("\n");
 
@@ -297,7 +290,7 @@ namespace SteamUpdateProject.Discord.Commands
 				PagesToShow.Add(new Page("", DiscordEmbed));
 			}
 
-			var interactivity = ctx.Client.GetInteractivity();
+			InteractivityExtension interactivity = ctx.Client.GetInteractivity();
 
 			await interactivity.SendPaginatedMessageAsync(ctx.Channel, ctx.User, PagesToShow, DSharpPlus.Interactivity.Enums.PaginationBehaviour.WrapAround, DSharpPlus.Interactivity.Enums.ButtonPaginationBehavior.DeleteButtons);
 		}
@@ -328,15 +321,15 @@ namespace SteamUpdateProject.Discord.Commands
 
 			embedBuilder.Title = $"{await SteamUpdateBot.SteamClient.GetAppName(AppID)} ({AppID})";
 
-			var db = SteamUpdateBot.DB.Client.GetDatabase(SteamUpdateBot.DatabaseName);
+			IMongoDatabase db = SteamUpdateBot.DB.Client.GetDatabase(SteamUpdateBot.DatabaseName);
 
-			var AI_Filter = Builders<AppInfo>.Filter.Eq("AppID", AppID);
+			FilterDefinition<AppInfo> AI_Filter = Builders<AppInfo>.Filter.Eq("AppID", AppID);
 
-			var AI_Collection = db.GetCollection<AppInfo>(AppInfo.DBName);
+			IMongoCollection<AppInfo> AI_Collection = db.GetCollection<AppInfo>(AppInfo.DBName);
 
-			var Local_AI_List = AI_Collection.Find(AI_Filter).SortBy(x => x.LastUpdated).ToList();
+			List<AppInfo> Local_AI_List = AI_Collection.Find(AI_Filter).SortBy(x => x.LastUpdated).ToList();
 
-			foreach(var AI in Local_AI_List)
+			foreach(AppInfo AI in Local_AI_List)
 			{
 				if (AI.LastUpdated == null || string.IsNullOrEmpty(AI.DepoName))
 					continue;
@@ -350,9 +343,9 @@ namespace SteamUpdateProject.Discord.Commands
 				return;
 			}
 
-			var interactivity = ctx.Client.GetInteractivity();
+			InteractivityExtension interactivity = ctx.Client.GetInteractivity();
 
-			var list_pages = interactivity.GeneratePagesInEmbed(builderToReturn.ToString(), DSharpPlus.Interactivity.Enums.SplitType.Line, embedBuilder);
+			IEnumerable<Page> list_pages = interactivity.GeneratePagesInEmbed(builderToReturn.ToString(), DSharpPlus.Interactivity.Enums.SplitType.Line, embedBuilder);
 
 			await interactivity.SendPaginatedMessageAsync(ctx.Channel, ctx.User, list_pages, DSharpPlus.Interactivity.Enums.PaginationBehaviour.WrapAround, DSharpPlus.Interactivity.Enums.ButtonPaginationBehavior.DeleteButtons);
 		}

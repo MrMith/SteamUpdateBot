@@ -41,7 +41,7 @@ namespace SteamUpdateProject.Entities
         /// </summary>
         public string DepoName { get; set; }
 
-        #region Equality checks
+        #region Equality Checks
         public override bool Equals(object obj)
         {
             return Equals(obj as AppUpdate);

@@ -9,10 +9,6 @@ namespace SteamUpdateProject.Entities
     /// </summary>
     public class SubbedApp : IEquatable<SubbedApp>
     {
-        public SubbedApp() //Needed by entity framework.
-        {
-        }
-
         public SubbedApp(long appid)
         {
             AppID = appid;

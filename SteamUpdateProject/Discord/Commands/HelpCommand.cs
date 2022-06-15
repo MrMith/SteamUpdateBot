@@ -40,7 +40,7 @@ namespace SteamUpdateProject.Discord.Commands
         public override BaseHelpFormatter WithSubcommands(IEnumerable<Command> cmds)
         {
             HelpBuilder.AddField("**[NOTICE]**", "This bot has full DM Support!");
-            foreach (var cmd in cmds)
+            foreach (Command cmd in cmds)
             {
                 if (cmd.Description == null || cmd.Name == "help") //Help
                     continue;

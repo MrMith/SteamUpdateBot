@@ -78,13 +78,13 @@ namespace SteamUpdateProject
 			MinorDataHandler = new MinorDataHandler();
 			MinorDataHandler.ReadData();
 
-			var Config = new ConfigHandler();
+			ConfigHandler Config = new ConfigHandler();
 
 			if (!Directory.Exists(LogPath))
 				Directory.CreateDirectory(LogPath);
 
 			DiscordClient = new DiscordBot();
-			DiscordClient.StartDiscordBot(Config.BotToken).GetAwaiter().GetResult();
+			DiscordClient.StartDiscordBot(Config).GetAwaiter().GetResult();
 
             OverrideDiscordID = ulong.Parse(Config.DiscordID);
 

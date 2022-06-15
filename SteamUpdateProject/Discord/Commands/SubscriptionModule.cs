@@ -33,7 +33,7 @@ namespace SteamUpdateProject.Discord.Commands
 
 			DiscordEmbedBuilder embedBuilder = new DiscordEmbedBuilder();
 
-			GuildInfo GuildInfo = GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Guild == null ? ctx.User.Id : ctx.Channel.Id);
+			GuildInfo GuildInfo = GetGuildInfo(ctx);
 
 			if (GuildInfo.SubscribedApps.Count == 0)
 			{
@@ -59,8 +59,8 @@ namespace SteamUpdateProject.Discord.Commands
 				if (objects[0] == "*")
 				{
 					await ctx.RespondAsync("Are you sure? Yes/No.");
-					var interact = ctx.Client.GetInteractivity();
-					var msg = await interact.WaitForMessageAsync(x => x != null);
+					InteractivityExtension interact = ctx.Client.GetInteractivity();
+					InteractivityResult<DiscordMessage> msg = await interact.WaitForMessageAsync(x => x != null);
 
 					if (msg.Result.Content.Contains("Yes", StringComparison.OrdinalIgnoreCase))
 					{
@@ -106,9 +106,9 @@ namespace SteamUpdateProject.Discord.Commands
 				if (stringBuilder.Length > 800)
 				{
 					//We're over the limit of 1024 characters (Short by 224 to make sure title and stuff can fit) and we need to use pages to display our data.
-					var interactivity = ctx.Client.GetInteractivity();
+					InteractivityExtension interactivity = ctx.Client.GetInteractivity();
 
-					var list_pages = interactivity.GeneratePagesInEmbed(stringBuilder.ToString(), DSharpPlus.Interactivity.Enums.SplitType.Line, embedBuilder);
+					IEnumerable<Page> list_pages = interactivity.GeneratePagesInEmbed(stringBuilder.ToString(), DSharpPlus.Interactivity.Enums.SplitType.Line, embedBuilder);
 
 					await interactivity.SendPaginatedMessageAsync(ctx.Channel, ctx.User, list_pages, DSharpPlus.Interactivity.Enums.PaginationBehaviour.WrapAround, DSharpPlus.Interactivity.Enums.ButtonPaginationBehavior.DeleteButtons);
 					return;
@@ -158,10 +158,12 @@ namespace SteamUpdateProject.Discord.Commands
 
 			DiscordEmbedBuilder embedBuilder = new DiscordEmbedBuilder();
 
-			GuildInfo GuildInfo = GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Guild == null ? ctx.User.Id : ctx.Channel.Id);
+			GuildInfo GuildInfo = GetGuildInfo(ctx);
+
 			if (objects.Length > 1) //Multiple apps
 			{
 				embedBuilder.Title = "Apps added:";
+
 				List<uint> ListOfAppIDS = new List<uint>();
 				foreach (string StringAppID in objects)
 				{
@@ -175,9 +177,10 @@ namespace SteamUpdateProject.Discord.Commands
 
 				if (ListOfConfirmedAppsAdded.Count == 0)
 				{
-					await ctx.RespondAsync("Already subscribed to all apps!");
+					await ctx.RespondAsync("Already subscribed to all of these steam apps!");
 					return;
 				}
+
 				StringBuilder builderToReturn = new StringBuilder();
 
 				foreach (uint app in ListOfConfirmedAppsAdded)
@@ -195,9 +198,9 @@ namespace SteamUpdateProject.Discord.Commands
 				if (builderToReturn.Length > 800)
 				{
 					//We're over the limit of 1024 characters (Short by 224 to make sure title and stuff can fit) and we need to use pages to display our data.
-					var interactivity = ctx.Client.GetInteractivity();
+					InteractivityExtension interactivity = ctx.Client.GetInteractivity();
 
-					var list_pages = interactivity.GeneratePagesInEmbed(builderToReturn.ToString(), DSharpPlus.Interactivity.Enums.SplitType.Line, embedBuilder);
+					IEnumerable<Page> list_pages = interactivity.GeneratePagesInEmbed(builderToReturn.ToString(), DSharpPlus.Interactivity.Enums.SplitType.Line, embedBuilder);
 
 					await interactivity.SendPaginatedMessageAsync(ctx.Channel, ctx.User, list_pages, DSharpPlus.Interactivity.Enums.PaginationBehaviour.WrapAround, DSharpPlus.Interactivity.Enums.ButtonPaginationBehavior.DeleteButtons);
 					return;
@@ -237,7 +240,7 @@ namespace SteamUpdateProject.Discord.Commands
 		{
 			await ctx.TriggerTypingAsync();
 
-			GuildInfo GuildInfo = GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Guild == null ? ctx.User.Id : ctx.Channel.Id);
+			GuildInfo GuildInfo = GetGuildInfo(ctx);
 
 			DiscordEmbedBuilder embedBuilder = new DiscordEmbedBuilder();
 			embedBuilder.Title = "List of subscribed steam apps:";
@@ -270,9 +273,9 @@ namespace SteamUpdateProject.Discord.Commands
 			if (builderToReturn.Length > 800)
 			{
 				//We're over the limit of 1024 characters (Short by 224 to make sure title and stuff can fit) and we need to use pages to display our data.
-				var interactivity = ctx.Client.GetInteractivity();
+				InteractivityExtension interactivity = ctx.Client.GetInteractivity();
 
-				var list_pages = interactivity.GeneratePagesInEmbed(builderToReturn.ToString(), DSharpPlus.Interactivity.Enums.SplitType.Line, embedBuilder);
+				IEnumerable<Page> list_pages = interactivity.GeneratePagesInEmbed(builderToReturn.ToString(), DSharpPlus.Interactivity.Enums.SplitType.Line, embedBuilder);
 
 				await interactivity.SendPaginatedMessageAsync(ctx.Channel, ctx.User, list_pages, DSharpPlus.Interactivity.Enums.PaginationBehaviour.WrapAround, DSharpPlus.Interactivity.Enums.ButtonPaginationBehavior.DeleteButtons);
 				return;
@@ -288,7 +291,7 @@ namespace SteamUpdateProject.Discord.Commands
 		{
 			await ctx.TriggerTypingAsync();
 
-			GuildInfo GuildInfo = GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Guild == null ? ctx.User.Id : ctx.Channel.Id);
+			GuildInfo GuildInfo = GetGuildInfo(ctx);
 
 			if (GuildInfo == null)
 			{
@@ -309,19 +312,19 @@ namespace SteamUpdateProject.Discord.Commands
 				return;
 			}
 
-			GuildInfo GuildInfo = GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Guild == null ? ctx.User.Id : ctx.Channel.Id);
+			GuildInfo GuildInfo = GetGuildInfo(ctx);
 
 			if (GuildInfo != null)
 			{
 				GuildInfo.ShowContent = Set;
 
-				var db = SteamUpdateBot.DB.Client.GetDatabase(SteamUpdateBot.DatabaseName);
+				IMongoDatabase db = SteamUpdateBot.DB.Client.GetDatabase(SteamUpdateBot.DatabaseName);
 
-				var GI_Filter = Builders<GuildInfo>.Filter.And(
+				FilterDefinition<GuildInfo> GI_Filter = Builders<GuildInfo>.Filter.And(
 								Builders<GuildInfo>.Filter.Eq("ChannelID", GuildInfo.ChannelID),
 								Builders<GuildInfo>.Filter.Eq("GuildID", GuildInfo.GuildID));
 
-				var GIcollection = db.GetCollection<GuildInfo>(GuildInfo.DBName);
+				IMongoCollection<GuildInfo> GIcollection = db.GetCollection<GuildInfo>(GuildInfo.DBName);
 
 				GIcollection.ReplaceOne(GI_Filter, GuildInfo);
 			}
@@ -337,7 +340,7 @@ namespace SteamUpdateProject.Discord.Commands
 
 			await ctx.TriggerTypingAsync();
 
-			GuildInfo GuildInfo = GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Guild == null ? ctx.User.Id : ctx.Channel.Id);
+			GuildInfo GuildInfo = GetGuildInfo(ctx);
 
 			await ctx.RespondAsync($"Debug mode is currently set to {GuildInfo.DebugMode}.");
 		}
@@ -356,19 +359,19 @@ namespace SteamUpdateProject.Discord.Commands
 				return;
 			}
 
-			GuildInfo GuildInfo = GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Guild == null ? ctx.User.Id : ctx.Channel.Id);
+			GuildInfo GuildInfo = GetGuildInfo(ctx);
 
 			if (GuildInfo != null)
 			{
 				GuildInfo.DebugMode = Set;
 
-				var db = SteamUpdateBot.DB.Client.GetDatabase(SteamUpdateBot.DatabaseName);
+				IMongoDatabase db = SteamUpdateBot.DB.Client.GetDatabase(SteamUpdateBot.DatabaseName);
 
-				var GI_Filter = Builders<GuildInfo>.Filter.And(
+				FilterDefinition<GuildInfo> GI_Filter = Builders<GuildInfo>.Filter.And(
 								Builders<GuildInfo>.Filter.Eq("ChannelID", GuildInfo.ChannelID),
 								Builders<GuildInfo>.Filter.Eq("GuildID", GuildInfo.GuildID));
 
-				var GIcollection = db.GetCollection<GuildInfo>(GuildInfo.DBName);
+				IMongoCollection<GuildInfo> GIcollection = db.GetCollection<GuildInfo>(GuildInfo.DBName);
 
 				GIcollection.ReplaceOne(GI_Filter, GuildInfo);
 			}
@@ -386,7 +389,7 @@ namespace SteamUpdateProject.Discord.Commands
 		{
 			await ctx.TriggerTypingAsync();
 
-			GuildInfo GuildInfo = GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Guild == null ? ctx.User.Id : ctx.Channel.Id);
+			GuildInfo GuildInfo = GetGuildInfo(ctx);
 
 			await ctx.RespondAsync($"Public mode is currently set to {GuildInfo.PublicDepoOnly}.");
 		}
@@ -402,19 +405,19 @@ namespace SteamUpdateProject.Discord.Commands
 				return;
 			}
 
-			GuildInfo GuildInfo = GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Guild == null ? ctx.User.Id : ctx.Channel.Id);
+			GuildInfo GuildInfo = GetGuildInfo(ctx);
 
 			if (GuildInfo != null)
 			{
 				GuildInfo.PublicDepoOnly = Set;
 
-				var db = SteamUpdateBot.DB.Client.GetDatabase(SteamUpdateBot.DatabaseName);
+				IMongoDatabase db = SteamUpdateBot.DB.Client.GetDatabase(SteamUpdateBot.DatabaseName);
 
-				var GI_Filter = Builders<GuildInfo>.Filter.And(
+				FilterDefinition<GuildInfo> GI_Filter = Builders<GuildInfo>.Filter.And(
 								Builders<GuildInfo>.Filter.Eq("ChannelID", GuildInfo.ChannelID),
 								Builders<GuildInfo>.Filter.Eq("GuildID", GuildInfo.GuildID));
 
-				var GIcollection = db.GetCollection<GuildInfo>(GuildInfo.DBName);
+				IMongoCollection<GuildInfo> GIcollection = db.GetCollection<GuildInfo>(GuildInfo.DBName);
 
 				GIcollection.ReplaceOne(GI_Filter, GuildInfo);
 			}
@@ -442,28 +445,28 @@ namespace SteamUpdateProject.Discord.Commands
 
 			StringBuilder stringBuilder = new StringBuilder();
 
-			var db = SteamUpdateBot.DB.Client.GetDatabase(SteamUpdateBot.DatabaseName);
+			IMongoDatabase db = SteamUpdateBot.DB.Client.GetDatabase(SteamUpdateBot.DatabaseName);
 
-			var GI_Filter = Builders<GuildInfo>.Filter.And(
+			FilterDefinition<GuildInfo> GI_Filter = Builders<GuildInfo>.Filter.And(
 							Builders<GuildInfo>.Filter.Eq("ChannelID", ctx.Guild == null ? ctx.User.Id : ctx.Channel.Id),
 							Builders<GuildInfo>.Filter.Eq("GuildID", ctx.Guild == null ? 0 : ctx.Guild.Id));
 
-			var GIcollection = db.GetCollection<GuildInfo>(GuildInfo.DBName);
+			IMongoCollection<GuildInfo> GIcollection = db.GetCollection<GuildInfo>(GuildInfo.DBName);
 
-			var Local_GI = GIcollection.Find(GI_Filter).Limit(1).SingleOrDefault();
+			GuildInfo Local_GI = GIcollection.Find(GI_Filter).Limit(1).SingleOrDefault();
 
 			if (ctx.Guild != null)
 			{
-				foreach (var app in Local_GI.SubscribedApps)
+				foreach (SubbedApp app in Local_GI.SubscribedApps)
 				{
-					var channel = ctx.Guild.GetChannel((ulong)Local_GI.ChannelID);
+					DiscordChannel channel = ctx.Guild.GetChannel((ulong)Local_GI.ChannelID);
 
 					stringBuilder.AppendLine($"{await SteamUpdateBot.SteamClient.GetAppName((uint)app.AppID)} ({app.AppID}) {(channel != null ? $"in {channel.Name}" : "")}");
 				}
 			}
 			else
 			{
-				foreach (var app in Local_GI.SubscribedApps)
+				foreach (SubbedApp app in Local_GI.SubscribedApps)
 				{
 					stringBuilder.AppendLine($"{await SteamUpdateBot.SteamClient.GetAppName((uint)app.AppID)} ({app.AppID})");
 				}
@@ -472,9 +475,9 @@ namespace SteamUpdateProject.Discord.Commands
 			if (stringBuilder.Length > 800)
 			{
 				//We're over the limit of 1024 characters (Short by 224 to make sure title and stuff can fit) and we need to use pages to display our data.
-				var interactivity = ctx.Client.GetInteractivity();
+				InteractivityExtension interactivity = ctx.Client.GetInteractivity();
 
-				var list_pages = interactivity.GeneratePagesInEmbed(stringBuilder.ToString(), DSharpPlus.Interactivity.Enums.SplitType.Line, embedBuilder);
+				IEnumerable<Page> list_pages = interactivity.GeneratePagesInEmbed(stringBuilder.ToString(), DSharpPlus.Interactivity.Enums.SplitType.Line, embedBuilder);
 
 				await interactivity.SendPaginatedMessageAsync(ctx.Channel, ctx.User, list_pages, DSharpPlus.Interactivity.Enums.PaginationBehaviour.WrapAround, DSharpPlus.Interactivity.Enums.ButtonPaginationBehavior.DeleteButtons);
 				return;
@@ -524,6 +527,15 @@ namespace SteamUpdateProject.Discord.Commands
 		public static GuildInfo GetGuildInfo(ulong GuildID, ulong ChannelID)
 		{
 			return DiscordBot.GetGuildInfo(GuildID, ChannelID);
+		}
+
+		/// <summary>
+		/// I didn't wanna type <see cref="DiscordBot.GetGuildInfo"/> every time I wanted it.
+		/// </summary>
+		/// <returns><see cref="DiscordBot.GetGuildInfo"/></returns>
+		public static GuildInfo GetGuildInfo(CommandContext ctx)
+		{
+			return DiscordBot.GetGuildInfo(ctx.Guild == null ? 0 : ctx.Guild.Id, ctx.Guild == null ? ctx.User.Id : ctx.Channel.Id);
 		}
 	}
 }

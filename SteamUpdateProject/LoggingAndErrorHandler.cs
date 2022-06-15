@@ -49,7 +49,7 @@ namespace SteamUpdateProject
 		/// <param name="e">Exception that makes me cry</param>
 		public void BadlyFormattedFunction(Exception e)
 		{
-			if (e is System.Net.Sockets.SocketException)
+			if (e is System.Net.Sockets.SocketException || e is System.IO.IOException)
 				return; //What the hell even is this, no line numbers or anything. Just a meaningless error.
 
             Console.WriteLine(e);
@@ -57,7 +57,7 @@ namespace SteamUpdateProject
 		}
 
 		/// <summary>
-		/// Error enum for my code so I don't have to use magic strings
+		/// Error enum for my code so I don't have to use strings
 		/// </summary>
 		public enum CustomErrorType
 		{

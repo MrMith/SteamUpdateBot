@@ -7,9 +7,6 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Linq;
-using MongoDB;
-using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace SteamUpdateProject.Steam
@@ -111,10 +108,10 @@ namespace SteamUpdateProject.Steam
                     continue;
 
                 //Go through steam applications information that we've gathered.
-                foreach (var CallBackInfo in FullProductInfo.ProductInfo)
+                foreach (SteamApps.PICSProductInfoCallback CallBackInfo in FullProductInfo.ProductInfo)
                 {
                     //Goes through the apps in the product info (This is because you can go through packages which could contain multiple apps but in this case we typically dont)
-                    foreach (var CallBackInfoApps in CallBackInfo.Apps)
+                    foreach (KeyValuePair<uint, SteamApps.PICSProductInfoCallback.PICSProductInfo> CallBackInfoApps in CallBackInfo.Apps)
                     {
                         //Get Depos (Where the downloadable content is)
                         KeyValue depotKV = CallBackInfoApps.Value.KeyValues.Children.Find(child => child.Name == "depots");
@@ -124,11 +121,11 @@ namespace SteamUpdateProject.Steam
                         AppUpdate.LastUpdated = DateTime.UtcNow;
                         AppUpdate.Name = CallBackInfoApps.Value.KeyValues["common"]["name"].AsString();
 
-						var db = SteamUpdateBot.DB.Client.GetDatabase(SteamUpdateBot.DatabaseName);
+						IMongoDatabase db = SteamUpdateBot.DB.Client.GetDatabase(SteamUpdateBot.DatabaseName);
 
-						var AI_Collection = db.GetCollection<AppInfo>(AppInfo.DBName);
+						IMongoCollection<AppInfo> AI_Collection = db.GetCollection<AppInfo>(AppInfo.DBName);
 
-						var AI_Filter = Builders<AppInfo>.Filter.Eq("AppID", AppUpdate.AppID);
+						FilterDefinition<AppInfo> AI_Filter = Builders<AppInfo>.Filter.Eq("AppID", AppUpdate.AppID);
 
 						//AI_Collection.DeleteMany(AI_Filter);
 
@@ -199,7 +196,7 @@ namespace SteamUpdateProject.Steam
                 return CachedInfo.Name;
             }
 
-            var ProductInfo = await Apps.PICSGetProductInfo(new SteamApps.PICSRequest(appid), null);
+			AsyncJobMultiple<SteamApps.PICSProductInfoCallback>.ResultSet ProductInfo = await Apps.PICSGetProductInfo(new SteamApps.PICSRequest(appid), null);
 
             AppInfo appInfo = new AppInfo()
             {
@@ -210,17 +207,17 @@ namespace SteamUpdateProject.Steam
             if (!ProductInfo.Complete)
                 return "Unknown App";
 
-            foreach (var CallBackInfo in ProductInfo.Results)
+            foreach (SteamApps.PICSProductInfoCallback CallBackInfo in ProductInfo.Results)
             {
-                foreach (var CallBackInfoApps in CallBackInfo.Apps)
+                foreach (KeyValuePair<uint, SteamApps.PICSProductInfoCallback.PICSProductInfo> CallBackInfoApps in CallBackInfo.Apps)
                 {
                     appInfo.Name = CallBackInfoApps.Value.KeyValues["common"]["name"].AsString();
 
-					var db = SteamUpdateBot.DB.Client.GetDatabase(SteamUpdateBot.DatabaseName);
+					IMongoDatabase db = SteamUpdateBot.DB.Client.GetDatabase(SteamUpdateBot.DatabaseName);
 
-					var AI_Collection = db.GetCollection<AppInfo>(AppInfo.DBName);
+					IMongoCollection<AppInfo> AI_Collection = db.GetCollection<AppInfo>(AppInfo.DBName);
 
-					//var AI_Filter = Builders<AppInfo>.Filter.Eq("AppID", appid);
+					//FilterDefinition<AppInfo> AI_Filter = Builders<AppInfo>.Filter.Eq("AppID", appid);
 
 					//AI_Collection.DeleteMany(AI_Filter);
 

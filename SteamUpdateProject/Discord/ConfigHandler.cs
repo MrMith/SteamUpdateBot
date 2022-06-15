@@ -1,13 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using SteamUpdateProject.Discord;
 using SteamUpdateProject.Steam;
 using System.IO;
 using Newtonsoft.Json;
-using Newtonsoft;
 
 namespace SteamUpdateProject.Discord
 {
@@ -30,40 +25,40 @@ namespace SteamUpdateProject.Discord
 			{
 				Console.WriteLine("No config.json found, input your config options here to be saved:\n");
 				Console.WriteLine("Input Bot Token: ");
-				var token = Console.ReadLine();
+				string token = Console.ReadLine();
 				BotToken = token;
 
 				Console.WriteLine("Input Bot Prefix: ");
-				var prefix = Console.ReadLine();
+				string prefix = Console.ReadLine();
 				BotPrefix = prefix;
 
 				Console.WriteLine("Input Steam Username: ");
-				var steamName = Console.ReadLine();
+				string steamName = Console.ReadLine();
 				SteamName = steamName;
 
 				Console.WriteLine("Input Steam Password: ");
-				var steamPW = Console.ReadLine();
+				string steamPW = Console.ReadLine();
 				SteamPW = steamPW;
 
 				Console.WriteLine("Input Discord Dev Override ID (Optional): ");
-				var discordID = Console.ReadLine();
+				string discordID = Console.ReadLine();
 				discordID = discordID == null ? "0" : discordID;
 				DiscordID = discordID;
 
 				ConfigJson json = new ConfigJson(token, prefix, steamName, steamPW, discordID);
 
-				var seralizedObject = JsonConvert.SerializeObject(json, Formatting.Indented);
+				string seralizedObject = JsonConvert.SerializeObject(json, Formatting.Indented);
 
 				using StreamWriter config = new StreamWriter("config.json");
 				config.Write(seralizedObject);
 				return;
 			}
 
-			var RawConfigJson = "";
+			string RawConfigJson = "";
 
-			using (var fs = File.OpenRead("config.json"))
+			using (FileStream fs = File.OpenRead("config.json"))
 
-			using (var sr = new StreamReader(fs, new UTF8Encoding(false)))
+			using (StreamReader sr = new StreamReader(fs, new UTF8Encoding(false)))
 				RawConfigJson = sr.ReadToEnd();
 
 			ConfigJson cfgjson = JsonConvert.DeserializeObject<ConfigJson>(RawConfigJson);
