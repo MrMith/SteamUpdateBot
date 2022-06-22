@@ -26,7 +26,7 @@ namespace SteamUpdateProject.Discord.Commands
         [Command("devoverride"), Hidden]
         public async Task Devoverride(CommandContext ctx, bool _ov)
         {
-			if (SubscriptionModule.IsDev(ctx.User))
+			if (!SubscriptionModule.IsDev(ctx.User))
 				return;
 
 			await ctx.TriggerTypingAsync();
@@ -39,7 +39,7 @@ namespace SteamUpdateProject.Discord.Commands
         [Command("devoverride"), Hidden]
         public async Task Devoverride(CommandContext ctx)
         {
-			if (SubscriptionModule.IsDev(ctx.User))
+			if (!SubscriptionModule.IsDev(ctx.User))
 				return;
 
 			await ctx.TriggerTypingAsync();
@@ -158,7 +158,7 @@ namespace SteamUpdateProject.Discord.Commands
         {
             await ctx.TriggerTypingAsync();
 
-            if (SubscriptionModule.IsDev(ctx.User))
+            if (!SubscriptionModule.IsDev(ctx.User))
 				return;
 
 			AppUpdate AppUpdate = new AppUpdate();
