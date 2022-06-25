@@ -1,4 +1,4 @@
-﻿using DSharpPlus;
+using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
@@ -33,9 +33,9 @@ namespace SteamUpdateProject.Discord.Commands
 
 			DiscordEmbedBuilder embedBuilder = new DiscordEmbedBuilder();
 
-			GuildInfo GuildInfo = GetGuildInfo(ctx);
+			GuildInfo guildInfo = GetGuildInfo(ctx);
 
-			if (GuildInfo.SubscribedApps.Count == 0)
+			if (guildInfo.SubscribedApps.Count == 0)
 			{
 				await ctx.RespondAsync("No Steam Application subscriptions in the database for this channel.");
 				return;
@@ -45,16 +45,16 @@ namespace SteamUpdateProject.Discord.Commands
 
 			if (objects.Length > 1 || (objects.Length == 1 && objects[0] == "*")) //Multiple
 			{
-				List<uint> ListOfAppIDS = new List<uint>();
-				foreach (string StringAppID in objects)
+				List<uint> listOfAppIDS = new List<uint>();
+				foreach (string stringAppID in objects)
 				{
-					if (uint.TryParse(StringAppID, out uint appid))
+					if (uint.TryParse(stringAppID, out uint appid))
 					{
-						ListOfAppIDS.Add(appid);
+						listOfAppIDS.Add(appid);
 					}
 				}
 
-				List<uint> AppsThatHaveBeenRemoved = null;
+				List<uint> appsThatHaveBeenRemoved = null;
 
 				if (objects[0] == "*")
 				{
@@ -73,31 +73,30 @@ namespace SteamUpdateProject.Discord.Commands
 						return;
 					}
 
-					AppsThatHaveBeenRemoved = GuildInfo.RemoveMultipleApps(GuildInfo.SubscribedApps);
+					appsThatHaveBeenRemoved = guildInfo.RemoveMultipleApps(guildInfo.SubscribedApps);
 				}
 				else
-					AppsThatHaveBeenRemoved = GuildInfo.RemoveMultipleApps(ListOfAppIDS);
+					appsThatHaveBeenRemoved = guildInfo.RemoveMultipleApps(listOfAppIDS);
 
-				if (AppsThatHaveBeenRemoved.Count == 0)
+				if (appsThatHaveBeenRemoved.Count == 0)
 				{
 					await ctx.RespondAsync("You're not subscribed to these apps!");
 					return;
 				}
 
-				foreach (uint app in AppsThatHaveBeenRemoved)
+				foreach (uint app in appsThatHaveBeenRemoved)
 				{
-					AppInfo AppInfo = new AppInfo()
+					AppInfo appInfo = new AppInfo
 					{
-						AppID = app
+						AppID = app,
+						Name = await SteamUpdateBot.SteamClient.GetAppName(app)
 					};
 
-					AppInfo.Name = await SteamUpdateBot.SteamClient.GetAppName(app);
+					stringBuilder.AppendLine($"{appInfo.Name} ({appInfo.AppID})");
 
-					stringBuilder.AppendLine($"{AppInfo.Name} ({AppInfo.AppID})");
-
-					if (AppInfo.LastUpdated != null && AppInfo.LastUpdated != DateTime.MinValue)
+					if (appInfo.LastUpdated != null && appInfo.LastUpdated != DateTime.MinValue)
 					{
-						stringBuilder.Append($". Last updated {AppInfo.LastUpdated?.ToLongDateString()}.");
+						stringBuilder.Append($". Last updated {appInfo.LastUpdated?.ToLongDateString()}.");
 					}
 				}
 
@@ -122,21 +121,20 @@ namespace SteamUpdateProject.Discord.Commands
 			}
 			else if (uint.TryParse(objects[0], out uint appid)) //Single
 			{
-				if (!GuildInfo.RemoveApp(appid))
+				if (!guildInfo.RemoveApp(appid))
 				{
 					await ctx.RespondAsync("You're not subscribed to this app!");
 					return;
 				}
 
-				AppInfo AppInfo = new AppInfo()
+				AppInfo appInfo = new AppInfo
 				{
-					AppID = appid
+					AppID = appid,
+					Name = await SteamUpdateBot.SteamClient.GetAppName(appid)
 				};
 
-				AppInfo.Name = await SteamUpdateBot.SteamClient.GetAppName(appid);
-
 				embedBuilder.Title = "Steam Apps removed:";
-				embedBuilder.AddField("Steam App:", $"{AppInfo.Name} ({appid})");
+				embedBuilder.AddField("Steam App:", $"{appInfo.Name} ({appid})");
 
 				await ctx.RespondAsync(embed: embedBuilder.Build());
 				return;
@@ -158,24 +156,24 @@ namespace SteamUpdateProject.Discord.Commands
 
 			DiscordEmbedBuilder embedBuilder = new DiscordEmbedBuilder();
 
-			GuildInfo GuildInfo = GetGuildInfo(ctx);
+			GuildInfo guildInfo = GetGuildInfo(ctx);
 
 			if (objects.Length > 1) //Multiple apps
 			{
 				embedBuilder.Title = "Apps added:";
 
-				List<uint> ListOfAppIDS = new List<uint>();
-				foreach (string StringAppID in objects)
+				List<uint> listOfAppIDS = new List<uint>();
+				foreach (string stringAppID in objects)
 				{
-					if (uint.TryParse(StringAppID, out uint appid) && !ListOfAppIDS.Contains(appid))
+					if (uint.TryParse(stringAppID, out uint appid) && !listOfAppIDS.Contains(appid))
 					{
-						ListOfAppIDS.Add(appid);
+						listOfAppIDS.Add(appid);
 					}
 				}
 
-				List<uint> ListOfConfirmedAppsAdded = GuildInfo.SubMultipleApps(ListOfAppIDS);
+				List<uint> listOfConfirmedAppsAdded = guildInfo.SubMultipleApps(listOfAppIDS);
 
-				if (ListOfConfirmedAppsAdded.Count == 0)
+				if (listOfConfirmedAppsAdded.Count == 0)
 				{
 					await ctx.RespondAsync("Already subscribed to all of these steam apps!");
 					return;
@@ -183,16 +181,15 @@ namespace SteamUpdateProject.Discord.Commands
 
 				StringBuilder builderToReturn = new StringBuilder();
 
-				foreach (uint app in ListOfConfirmedAppsAdded)
+				foreach (uint app in listOfConfirmedAppsAdded)
 				{
-					AppInfo AppInfo = new AppInfo()
+					AppInfo appInfo = new AppInfo
 					{
-						AppID = app
+						AppID = app,
+						Name = await SteamUpdateBot.SteamClient.GetAppName(app)
 					};
 
-					AppInfo.Name = await SteamUpdateBot.SteamClient.GetAppName(app);
-
-					builderToReturn.AppendLine($"{AppInfo.Name} ({AppInfo.AppID})");
+					builderToReturn.AppendLine($"{appInfo.Name} ({appInfo.AppID})");
 				}
 
 				if (builderToReturn.Length > 800)
@@ -213,21 +210,20 @@ namespace SteamUpdateProject.Discord.Commands
 			}
 			else if (uint.TryParse(objects[0], out uint appid)) //single app
 			{
-				if (!GuildInfo.SubApp(appid))
+				if (!guildInfo.SubApp(appid))
 				{
 					await ctx.RespondAsync($"Already added app! ({appid})");
 					return;
 				}
 
-				AppInfo AppInfo = new AppInfo()
+				AppInfo appInfo = new AppInfo
 				{
-					AppID = appid
+					AppID = appid,
+					Name = SteamUpdateBot.SteamClient.GetAppName(appid).Result
 				};
 
-				AppInfo.Name = SteamUpdateBot.SteamClient.GetAppName(appid).Result;
-
 				embedBuilder.Title = "Steam Apps added:";
-				embedBuilder.AddField("Steam App:", $"{AppInfo.Name} ({appid})");
+				embedBuilder.AddField("Steam App:", $"{appInfo.Name} ({appid})");
 
 				await ctx.RespondAsync(embed: embedBuilder.Build());
 				return;
@@ -236,16 +232,18 @@ namespace SteamUpdateProject.Discord.Commands
 		}
 
 		[Command("list"), Aliases("apps"), Description("Displays all of the subscribed apps for this channel.")]
-		public async Task ListAllSubscribedApps(CommandContext ctx)
+		public static async Task ListAllSubscribedApps(CommandContext ctx)
 		{
 			await ctx.TriggerTypingAsync();
 
-			GuildInfo GuildInfo = GetGuildInfo(ctx);
+			GuildInfo guildInfo = GetGuildInfo(ctx);
 
-			DiscordEmbedBuilder embedBuilder = new DiscordEmbedBuilder();
-			embedBuilder.Title = "List of subscribed steam apps:";
+			DiscordEmbedBuilder embedBuilder = new DiscordEmbedBuilder
+			{
+				Title = "List of subscribed steam apps:"
+			};
 
-			if (GuildInfo == null || GuildInfo.SubscribedApps.Count == 0)
+			if (guildInfo == null || guildInfo.SubscribedApps.Count == 0)
 			{
 				await ctx.RespondAsync("No apps found!");
 				return;
@@ -253,20 +251,20 @@ namespace SteamUpdateProject.Discord.Commands
 
 			StringBuilder builderToReturn = new StringBuilder();
 
-			foreach (SubbedApp SubbedApp in GuildInfo.SubscribedApps)
+			foreach (SubbedApp subbedApp in guildInfo.SubscribedApps)
 			{
-				AppInfo AppInfo = DiscordBot.GetCachedAppInfo(SubbedApp.AppID);
+				AppInfo appInfo = DiscordBot.GetCachedAppInfo(subbedApp.AppID);
 
-				if (AppInfo.Name == null || AppInfo.Name.Length == 0) AppInfo.Name = "Unknown App";
+				if (appInfo.Name == null || appInfo.Name.Length == 0) appInfo.Name = "Unknown App";
 
-				if (AppInfo.LastUpdated != null)
+				if (appInfo.LastUpdated != null)
 				{
-					builderToReturn.Append($"{AppInfo.Name} ({SubbedApp.AppID})");
-					builderToReturn.AppendLine($" was last updated {SteamUpdateBot.DiscordClient.ElapsedTime(AppInfo.LastUpdated)}.");
+					builderToReturn.Append($"{appInfo.Name} ({subbedApp.AppID})");
+					builderToReturn.AppendLine($" was last updated {SteamUpdateBot.DiscordClient.ElapsedTime(appInfo.LastUpdated)}.");
 				}
 				else
 				{
-					builderToReturn.AppendLine($"{AppInfo.Name} ({SubbedApp.AppID})");
+					builderToReturn.AppendLine($"{appInfo.Name} ({subbedApp.AppID})");
 				}
 			}
 
@@ -291,18 +289,18 @@ namespace SteamUpdateProject.Discord.Commands
 		{
 			await ctx.TriggerTypingAsync();
 
-			GuildInfo GuildInfo = GetGuildInfo(ctx);
+			GuildInfo guildInfo = GetGuildInfo(ctx);
 
-			if (GuildInfo == null)
+			if (guildInfo == null)
 			{
 				await ctx.RespondAsync("Show all is set to False.");
 			}
 
-			await ctx.RespondAsync($"Show all is set to: {GuildInfo.ShowContent}.");
+			await ctx.RespondAsync($"Show all is set to: {guildInfo.ShowContent}.");
 		}
 
 		[Command("showall"), Description("Do we show only content changes (Content as in downloadable updates)")]
-		public async Task ShowContentBool(CommandContext ctx, bool Set)
+		public async Task ShowContentBool(CommandContext ctx, bool set)
 		{
 			await ctx.TriggerTypingAsync();
 
@@ -312,24 +310,24 @@ namespace SteamUpdateProject.Discord.Commands
 				return;
 			}
 
-			GuildInfo GuildInfo = GetGuildInfo(ctx);
+			GuildInfo guildInfo = GetGuildInfo(ctx);
 
-			if (GuildInfo != null)
+			if (guildInfo != null)
 			{
-				GuildInfo.ShowContent = Set;
+				guildInfo.ShowContent = set;
 
 				IMongoDatabase db = SteamUpdateBot.DB.Client.GetDatabase(SteamUpdateBot.DatabaseName);
 
-				FilterDefinition<GuildInfo> GI_Filter = Builders<GuildInfo>.Filter.And(
-								Builders<GuildInfo>.Filter.Eq("ChannelID", GuildInfo.ChannelID),
-								Builders<GuildInfo>.Filter.Eq("GuildID", GuildInfo.GuildID));
+				FilterDefinition<GuildInfo> gI_Filter = Builders<GuildInfo>.Filter.And(
+								Builders<GuildInfo>.Filter.Eq("ChannelID", guildInfo.ChannelID),
+								Builders<GuildInfo>.Filter.Eq("GuildID", guildInfo.GuildID));
 
-				IMongoCollection<GuildInfo> GIcollection = db.GetCollection<GuildInfo>(GuildInfo.DBName);
+				IMongoCollection<GuildInfo> gIcollection = db.GetCollection<GuildInfo>(GuildInfo.DBName);
 
-				GIcollection.ReplaceOne(GI_Filter, GuildInfo);
+				_ = gIcollection.ReplaceOne(gI_Filter, guildInfo);
 			}
 
-			await ctx.RespondAsync($"Set show all to {Set}.");
+			await ctx.RespondAsync($"Set show all to {set}.");
 		}
 
 		[Command("debug"), Description("***WARNING*** *EVERY* steam update goes through as if you were subscribed to it."), Hidden]
@@ -340,13 +338,13 @@ namespace SteamUpdateProject.Discord.Commands
 
 			await ctx.TriggerTypingAsync();
 
-			GuildInfo GuildInfo = GetGuildInfo(ctx);
+			GuildInfo guildInfo = GetGuildInfo(ctx);
 
-			await ctx.RespondAsync($"Debug mode is currently set to {GuildInfo.DebugMode}.");
+			await ctx.RespondAsync($"Debug mode is currently set to {guildInfo.DebugMode}.");
 		}
 
 		[Command("debug"), Description("***WARNING*** *EVERY* steam update goes through as if you were subscribed to it."), Hidden]
-		public async Task DebugBool(CommandContext ctx, bool Set)
+		public async Task DebugBool(CommandContext ctx, bool set)
 		{
 			if (!IsDev(ctx.User))
 				return;
@@ -359,21 +357,21 @@ namespace SteamUpdateProject.Discord.Commands
 				return;
 			}
 
-			GuildInfo GuildInfo = GetGuildInfo(ctx);
+			GuildInfo guildInfo = GetGuildInfo(ctx);
 
-			if (GuildInfo != null)
+			if (guildInfo != null)
 			{
-				GuildInfo.DebugMode = Set;
+				guildInfo.DebugMode = set;
 
 				IMongoDatabase db = SteamUpdateBot.DB.Client.GetDatabase(SteamUpdateBot.DatabaseName);
 
-				FilterDefinition<GuildInfo> GI_Filter = Builders<GuildInfo>.Filter.And(
-								Builders<GuildInfo>.Filter.Eq("ChannelID", GuildInfo.ChannelID),
-								Builders<GuildInfo>.Filter.Eq("GuildID", GuildInfo.GuildID));
+				FilterDefinition<GuildInfo> gI_Filter = Builders<GuildInfo>.Filter.And(
+								Builders<GuildInfo>.Filter.Eq("ChannelID", guildInfo.ChannelID),
+								Builders<GuildInfo>.Filter.Eq("GuildID", guildInfo.GuildID));
 
-				IMongoCollection<GuildInfo> GIcollection = db.GetCollection<GuildInfo>(GuildInfo.DBName);
+				IMongoCollection<GuildInfo> gIcollection = db.GetCollection<GuildInfo>(GuildInfo.DBName);
 
-				GIcollection.ReplaceOne(GI_Filter, GuildInfo);
+				gIcollection.ReplaceOne(gI_Filter, guildInfo);
 			}
 			else
 			{
@@ -381,7 +379,7 @@ namespace SteamUpdateProject.Discord.Commands
 				return;
 			}
 
-			await ctx.RespondAsync($"Debug mode set to {Set}.");
+			await ctx.RespondAsync($"Debug mode set to {set}.");
 		}
 
 		[Command("public"), Description("Should we only notify this channel if the update is on the default public branch.")]
@@ -389,13 +387,13 @@ namespace SteamUpdateProject.Discord.Commands
 		{
 			await ctx.TriggerTypingAsync();
 
-			GuildInfo GuildInfo = GetGuildInfo(ctx);
+			GuildInfo guildInfo = GetGuildInfo(ctx);
 
-			await ctx.RespondAsync($"Public mode is currently set to {GuildInfo.PublicDepoOnly}.");
+			await ctx.RespondAsync($"Public mode is currently set to {guildInfo.PublicDepoOnly}.");
 		}
 
 		[Command("public"), Description("Should we only notify this channel if the update is on the default public branch.")]
-		public async Task PublicBool(CommandContext ctx, bool Set)
+		public async Task PublicBool(CommandContext ctx, bool set)
 		{
 			await ctx.TriggerTypingAsync();
 
@@ -405,21 +403,21 @@ namespace SteamUpdateProject.Discord.Commands
 				return;
 			}
 
-			GuildInfo GuildInfo = GetGuildInfo(ctx);
+			GuildInfo guildInfo = GetGuildInfo(ctx);
 
-			if (GuildInfo != null)
+			if (guildInfo != null)
 			{
-				GuildInfo.PublicDepoOnly = Set;
+				guildInfo.PublicDepoOnly = set;
 
 				IMongoDatabase db = SteamUpdateBot.DB.Client.GetDatabase(SteamUpdateBot.DatabaseName);
 
-				FilterDefinition<GuildInfo> GI_Filter = Builders<GuildInfo>.Filter.And(
-								Builders<GuildInfo>.Filter.Eq("ChannelID", GuildInfo.ChannelID),
-								Builders<GuildInfo>.Filter.Eq("GuildID", GuildInfo.GuildID));
+				FilterDefinition<GuildInfo> gI_Filter = Builders<GuildInfo>.Filter.And(
+								Builders<GuildInfo>.Filter.Eq("ChannelID", guildInfo.ChannelID),
+								Builders<GuildInfo>.Filter.Eq("GuildID", guildInfo.GuildID));
 
-				IMongoCollection<GuildInfo> GIcollection = db.GetCollection<GuildInfo>(GuildInfo.DBName);
+				IMongoCollection<GuildInfo> gIcollection = db.GetCollection<GuildInfo>(GuildInfo.DBName);
 
-				GIcollection.ReplaceOne(GI_Filter, GuildInfo);
+				gIcollection.ReplaceOne(gI_Filter, guildInfo);
 			}
 			else
 			{
@@ -427,7 +425,7 @@ namespace SteamUpdateProject.Discord.Commands
 				return;
 			}
 
-			await ctx.RespondAsync($"Public mode set to {Set}.");
+			await ctx.RespondAsync($"Public mode set to {set}.");
 		}
 
 		[Command("AllSubs"), Hidden]
@@ -440,33 +438,35 @@ namespace SteamUpdateProject.Discord.Commands
 				await ctx.RespondAsync($"You're not the dev!");
 				return;
 			}
-			DiscordEmbedBuilder embedBuilder = new DiscordEmbedBuilder();
-			embedBuilder.Title = "List of subscribed steam apps for this server:";
+			DiscordEmbedBuilder embedBuilder = new DiscordEmbedBuilder
+			{
+				Title = "List of subscribed steam apps for this server:"
+			};
 
 			StringBuilder stringBuilder = new StringBuilder();
 
 			IMongoDatabase db = SteamUpdateBot.DB.Client.GetDatabase(SteamUpdateBot.DatabaseName);
 
-			FilterDefinition<GuildInfo> GI_Filter = Builders<GuildInfo>.Filter.And(
+			FilterDefinition<GuildInfo> gI_Filter = Builders<GuildInfo>.Filter.And(
 							Builders<GuildInfo>.Filter.Eq("ChannelID", ctx.Guild == null ? ctx.User.Id : ctx.Channel.Id),
 							Builders<GuildInfo>.Filter.Eq("GuildID", ctx.Guild == null ? 0 : ctx.Guild.Id));
 
-			IMongoCollection<GuildInfo> GIcollection = db.GetCollection<GuildInfo>(GuildInfo.DBName);
+			IMongoCollection<GuildInfo> gIcollection = db.GetCollection<GuildInfo>(GuildInfo.DBName);
 
-			GuildInfo Local_GI = GIcollection.Find(GI_Filter).Limit(1).SingleOrDefault();
+			GuildInfo local_GI = gIcollection.Find(gI_Filter).Limit(1).SingleOrDefault();
 
 			if (ctx.Guild != null)
 			{
-				foreach (SubbedApp app in Local_GI.SubscribedApps)
+				foreach (SubbedApp app in local_GI.SubscribedApps)
 				{
-					DiscordChannel channel = ctx.Guild.GetChannel((ulong)Local_GI.ChannelID);
+					DiscordChannel channel = ctx.Guild.GetChannel((ulong)local_GI.ChannelID);
 
 					stringBuilder.AppendLine($"{await SteamUpdateBot.SteamClient.GetAppName((uint)app.AppID)} ({app.AppID}) {(channel != null ? $"in {channel.Name}" : "")}");
 				}
 			}
 			else
 			{
-				foreach (SubbedApp app in Local_GI.SubscribedApps)
+				foreach (SubbedApp app in local_GI.SubscribedApps)
 				{
 					stringBuilder.AppendLine($"{await SteamUpdateBot.SteamClient.GetAppName((uint)app.AppID)} ({app.AppID})");
 				}
@@ -514,19 +514,16 @@ namespace SteamUpdateProject.Discord.Commands
 		/// <returns>If the DiscordUser.Id is the same as the provided OverrideDiscordID</returns>
 		public static bool IsDev(DiscordUser u)
 		{
-			if (u.Id == SteamUpdateBot.OverrideDiscordID)
-				return true;
-
-			return false;
+			return u.Id == SteamUpdateBot.OverrideDiscordID;
 		}
 
 		/// <summary>
 		/// I didn't wanna type <see cref="DiscordBot.GetGuildInfo"/> every time I wanted it.
 		/// </summary>
 		/// <returns><see cref="DiscordBot.GetGuildInfo"/></returns>
-		public static GuildInfo GetGuildInfo(ulong GuildID, ulong ChannelID)
+		public static GuildInfo GetGuildInfo(ulong guildID, ulong channelID)
 		{
-			return DiscordBot.GetGuildInfo(GuildID, ChannelID);
+			return DiscordBot.GetGuildInfo(guildID, channelID);
 		}
 
 		/// <summary>

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Text;
 using SteamUpdateProject.Steam;
 using System.IO;
@@ -42,7 +42,7 @@ namespace SteamUpdateProject.Discord
 
 				Console.WriteLine("Input Discord Dev Override ID (Optional): ");
 				string discordID = Console.ReadLine();
-				discordID = discordID == null ? "0" : discordID;
+				discordID ??= "0";
 				DiscordID = discordID;
 
 				ConfigJson json = new ConfigJson(token, prefix, steamName, steamPW, discordID);
@@ -54,14 +54,14 @@ namespace SteamUpdateProject.Discord
 				return;
 			}
 
-			string RawConfigJson = "";
+			string rawConfigJson = "";
 
 			using (FileStream fs = File.OpenRead("config.json"))
 
 			using (StreamReader sr = new StreamReader(fs, new UTF8Encoding(false)))
-				RawConfigJson = sr.ReadToEnd();
+				rawConfigJson = sr.ReadToEnd();
 
-			ConfigJson cfgjson = JsonConvert.DeserializeObject<ConfigJson>(RawConfigJson);
+			ConfigJson cfgjson = JsonConvert.DeserializeObject<ConfigJson>(rawConfigJson);
 
 			if (cfgjson.DevOverride == null)
 				cfgjson.DevOverride = "0";
@@ -75,13 +75,13 @@ namespace SteamUpdateProject.Discord
 
 		public struct ConfigJson
 		{
-			public ConfigJson(string _token, string _prefix, string _steamName, string _steamPW, string _devOverride)
+			public ConfigJson(string token, string prefix, string steamName, string steamPW, string devOverride)
 			{
-				Token = _token;
-				CommandPrefix = _prefix;
-				SteamName = _steamName;
-				SteamPassword = _steamPW;
-				DevOverride = _devOverride;
+				Token = token;
+				CommandPrefix = prefix;
+				SteamName = steamName;
+				SteamPassword = steamPW;
+				DevOverride = devOverride;
 			}
 
 			[JsonProperty("token")]

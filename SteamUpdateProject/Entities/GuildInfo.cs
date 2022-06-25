@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -75,13 +75,13 @@ namespace SteamUpdateProject.Entities
 
 				IMongoDatabase db = SteamUpdateBot.DB.Client.GetDatabase(SteamUpdateBot.DatabaseName);
 
-				FilterDefinition<GuildInfo> GI_Filter = Builders<GuildInfo>.Filter.And(
+				FilterDefinition<GuildInfo> gI_Filter = Builders<GuildInfo>.Filter.And(
 								Builders<GuildInfo>.Filter.Eq("ChannelID", ChannelID),
 								Builders<GuildInfo>.Filter.Eq("GuildID", GuildID));
 
-				IMongoCollection<GuildInfo> GIcollection = db.GetCollection<GuildInfo>(GuildInfo.DBName);
+				IMongoCollection<GuildInfo> gIcollection = db.GetCollection<GuildInfo>(GuildInfo.DBName);
 
-				GIcollection.ReplaceOne(GI_Filter, this);
+				gIcollection.ReplaceOne(gI_Filter, this);
 				return true;
 			}
 
@@ -95,35 +95,35 @@ namespace SteamUpdateProject.Entities
 		/// <returns>List of AppIDs that were added to the subscribed list of <see cref="GuildInfo"/>.</returns>
 		public List<uint> SubMultipleApps(List<uint> listOfApps)
 		{
-			List<uint> ListOfAddedApps = new List<uint>();
+			List<uint> listOfAddedApps = new List<uint>();
 
 			foreach (uint appid in listOfApps)
 			{
 				if (!IsSubbed(appid))
 				{
-					ListOfAddedApps.Add(appid);
+					listOfAddedApps.Add(appid);
 				}
 			}
 
-			if (ListOfAddedApps.Count != 0)
+			if (listOfAddedApps.Count != 0)
 			{
-				foreach (uint app in ListOfAddedApps)
+				foreach (uint app in listOfAddedApps)
 				{
 					SubscribedApps.Add(new SubbedApp(app));
 				}
 
 				IMongoDatabase db = SteamUpdateBot.DB.Client.GetDatabase(SteamUpdateBot.DatabaseName);
 
-				FilterDefinition<GuildInfo> GI_Filter = Builders<GuildInfo>.Filter.And(
+				FilterDefinition<GuildInfo> gI_Filter = Builders<GuildInfo>.Filter.And(
 								Builders<GuildInfo>.Filter.Eq("ChannelID", ChannelID),
 								Builders<GuildInfo>.Filter.Eq("GuildID", GuildID));
 
-				IMongoCollection<GuildInfo> GIcollection = db.GetCollection<GuildInfo>(GuildInfo.DBName);
+				IMongoCollection<GuildInfo> gIcollection = db.GetCollection<GuildInfo>(GuildInfo.DBName);
 
-				GIcollection.ReplaceOne(GI_Filter, this);
+				gIcollection.ReplaceOne(gI_Filter, this);
 			}
 
-			return ListOfAddedApps;
+			return listOfAddedApps;
 		}
 
 		/// <summary>
@@ -136,17 +136,17 @@ namespace SteamUpdateProject.Entities
 			if (!IsSubbed(appid))
 				return false;
 
-			SubscribedApps.RemoveAll(SubbedApp => SubbedApp.AppID == appid);
+			SubscribedApps.RemoveAll(subbedApp => subbedApp.AppID == appid);
 
 			IMongoDatabase db = SteamUpdateBot.DB.Client.GetDatabase(SteamUpdateBot.DatabaseName);
 
-			FilterDefinition<GuildInfo> GI_Filter = Builders<GuildInfo>.Filter.And(
+			FilterDefinition<GuildInfo> gI_Filter = Builders<GuildInfo>.Filter.And(
 							Builders<GuildInfo>.Filter.Eq("ChannelID", ChannelID),
 							Builders<GuildInfo>.Filter.Eq("GuildID", GuildID));
 
-			IMongoCollection<GuildInfo> GIcollection = db.GetCollection<GuildInfo>(GuildInfo.DBName);
+			IMongoCollection<GuildInfo> gIcollection = db.GetCollection<GuildInfo>(GuildInfo.DBName);
 
-			GIcollection.ReplaceOne(GI_Filter, this);
+			gIcollection.ReplaceOne(gI_Filter, this);
 
 			return true;
 		}
@@ -158,44 +158,44 @@ namespace SteamUpdateProject.Entities
 		/// <returns>List of AppIDs that have been removed successfully.</returns>
 		public List<uint> RemoveMultipleApps(List<uint> listOfApps)
 		{
-			List<uint> AppsThatHaveBeenRemoved = new List<uint>();
+			List<uint> appsThatHaveBeenRemoved = new List<uint>();
 
 			foreach (uint appid in listOfApps)
 			{
 				if (IsSubbed(appid))
 				{
-					AppsThatHaveBeenRemoved.Add(appid);
+					appsThatHaveBeenRemoved.Add(appid);
 				}
 			}
 
-			if (AppsThatHaveBeenRemoved.Count != 0)
+			if (appsThatHaveBeenRemoved.Count != 0)
 			{
-				SubscribedApps.RemoveAll(SubbedApp => AppsThatHaveBeenRemoved.Contains((uint)SubbedApp.AppID));
+				SubscribedApps.RemoveAll(subbedApp => appsThatHaveBeenRemoved.Contains((uint)subbedApp.AppID));
 
 				IMongoDatabase db = SteamUpdateBot.DB.Client.GetDatabase(SteamUpdateBot.DatabaseName);
 
-				FilterDefinition<GuildInfo> GI_Filter = Builders<GuildInfo>.Filter.And(
+				FilterDefinition<GuildInfo> gI_Filter = Builders<GuildInfo>.Filter.And(
 								Builders<GuildInfo>.Filter.Eq("ChannelID", ChannelID),
 								Builders<GuildInfo>.Filter.Eq("GuildID", GuildID));
 
-				IMongoCollection<GuildInfo> GIcollection = db.GetCollection<GuildInfo>(GuildInfo.DBName);
+				IMongoCollection<GuildInfo> gIcollection = db.GetCollection<GuildInfo>(GuildInfo.DBName);
 
-				GIcollection.ReplaceOne(GI_Filter, this);
+				gIcollection.ReplaceOne(gI_Filter, this);
 			}
 
-			return AppsThatHaveBeenRemoved;
+			return appsThatHaveBeenRemoved;
 		}
 
 		public List<uint> RemoveMultipleApps(List<SubbedApp> listOfApps)
 		{
-			List<uint> ListToReturn = new List<uint>();
+			List<uint> listToReturn = new List<uint>();
 
 			foreach(SubbedApp app in listOfApps)
 			{
-				ListToReturn.Add((uint)app.AppID);
+				listToReturn.Add((uint)app.AppID);
 			}
 
-			return RemoveMultipleApps(ListToReturn);
+			return RemoveMultipleApps(listToReturn);
 		}
 
 		#region Equality Functions

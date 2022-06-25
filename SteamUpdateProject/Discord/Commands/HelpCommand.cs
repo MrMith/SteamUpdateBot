@@ -1,4 +1,4 @@
-﻿using DSharpPlus.CommandsNext;
+using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Converters;
 using DSharpPlus.CommandsNext.Entities;
 using DSharpPlus.Entities;
@@ -13,7 +13,7 @@ namespace SteamUpdateProject.Discord.Commands
     {
         protected DiscordEmbedBuilder HelpBuilder;
 
-        private readonly Dictionary<string, string> GodHasLeftUs = new Dictionary<string, string>()
+        private readonly Dictionary<string, string> _godHasLeftUs = new Dictionary<string, string>()
         {
             {"sub","<AppID> or <AppID1 AppID2> `**`" },
             {"del","<AppID> or <AppID1 AppID2> `**`" },
@@ -45,7 +45,7 @@ namespace SteamUpdateProject.Discord.Commands
                 if (cmd.Description == null || cmd.Name == "help") //Help
                     continue;
 
-                HelpBuilder.AddField($"{Context.Prefix}{cmd.Name} {(GodHasLeftUs.ContainsKey(cmd.Name) ? GodHasLeftUs[cmd.Name] : "")}", cmd.Description);
+                HelpBuilder.AddField($"{Context.Prefix}{cmd.Name} {(_godHasLeftUs.ContainsKey(cmd.Name) ? _godHasLeftUs[cmd.Name] : "")}", cmd.Description);
             }
             HelpBuilder.AddField("**[NOTICE]**", "Commands with `**` are limited to anyone with Admin, Manage Channels or All permissions.");
             return this;

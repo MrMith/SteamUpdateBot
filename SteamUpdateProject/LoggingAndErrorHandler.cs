@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Runtime.ExceptionServices;
 
@@ -31,11 +31,11 @@ namespace SteamUpdateProject
 		/// <summary>
 		/// This is my custom debug to console so when we have an error I can do look at [Code 0.0] and then go debugger it.
 		/// </summary>
-		/// <param name="Code">Which debug code</param>
-		/// <param name="Type">Steam or Discord</param>
-		public void CustomError(CustomErrorType Code, Platform Type, Exception e = null)
+		/// <param name="code">Which debug code</param>
+		/// <param name="type">Steam or Discord</param>
+		public void CustomError(CustomErrorType code, Platform type, Exception e = null)
 		{
-			Console.WriteLine($"Error {Type} is down or your need to check your connection. Code: {Code}");
+			Console.WriteLine($"Error {type} is down or your need to check your connection. Code: {code}");
 
 			if (e != null)
 			{

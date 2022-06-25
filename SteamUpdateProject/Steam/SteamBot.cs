@@ -1,4 +1,4 @@
-﻿using SteamKit2;
+using SteamKit2;
 using SteamUpdateProject.Discord;
 using SteamUpdateProject.Entities;
 using System;
@@ -29,11 +29,11 @@ namespace SteamUpdateProject.Steam
         public CallbackManager Manager;
         public bool IsRunning;
 
-        public SteamBot(string Name, string Password, DiscordBot bot)
+        public SteamBot(string name, string password, DiscordBot bot)
         {
             _discordClient = bot;
-            _user = Name;
-            _pass = Password;
+            _user = name;
+            _pass = password;
             _steamClient = new SteamClient();
 
             _steamUser = _steamClient.GetHandler<SteamUser>();
@@ -68,9 +68,9 @@ namespace SteamUpdateProject.Steam
         /// <summary>
         /// Debug logging, comment this out and I know where all of my temp logging is and can remove it.
         /// </summary>
-        public void Log(string Log)
+        public static void Log(string log)
         {
-            Console.WriteLine(Log);
+            Console.WriteLine(log);
         }
 
         /// <summary>
@@ -85,18 +85,18 @@ namespace SteamUpdateProject.Steam
             _lastChangeNumber = callback.CurrentChangeNumber;
 
             ///Go through all of the app changes
-            foreach (KeyValuePair<uint, SteamApps.PICSChangesCallback.PICSChangeData> AppsThatUpdated in callback.AppChanges)
+            foreach (KeyValuePair<uint, SteamApps.PICSChangesCallback.PICSChangeData> appsThatUpdated in callback.AppChanges)
             {
-                AppUpdate AppUpdate = new AppUpdate
+                AppUpdate appUpdate = new AppUpdate
                 {
-                    AppID = AppsThatUpdated.Key,
+                    AppID = appsThatUpdated.Key,
                     ChangeNumber = callback.CurrentChangeNumber,
                 };
 
-                CustomProductInfo FullProductInfo = null;
+                CustomProductInfo fullProductInfo = null;
                 try
                 {
-                    FullProductInfo = await GetFullProductInfo(AppsThatUpdated.Key);
+                    fullProductInfo = await GetFullProductInfo(appsThatUpdated.Key);
                 }
                 catch
                 {
@@ -104,64 +104,64 @@ namespace SteamUpdateProject.Steam
                     return;
                 }
 
-                if (FullProductInfo == null)
+                if (fullProductInfo == null)
                     continue;
 
                 //Go through steam applications information that we've gathered.
-                foreach (SteamApps.PICSProductInfoCallback CallBackInfo in FullProductInfo.ProductInfo)
+                foreach (SteamApps.PICSProductInfoCallback callBackInfo in fullProductInfo.ProductInfo)
                 {
                     //Goes through the apps in the product info (This is because you can go through packages which could contain multiple apps but in this case we typically dont)
-                    foreach (KeyValuePair<uint, SteamApps.PICSProductInfoCallback.PICSProductInfo> CallBackInfoApps in CallBackInfo.Apps)
+                    foreach (KeyValuePair<uint, SteamApps.PICSProductInfoCallback.PICSProductInfo> callBackInfoApps in callBackInfo.Apps)
                     {
                         //Get Depos (Where the downloadable content is)
-                        KeyValue depotKV = CallBackInfoApps.Value.KeyValues.Children.Find(child => child.Name == "depots");
+                        KeyValue depotKV = callBackInfoApps.Value.KeyValues.Children.Find(child => child.Name == "depots");
 
-                        AppUpdate = ParseUpdateInformation(AppUpdate, FullProductInfo.IsPublic, depotKV);
+                        appUpdate = ParseUpdateInformation(appUpdate, fullProductInfo.IsPublic, depotKV);
 
-                        AppUpdate.LastUpdated = DateTime.UtcNow;
-                        AppUpdate.Name = CallBackInfoApps.Value.KeyValues["common"]["name"].AsString();
+                        appUpdate.LastUpdated = DateTime.UtcNow;
+                        appUpdate.Name = callBackInfoApps.Value.KeyValues["common"]["name"].AsString();
 
 						IMongoDatabase db = SteamUpdateBot.DB.Client.GetDatabase(SteamUpdateBot.DatabaseName);
 
-						IMongoCollection<AppInfo> AI_Collection = db.GetCollection<AppInfo>(AppInfo.DBName);
+						IMongoCollection<AppInfo> aI_Collection = db.GetCollection<AppInfo>(AppInfo.DBName);
 
-						FilterDefinition<AppInfo> AI_Filter = Builders<AppInfo>.Filter.Eq("AppID", AppUpdate.AppID);
+						FilterDefinition<AppInfo> aI_Filter = Builders<AppInfo>.Filter.Eq("AppID", appUpdate.AppID);
 
 						//AI_Collection.DeleteMany(AI_Filter);
 
 						AppInfo appinfo = new AppInfo()
 						{
-							AppID = AppUpdate.AppID,
-							Name = AppUpdate.Name,
-							LastUpdated = AppUpdate.LastUpdated,
-							DepoName = AppUpdate.DepoName
+							AppID = appUpdate.AppID,
+							Name = appUpdate.Name,
+							LastUpdated = appUpdate.LastUpdated,
+							DepoName = appUpdate.DepoName
 						};
 
-						AI_Collection.InsertOne(appinfo);
+						aI_Collection.InsertOne(appinfo);
                     }
                 }
 
                 LoggingAndErrorHandler.Updates++;
-                _discordClient.AppUpdated(AppUpdate);
+                _discordClient.AppUpdated(appUpdate);
             }
         }
 
         /// <summary>
         /// See if a KeyValuePair of a steam application update contains information like if its a content update (Aka not store tag updates)
         /// </summary>
-        /// <param name="AppUpdate">App being updated</param>
-        /// <param name="_isPublic">If this steam application data is public. If false we don't get to know whats happening.</param>
-        /// <param name="_depotKV">Steam application's information</param>
+        /// <param name="appUpdate">App being updated</param>
+        /// <param name="isPublic">If this steam application data is public. If false we don't get to know whats happening.</param>
+        /// <param name="depotKV">Steam application's information</param>
         /// <returns>AppUpdate with hopefully updated information like which branch updated.</returns>
-        private static AppUpdate ParseUpdateInformation(AppUpdate AppUpdate, bool _isPublic, KeyValue _depotKV)
+        private static AppUpdate ParseUpdateInformation(AppUpdate appUpdate, bool isPublic, KeyValue depotKV)
         {
-            if (_depotKV == null || !_isPublic)
-                return AppUpdate;
+            if (depotKV == null || !isPublic)
+                return appUpdate;
 
-            if (_depotKV["branches"] == null)
-                return AppUpdate;
+            if (depotKV["branches"] == null)
+                return appUpdate;
 
-            foreach (KeyValue branchKV in _depotKV["branches"].Children) //One single branch
+            foreach (KeyValue branchKV in depotKV["branches"].Children) //One single branch
             {
                 foreach (KeyValue timeUpdatedKV in branchKV.Children) //Time updated Key value pair (KVP)
                 {
@@ -173,13 +173,13 @@ namespace SteamUpdateProject.Steam
                     if ((t.TotalSeconds - double.Parse(timeUpdatedKV.Value)) > 10) // Needed because it can take a couple of seconds to go through the steam pipeline.
                         continue;
 
-                    AppUpdate.DepoName = branchKV.Name;
-                    AppUpdate.Content = true;
+                    appUpdate.DepoName = branchKV.Name;
+                    appUpdate.Content = true;
                     LoggingAndErrorHandler.ContentUpdates++;
                 }
             }
 
-            return AppUpdate;
+            return appUpdate;
         }
 
         /// <summary>
@@ -189,14 +189,14 @@ namespace SteamUpdateProject.Steam
         /// <returns>Steam Application's name for given appid.</returns>
         public async Task<string> GetAppName(uint appid)
         {
-            AppInfo CachedInfo = DiscordBot.GetCachedAppInfo(appid, true);
+            AppInfo cachedInfo = DiscordBot.GetCachedAppInfo(appid, true);
 
-            if (CachedInfo != null)
+            if (cachedInfo != null)
             {
-                return CachedInfo.Name;
+                return cachedInfo.Name;
             }
 
-			AsyncJobMultiple<SteamApps.PICSProductInfoCallback>.ResultSet ProductInfo = await Apps.PICSGetProductInfo(new SteamApps.PICSRequest(appid), null);
+			AsyncJobMultiple<SteamApps.PICSProductInfoCallback>.ResultSet productInfo = await Apps.PICSGetProductInfo(new SteamApps.PICSRequest(appid), null);
 
             AppInfo appInfo = new AppInfo()
             {
@@ -204,24 +204,24 @@ namespace SteamUpdateProject.Steam
                 Name = "Unknown App"
             };
 
-            if (!ProductInfo.Complete)
+            if (!productInfo.Complete)
                 return "Unknown App";
 
-            foreach (SteamApps.PICSProductInfoCallback CallBackInfo in ProductInfo.Results)
+            foreach (SteamApps.PICSProductInfoCallback callBackInfo in productInfo.Results)
             {
-                foreach (KeyValuePair<uint, SteamApps.PICSProductInfoCallback.PICSProductInfo> CallBackInfoApps in CallBackInfo.Apps)
+                foreach (KeyValuePair<uint, SteamApps.PICSProductInfoCallback.PICSProductInfo> callBackInfoApps in callBackInfo.Apps)
                 {
-                    appInfo.Name = CallBackInfoApps.Value.KeyValues["common"]["name"].AsString();
+                    appInfo.Name = callBackInfoApps.Value.KeyValues["common"]["name"].AsString();
 
 					IMongoDatabase db = SteamUpdateBot.DB.Client.GetDatabase(SteamUpdateBot.DatabaseName);
 
-					IMongoCollection<AppInfo> AI_Collection = db.GetCollection<AppInfo>(AppInfo.DBName);
+					IMongoCollection<AppInfo> aI_Collection = db.GetCollection<AppInfo>(AppInfo.DBName);
 
 					//FilterDefinition<AppInfo> AI_Filter = Builders<AppInfo>.Filter.Eq("AppID", appid);
 
 					//AI_Collection.DeleteMany(AI_Filter);
 
-					AI_Collection.InsertOne(appInfo);
+					aI_Collection.InsertOne(appInfo);
 				}
             }
 
@@ -240,12 +240,9 @@ namespace SteamUpdateProject.Steam
 					return true;
 
 				//570 is Dota 2.
-				AsyncJobMultiple<SteamApps.PICSProductInfoCallback>.ResultSet ProductInfo = await Apps.PICSGetProductInfo(new SteamApps.PICSRequest(570), null);
+				AsyncJobMultiple<SteamApps.PICSProductInfoCallback>.ResultSet productInfo = await Apps.PICSGetProductInfo(new SteamApps.PICSRequest(570), null);
 
-				if (ProductInfo.Failed)
-					return true;
-
-				return !ProductInfo.Complete;
+				return productInfo.Failed || !productInfo.Complete;
 			}
 			catch
 			{
@@ -266,13 +263,11 @@ namespace SteamUpdateProject.Steam
             try
             {
 				//This randomly errors and has cost me sleep so therefor slap a try-catch on it.
-                SteamApps.PICSTokensCallback AppTokenInfo = await SteamUpdateBot.SteamClient.Apps.PICSGetAccessTokens(appid, null);
+                SteamApps.PICSTokensCallback appTokenInfo = await SteamUpdateBot.SteamClient.Apps.PICSGetAccessTokens(appid, null);
 
-                if (AppTokenInfo.AppTokensDenied.Contains(appid) || !AppTokenInfo.AppTokens.ContainsKey(appid)) return 0;
-
-                return AppTokenInfo.AppTokens[appid];
-            }
-            catch
+				return appTokenInfo.AppTokensDenied.Contains(appid) || !appTokenInfo.AppTokens.ContainsKey(appid) ? 0 : appTokenInfo.AppTokens[appid];
+			}
+			catch
             {
                 SteamUpdateBot.LAEH.CustomError(LoggingAndErrorHandler.CustomErrorType.Steam_AppInfoToken, LoggingAndErrorHandler.Platform.Steam);
                 return 0;
@@ -288,13 +283,13 @@ namespace SteamUpdateProject.Steam
         {
             CustomProductInfo customProductInfo = new CustomProductInfo();
 
-            SteamApps.PICSRequest request = new SteamApps.PICSRequest(appid);
+			SteamApps.PICSRequest request = new SteamApps.PICSRequest(appid);
 
-            ulong AccessToken = await GetAccessToken(appid);
+            ulong accessToken = await GetAccessToken(appid);
 
 			//If the accesstoken is 0 then we don't have a token to get more detailed information so we get the publicly available information
 			//Also randomly errors and that causes me physical pain.
-			if (AccessToken == 0)
+			if (accessToken == 0)
             {
                 try
                 {
@@ -311,7 +306,7 @@ namespace SteamUpdateProject.Steam
             {
                 try
                 {
-                    request.AccessToken = AccessToken;
+                    request.AccessToken = accessToken;
                     customProductInfo.IsPublic = false;
                     customProductInfo.ProductInfo = (await SteamUpdateBot.SteamClient.Apps.PICSGetProductInfo(new List<SteamApps.PICSRequest>() { request }, new List<SteamApps.PICSRequest>() { })).Results;
                 }

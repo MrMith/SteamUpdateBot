@@ -1,4 +1,4 @@
-﻿using SteamUpdateProject.Discord;
+using SteamUpdateProject.Discord;
 using SteamUpdateProject.Steam;
 using System;
 using System.IO;
@@ -78,17 +78,17 @@ namespace SteamUpdateProject
 			MinorDataHandler = new MinorDataHandler();
 			MinorDataHandler.ReadData();
 
-			ConfigHandler Config = new ConfigHandler();
+			ConfigHandler config = new ConfigHandler();
 
 			if (!Directory.Exists(LogPath))
 				Directory.CreateDirectory(LogPath);
 
 			DiscordClient = new DiscordBot();
-			DiscordClient.StartDiscordBot(Config).GetAwaiter().GetResult();
+			DiscordClient.StartDiscordBot(config).GetAwaiter().GetResult();
 
-            OverrideDiscordID = ulong.Parse(Config.DiscordID);
+            OverrideDiscordID = ulong.Parse(config.DiscordID);
 
-			SteamClient = new SteamBot(Config.SteamName, Config.SteamPW, DiscordClient);
+			SteamClient = new SteamBot(config.SteamName, config.SteamPW, DiscordClient);
 
 			while (SteamClient.IsRunning)
 			{

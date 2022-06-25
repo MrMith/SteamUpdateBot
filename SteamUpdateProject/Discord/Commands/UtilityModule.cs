@@ -1,4 +1,4 @@
-﻿using DSharpPlus.CommandsNext;
+using DSharpPlus.CommandsNext;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.CommandsNext.Attributes;
@@ -24,14 +24,14 @@ namespace SteamUpdateProject.Discord.Commands
     internal class UtilityModule : BaseCommandModule
     {
         [Command("devoverride"), Hidden]
-        public async Task Devoverride(CommandContext ctx, bool _ov)
+        public async Task Devoverride(CommandContext ctx, bool ov)
         {
 			if (!SubscriptionModule.IsDev(ctx.User))
 				return;
 
 			await ctx.TriggerTypingAsync();
 
-			SteamUpdateBot.DiscordClient.DevOverride = _ov;
+			SteamUpdateBot.DiscordClient.DevOverride = ov;
 
             await ctx.RespondAsync($"Set override to {SteamUpdateBot.DiscordClient.DevOverride}.");
         }
@@ -57,7 +57,7 @@ namespace SteamUpdateProject.Discord.Commands
         }
 
         [Command("branches"), Description("Lists all of the branches for a certain steam app.")]
-        public async Task Branches(CommandContext ctx, uint AppID)
+        public async Task Branches(CommandContext ctx, uint appID)
         {
             await ctx.TriggerTypingAsync();
 
@@ -67,19 +67,20 @@ namespace SteamUpdateProject.Discord.Commands
                 return;
             }
 
-            DiscordEmbedBuilder embedBuilder = new DiscordEmbedBuilder();
+			DiscordEmbedBuilder embedBuilder = new DiscordEmbedBuilder
+			{
+				Title = $"{await SteamUpdateBot.SteamClient.GetAppName(appID)} ({appID})"
+			};
 
-            embedBuilder.Title = $"{await SteamUpdateBot.SteamClient.GetAppName(AppID)} ({AppID})";
+			CustomProductInfo customProductInfo = await Steam.SteamBot.GetFullProductInfo(appID);
 
-            CustomProductInfo customProductInfo = await Steam.SteamBot.GetFullProductInfo(AppID);
+            ReadOnlyCollection<SteamApps.PICSProductInfoCallback> completeInfo = customProductInfo.ProductInfo;
 
-            ReadOnlyCollection<SteamApps.PICSProductInfoCallback> CompleteInfo = customProductInfo.ProductInfo;
-
-            foreach (SteamApps.PICSProductInfoCallback CallBackInfo in CompleteInfo)
+            foreach (SteamApps.PICSProductInfoCallback callBackInfo in completeInfo)
             {
-                foreach (KeyValuePair<uint, SteamApps.PICSProductInfoCallback.PICSProductInfo> CallBackInfoApps in CallBackInfo.Apps)
+                foreach (KeyValuePair<uint, SteamApps.PICSProductInfoCallback.PICSProductInfo> callBackInfoApps in callBackInfo.Apps)
                 {
-                    KeyValue depotKV = CallBackInfoApps.Value.KeyValues.Children.Find(child => child.Name == "depots");
+                    KeyValue depotKV = callBackInfoApps.Value.KeyValues.Children.Find(child => child.Name == "depots");
 
                     if (depotKV == null)
                         continue;
@@ -100,18 +101,18 @@ namespace SteamUpdateProject.Discord.Commands
                             {
 								IMongoDatabase db = SteamUpdateBot.DB.Client.GetDatabase(SteamUpdateBot.DatabaseName);
 
-								IMongoCollection<AppInfo> AI_Collection = db.GetCollection<AppInfo>(AppInfo.DBName);
+								IMongoCollection<AppInfo> aI_Collection = db.GetCollection<AppInfo>(AppInfo.DBName);
 
-								FilterDefinition<AppInfo> AI_Filter = Builders<AppInfo>.Filter.Eq("AppID", AppID);
+								FilterDefinition<AppInfo> aI_Filter = Builders<AppInfo>.Filter.Eq("AppID", appID);
 
-								AppInfo app = AI_Collection.Find(AI_Filter).Limit(1).SingleOrDefault();
+								AppInfo app = aI_Collection.Find(aI_Filter).Limit(1).SingleOrDefault();
 
-								DateTime BranchUpdateTime = DateTime.UnixEpoch.AddSeconds(double.Parse(branchData.Value));
+								DateTime branchUpdateTime = DateTime.UnixEpoch.AddSeconds(double.Parse(branchData.Value));
 
-								if (app.LastUpdated.Value.Ticks > BranchUpdateTime.Ticks)
+								if (app.LastUpdated.Value.Ticks > branchUpdateTime.Ticks)
 								{
-									app.LastUpdated = BranchUpdateTime;
-									AI_Collection.InsertOne(app);
+									app.LastUpdated = branchUpdateTime;
+									aI_Collection.InsertOne(app);
 								}
 							}
 
@@ -144,9 +145,9 @@ namespace SteamUpdateProject.Discord.Commands
 
             foreach (string obj in objects)
             {
-                if (uint.TryParse(obj, out uint AppID))
+                if (uint.TryParse(obj, out uint appID))
                 {
-                    embedBuilder.AddField(AppID.ToString(), await SteamUpdateBot.SteamClient.GetAppName(AppID));
+                    embedBuilder.AddField(appID.ToString(), await SteamUpdateBot.SteamClient.GetAppName(appID));
                 }
             }
 
@@ -161,18 +162,19 @@ namespace SteamUpdateProject.Discord.Commands
             if (!SubscriptionModule.IsDev(ctx.User))
 				return;
 
-			AppUpdate AppUpdate = new AppUpdate();
+			AppUpdate appUpdate = new AppUpdate
+			{
+				AppID = 570,
+				Content = true,
+				Name = "Dota 2",
+				DepoName = "public",
+				ChangeNumber = 1,
+				LastUpdated = DateTime.UtcNow.AddYears(50)
+			};
 
-            AppUpdate.AppID = 570;
-            AppUpdate.Content = true;
-            AppUpdate.Name = "Dota 2";
-            AppUpdate.DepoName = "public";
-            AppUpdate.ChangeNumber = 1;
-            AppUpdate.LastUpdated = DateTime.UtcNow.AddYears(50);
+			SteamUpdateBot.DiscordClient.AppUpdated(appUpdate);
 
-            SteamUpdateBot.DiscordClient.AppUpdated(AppUpdate);
-
-            await ctx.RespondAsync($"Force updated {AppUpdate.AppID}.");
+            await ctx.RespondAsync($"Force updated {appUpdate.AppID}.");
         }
 
         [Command("status"), Description("Shows statistics about updates, if steam is down and ping.")]
@@ -190,8 +192,11 @@ namespace SteamUpdateProject.Discord.Commands
 
 			Process currentProcess = Process.GetCurrentProcess();
 
-			DiscordEmbedBuilder builder = new DiscordEmbedBuilder();
-			builder.Title = "Status";
+			DiscordEmbedBuilder builder = new DiscordEmbedBuilder
+			{
+				Title = "Status"
+			};
+
 			builder.AddField("Ping:", ctx.Client.Ping.ToString(), true);
 			builder.AddField("Steam Status:", (!steamStatus ? "Online" : "Offline"), false);
 			builder.AddField("Total updates processed:", $"{LoggingAndErrorHandler.Updates} ({(int)(LoggingAndErrorHandler.Updates / LoggingAndErrorHandler.MinutesRunning)} per minute)", true);
@@ -256,7 +261,7 @@ namespace SteamUpdateProject.Discord.Commands
 
 		///Not the best way to do it since its hard-coded 
 		///But I like the pain.
-		private string[] AllPatchNotes = new string[]
+		private readonly string[] _allPatchNotes = new string[]
 		{
 			"June 12th 2022\nAdded **history** command *(Ex: !history 570)* which allows you to list all of the updates of an app in the database.",
 			"June 11th 2022\nDatabase no longer deletes every entry from the database when an app updates.",
@@ -277,22 +282,22 @@ namespace SteamUpdateProject.Discord.Commands
 		{
 			await ctx.TriggerTypingAsync();
 
-			List<Page> PagesToShow = new List<Page>();
+			List<Page> pagesToShow = new List<Page>();
 
-			foreach(string Note in AllPatchNotes)
+			foreach(string note in _allPatchNotes)
 			{
-				string[] Notes = Note.Split("\n");
+				string[] notes = note.Split("\n");
 
-				DiscordEmbedBuilder DiscordEmbed = new DiscordEmbedBuilder();
-				DiscordEmbed.Title = "Patch Notes";
-				DiscordEmbed.AddField(Notes[0], Notes[1]);
+				DiscordEmbedBuilder discordEmbed = new DiscordEmbedBuilder();
+				discordEmbed.Title = "Patch Notes";
+				discordEmbed.AddField(notes[0], notes[1]);
 
-				PagesToShow.Add(new Page("", DiscordEmbed));
+				pagesToShow.Add(new Page("", discordEmbed));
 			}
 
 			InteractivityExtension interactivity = ctx.Client.GetInteractivity();
 
-			await interactivity.SendPaginatedMessageAsync(ctx.Channel, ctx.User, PagesToShow, DSharpPlus.Interactivity.Enums.PaginationBehaviour.WrapAround, DSharpPlus.Interactivity.Enums.ButtonPaginationBehavior.DeleteButtons);
+			await interactivity.SendPaginatedMessageAsync(ctx.Channel, ctx.User, pagesToShow, DSharpPlus.Interactivity.Enums.PaginationBehaviour.WrapAround, DSharpPlus.Interactivity.Enums.ButtonPaginationBehavior.DeleteButtons);
 		}
 
 		[Command("history"), Description("Lists all of updates in located within the database of this project.")]
@@ -305,7 +310,7 @@ namespace SteamUpdateProject.Discord.Commands
 		}
 
 		[Command("history"), Description("Lists all of updates in located within the database of this project.")]
-		public async Task History(CommandContext ctx, uint AppID)
+		public async Task History(CommandContext ctx, uint appID)
 		{
 			await ctx.TriggerTypingAsync();
 
@@ -319,22 +324,22 @@ namespace SteamUpdateProject.Discord.Commands
 
 			StringBuilder builderToReturn = new StringBuilder();
 
-			embedBuilder.Title = $"{await SteamUpdateBot.SteamClient.GetAppName(AppID)} ({AppID})";
+			embedBuilder.Title = $"{await SteamUpdateBot.SteamClient.GetAppName(appID)} ({appID})";
 
 			IMongoDatabase db = SteamUpdateBot.DB.Client.GetDatabase(SteamUpdateBot.DatabaseName);
 
-			FilterDefinition<AppInfo> AI_Filter = Builders<AppInfo>.Filter.Eq("AppID", AppID);
+			FilterDefinition<AppInfo> aI_Filter = Builders<AppInfo>.Filter.Eq("AppID", appID);
 
-			IMongoCollection<AppInfo> AI_Collection = db.GetCollection<AppInfo>(AppInfo.DBName);
+			IMongoCollection<AppInfo> aI_Collection = db.GetCollection<AppInfo>(AppInfo.DBName);
 
-			List<AppInfo> Local_AI_List = AI_Collection.Find(AI_Filter).SortBy(x => x.LastUpdated).ToList();
+			List<AppInfo> local_AI_List = aI_Collection.Find(aI_Filter).SortBy(x => x.LastUpdated).ToList();
 
-			foreach(AppInfo AI in Local_AI_List)
+			foreach(AppInfo aI in local_AI_List)
 			{
-				if (AI.LastUpdated == null || string.IsNullOrEmpty(AI.DepoName))
+				if (aI.LastUpdated == null || string.IsNullOrEmpty(aI.DepoName))
 					continue;
 
-				builderToReturn.AppendLine($"{AI.DepoName} was updated {SteamUpdateBot.DiscordClient.ElapsedTime(AI.LastUpdated)}.");
+				builderToReturn.AppendLine($"{aI.DepoName} was updated {SteamUpdateBot.DiscordClient.ElapsedTime(aI.LastUpdated)}.");
 			}
 
 			if (builderToReturn.Length == 0)

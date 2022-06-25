@@ -8,11 +8,11 @@
 
 
 
-This is a Discord bot ([DSharp+](https://github.com/DSharpPlus/DSharpPlus)) that connects to Tteam ([SteamKit](https://github.com/SteamRE/SteamKit)) and listens for any Steam application updates so a Text Channel/DM message can be sent to notify people through discord.
+This is a Discord bot ([DSharp+](https://github.com/DSharpPlus/DSharpPlus)) that connects to Steam ([SteamKit](https://github.com/SteamRE/SteamKit)) and listens for any Steam application updates so a Text Channel/DM message can be sent to notify people about a steam application update. You can choose to filter out any non-content update (Store tag updates) and just be notified about content updates (Game files changing)
 
-<img src="https://i.imgur.com/OLV4GZP.gif" width="350" height="350" />
+<img src="https://i.imgur.com/OLV4GZP.gif" width="300" height="300" />
 
-##### I'm super open to code quality issues or suggestions if you want to make an issue or DM me on discord (Mith#7575)
+##### I'm open to code quality issues or suggestions if you want to make an issue or DM me on discord (Mith#7575) or use the !feedback bot command!
 
 ## Discord Commands
 | Commands Option        | Value Type      | Description       | Alias | Example |
