@@ -1,12 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using MongoDB;
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver;
+using System;
+using System.Collections.Generic;
 
 namespace SteamUpdateProject.Entities
 {
@@ -170,7 +165,7 @@ namespace SteamUpdateProject.Entities
 
 			if (appsThatHaveBeenRemoved.Count != 0)
 			{
-				SubscribedApps.RemoveAll(subbedApp => appsThatHaveBeenRemoved.Contains((uint)subbedApp.AppID));
+				SubscribedApps.RemoveAll(subbedApp => appsThatHaveBeenRemoved.Contains((uint) subbedApp.AppID));
 
 				IMongoDatabase db = SteamUpdateBot.DB.Client.GetDatabase(SteamUpdateBot.DatabaseName);
 
@@ -190,9 +185,9 @@ namespace SteamUpdateProject.Entities
 		{
 			List<uint> listToReturn = new List<uint>();
 
-			foreach(SubbedApp app in listOfApps)
+			foreach (SubbedApp app in listOfApps)
 			{
-				listToReturn.Add((uint)app.AppID);
+				listToReturn.Add((uint) app.AppID);
 			}
 
 			return RemoveMultipleApps(listToReturn);

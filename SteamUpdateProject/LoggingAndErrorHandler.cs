@@ -1,10 +1,9 @@
 using System;
-using System.IO;
 using System.Runtime.ExceptionServices;
 
 namespace SteamUpdateProject
 {
-    //To-do -> use microsoft's logging system and not this garbo.
+	//To-do -> use microsoft's logging system and not this garbo.
 	/// <summary>
 	/// This class handles any errors and then logging said errors to give a easier time when debugging.
 	/// </summary>
@@ -19,9 +18,9 @@ namespace SteamUpdateProject
 		/// Total number of minutes this program as been running.
 		public static long MinutesRunning = 0;
 
-        /// <summary>
-        /// Intercepts any exceptions that arise in the program during runtime.
-        /// </summary>
+		/// <summary>
+		/// Intercepts any exceptions that arise in the program during runtime.
+		/// </summary>
 		public void FirstChanceHandler(object sender, FirstChanceExceptionEventArgs e)
 		{
 			Exceptions++;
@@ -52,8 +51,8 @@ namespace SteamUpdateProject
 			if (e is System.Net.Sockets.SocketException || e is System.IO.IOException)
 				return; //What the hell even is this, no line numbers or anything. Just a meaningless error.
 
-            Console.WriteLine(e);
-		    //To-do: Implement Microsoft's logging system.
+			Console.WriteLine(e);
+			//To-do: Implement Microsoft's logging system.
 		}
 
 		/// <summary>

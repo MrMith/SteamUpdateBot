@@ -3,15 +3,14 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
-using DSharpPlus.Interactivity.EventHandling;
 using DSharpPlus.Interactivity.Extensions;
+using MongoDB.Driver;
 using SteamUpdateProject.Entities;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Linq;
-using MongoDB.Driver;
 
 namespace SteamUpdateProject.Discord.Commands
 {
@@ -232,7 +231,7 @@ namespace SteamUpdateProject.Discord.Commands
 		}
 
 		[Command("list"), Aliases("apps"), Description("Displays all of the subscribed apps for this channel.")]
-		public static async Task ListAllSubscribedApps(CommandContext ctx)
+		public async Task ListAllSubscribedApps(CommandContext ctx)
 		{
 			await ctx.TriggerTypingAsync();
 
@@ -459,16 +458,16 @@ namespace SteamUpdateProject.Discord.Commands
 			{
 				foreach (SubbedApp app in local_GI.SubscribedApps)
 				{
-					DiscordChannel channel = ctx.Guild.GetChannel((ulong)local_GI.ChannelID);
+					DiscordChannel channel = ctx.Guild.GetChannel((ulong) local_GI.ChannelID);
 
-					stringBuilder.AppendLine($"{await SteamUpdateBot.SteamClient.GetAppName((uint)app.AppID)} ({app.AppID}) {(channel != null ? $"in {channel.Name}" : "")}");
+					stringBuilder.AppendLine($"{await SteamUpdateBot.SteamClient.GetAppName((uint) app.AppID)} ({app.AppID}) {(channel != null ? $"in {channel.Name}" : "")}");
 				}
 			}
 			else
 			{
 				foreach (SubbedApp app in local_GI.SubscribedApps)
 				{
-					stringBuilder.AppendLine($"{await SteamUpdateBot.SteamClient.GetAppName((uint)app.AppID)} ({app.AppID})");
+					stringBuilder.AppendLine($"{await SteamUpdateBot.SteamClient.GetAppName((uint) app.AppID)} ({app.AppID})");
 				}
 			}
 

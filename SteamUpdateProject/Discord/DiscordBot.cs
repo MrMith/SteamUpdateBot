@@ -4,15 +4,13 @@ using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Enums;
 using DSharpPlus.Interactivity.Extensions;
+using MongoDB.Driver;
 using SteamUpdateProject.Discord.Commands;
 using SteamUpdateProject.Entities;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using System.Linq;
-using MongoDB;
-using MongoDB.Bson;
-using MongoDB.Driver;
+using System.Threading.Tasks;
 
 namespace SteamUpdateProject.Discord
 {
@@ -96,7 +94,7 @@ namespace SteamUpdateProject.Discord
 			if (DateTime.Now > _timeForStatusUpdate)
 				UpdateStatus();
 
-			DiscordColor Color = new DiscordColor((float)_rand.Next(1, 100) / 100, (float)_rand.Next(1, 100) / 100, (float)_rand.Next(1, 100) / 100);
+			DiscordColor Color = new DiscordColor((float) _rand.Next(1, 100) / 100, (float) _rand.Next(1, 100) / 100, (float) _rand.Next(1, 100) / 100);
 
 			DiscordEmbedBuilder AppEmbed = new DiscordEmbedBuilder
 			{
@@ -149,7 +147,7 @@ namespace SteamUpdateProject.Discord
 				{
 					try
 					{
-						DiscordMember DMUser = await GetDiscordMember((ulong)ServerInfo.ChannelID);
+						DiscordMember DMUser = await GetDiscordMember((ulong) ServerInfo.ChannelID);
 
 						//If we cannot find the user (we're not in the same server) then we continue on because discord will block DMs.
 						if (DMUser == null)
@@ -172,8 +170,8 @@ namespace SteamUpdateProject.Discord
 					try
 					{
 						//This is only seperated for debugging.
-						DiscordGuild _1st = await Client.GetGuildAsync((ulong)ServerInfo.GuildID);
-						DiscordChannel _2nd = _1st.GetChannel((ulong)ServerInfo.ChannelID);
+						DiscordGuild _1st = await Client.GetGuildAsync((ulong) ServerInfo.GuildID);
+						DiscordChannel _2nd = _1st.GetChannel((ulong) ServerInfo.ChannelID);
 						await _2nd.SendMessageAsync(embed: AppUpdate);
 					}
 					catch (Exception e)
@@ -266,7 +264,7 @@ namespace SteamUpdateProject.Discord
 			AppInfo LocalAppInfo = new AppInfo()
 			{
 				AppID = appid,
-				Name = SteamUpdateBot.SteamClient.GetAppName((uint)appid).Result
+				Name = SteamUpdateBot.SteamClient.GetAppName((uint) appid).Result
 			};
 
 			if (LocalAppInfo.Name != null)
@@ -286,8 +284,8 @@ namespace SteamUpdateProject.Discord
 		/// <returns><see cref="GuildInfo"/> for the given guildID and channelID.</returns>
 		public static GuildInfo GetGuildInfo(ulong uguildid, ulong uchannelid)
 		{
-			long guildid = (long)uguildid;
-			long channelid = (long)uchannelid;
+			long guildid = (long) uguildid;
+			long channelid = (long) uchannelid;
 
 			IMongoDatabase db = SteamUpdateBot.DB.Client.GetDatabase(SteamUpdateBot.DatabaseName);
 
@@ -299,7 +297,7 @@ namespace SteamUpdateProject.Discord
 
 			GuildInfo LocalGI = GIcollection.Find(chadFilter).Limit(1).SingleOrDefault();
 
-			if(LocalGI != null)
+			if (LocalGI != null)
 				return LocalGI;
 
 			GuildInfo LocalGuildInfo = new GuildInfo()
@@ -343,7 +341,7 @@ namespace SteamUpdateProject.Discord
 		/// </summary>
 		public string ElapsedTime(DateTime? nullabledtEvent)
 		{
-			DateTime dtEvent = (DateTime)nullabledtEvent;
+			DateTime dtEvent = (DateTime) nullabledtEvent;
 			TimeSpan ts = new TimeSpan(DateTime.UtcNow.Ticks - dtEvent.Ticks);
 			double delta = Math.Abs(ts.TotalSeconds);
 
@@ -370,12 +368,12 @@ namespace SteamUpdateProject.Discord
 
 			if (delta < 12 * MONTH)
 			{
-				int months = Convert.ToInt32(Math.Floor((double)ts.Days / 30));
+				int months = Convert.ToInt32(Math.Floor((double) ts.Days / 30));
 				return months <= 1 ? "one month ago" : months + " months ago";
 			}
 			else
 			{
-				int years = Convert.ToInt32(Math.Floor((double)ts.Days / 365));
+				int years = Convert.ToInt32(Math.Floor((double) ts.Days / 365));
 				return years <= 1 ? "one year ago" : years + " years ago";
 			}
 		}

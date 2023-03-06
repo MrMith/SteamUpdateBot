@@ -5,7 +5,7 @@ using System.IO;
 
 namespace SteamUpdateProject
 {
-    /* To-Do
+	/* To-Do
      * 
 	 *  Long Term
 	 *  1. Queue system for Steam ratelimiting
@@ -15,10 +15,10 @@ namespace SteamUpdateProject
 	 *  
 	 */
 
-    /// <summary>
-    /// Main logic that handles the steam bot, discord bot and managing the database.
-    /// </summary>
-    internal class SteamUpdateBot
+	/// <summary>
+	/// Main logic that handles the steam bot, discord bot and managing the database.
+	/// </summary>
+	internal class SteamUpdateBot
 	{
 		/// <summary>
 		/// Main discord bot that we can talk to.
@@ -61,7 +61,7 @@ namespace SteamUpdateProject
 		public static DataBaseHandler DB;
 
 		/// <summary>
-        /// Main entry for the program. It all goes downhill.
+		/// Main entry for the program. It all goes downhill.
 		/// </summary>
 		public static void Main()
 		{
@@ -86,7 +86,7 @@ namespace SteamUpdateProject
 			DiscordClient = new DiscordBot();
 			DiscordClient.StartDiscordBot(config).GetAwaiter().GetResult();
 
-            OverrideDiscordID = ulong.Parse(config.DiscordID);
+			OverrideDiscordID = ulong.Parse(config.DiscordID);
 
 			SteamClient = new SteamBot(config.SteamName, config.SteamPW, DiscordClient);
 

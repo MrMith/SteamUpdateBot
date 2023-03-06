@@ -1,8 +1,8 @@
-using System;
-using System.Text;
-using SteamUpdateProject.Steam;
-using System.IO;
 using Newtonsoft.Json;
+using SteamUpdateProject.Steam;
+using System;
+using System.IO;
+using System.Text;
 
 namespace SteamUpdateProject.Discord
 {
@@ -21,7 +21,7 @@ namespace SteamUpdateProject.Discord
 
 		public ConfigHandler()
 		{
-			if(!File.Exists("config.json"))
+			if (!File.Exists("config.json"))
 			{
 				Console.WriteLine("No config.json found, input your config options here to be saved:\n");
 				Console.WriteLine("Input Bot Token: ");
