@@ -1,4 +1,5 @@
-﻿using MongoDB.Driver;
+using MongoDB.Driver;
+using MongoDB.Driver.Linq;
 using SteamUpdateProject.Entities;
 
 namespace SteamUpdateProject
@@ -8,11 +9,17 @@ namespace SteamUpdateProject
 	/// </summary>
 	public class DataBaseHandler
 	{
+		/// <summary>
+		/// The client for MongoDB, this is where the data goes to die.
+		/// </summary>
 		public MongoClient Client;
 
 		public DataBaseHandler()
 		{
-			Client = new MongoClient();
+			var connectionString = "mongodb://localhost";
+			var clientSettings = MongoClientSettings.FromConnectionString(connectionString);
+			clientSettings.LinqProvider = LinqProvider.V2;
+			Client = new MongoClient(clientSettings);
 		}
 	}
 }
