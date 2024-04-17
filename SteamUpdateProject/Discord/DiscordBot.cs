@@ -1,4 +1,4 @@
-﻿using DSharpPlus;
+using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;

@@ -18,6 +18,7 @@ namespace SteamUpdateProject.Entities
 		public int Key { get; set; }
 		public long AppID { get; set; }
 
+		#region Equality Methods
 		public override bool Equals(object obj)
 		{
 			return Equals(obj as SubbedApp);
@@ -43,5 +44,6 @@ namespace SteamUpdateProject.Entities
 		{
 			return !(left == right);
 		}
+		#endregion
 	}
 }

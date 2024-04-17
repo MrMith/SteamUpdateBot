@@ -13,6 +13,7 @@ namespace SteamUpdateProject.Discord.Commands
 	{
 		protected DiscordEmbedBuilder HelpBuilder;
 
+		// Ideally I'd use reflection and grab the attributes for the commands so I don't have treadmill work
 		private readonly Dictionary<string, string> _godHasLeftUs = new Dictionary<string, string>()
 		{
 			{"sub","<AppID> or <AppID1 AppID2> `**`" },
@@ -47,7 +48,7 @@ namespace SteamUpdateProject.Discord.Commands
 
 				HelpBuilder.AddField($"{Context.Prefix}{cmd.Name} {(_godHasLeftUs.ContainsKey(cmd.Name) ? _godHasLeftUs[cmd.Name] : "")}", cmd.Description);
 			}
-			HelpBuilder.AddField("**[NOTICE]**", "Commands with `**` are limited to anyone with Admin, Manage Channels or All permissions.");
+			HelpBuilder.AddField("**[NOTICE]**", "Commands with `**` are limited to anyone with Admin, Manage Channels, or All permissions.");
 			return this;
 		}
 

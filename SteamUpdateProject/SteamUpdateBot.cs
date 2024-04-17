@@ -12,11 +12,11 @@ namespace SteamUpdateProject
 	 *  2. Queue system for Discord ratelimiting (Might be included in DSharpPlus?)
 	 * 
 	 *  Short Term
-	 *  
+	 *  Rewrite the MASSIVE indented mess of parsing update information from steam.
 	 */
 
 	/// <summary>
-	/// Main logic that handles the steam bot, discord bot and managing the database.
+	/// Main logic that handles the steam bot, discord bot, and managing the database.
 	/// </summary>
 	internal class SteamUpdateBot
 	{
@@ -70,7 +70,7 @@ namespace SteamUpdateProject
 			DB = new DataBaseHandler();
 			#endregion
 
-			#region Bot Starts, Logging and Main While thread.
+			#region Bot Starts, Logging, and Main While thread.
 
 			LAEH = new LoggingAndErrorHandler();
 			AppDomain.CurrentDomain.FirstChanceException += LAEH.FirstChanceHandler;

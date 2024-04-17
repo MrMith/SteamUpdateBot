@@ -1,4 +1,4 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
+using MongoDB.Bson.Serialization.Attributes;
 using System;
 using System.Collections.Generic;
 
@@ -35,7 +35,7 @@ namespace SteamUpdateProject.Entities
 		/// </summary>
 		public string DepoName { get; set; }
 
-		#region Equality Methods.
+		#region Equality Methods
 		public override bool Equals(object obj)
 		{
 			return Equals(obj as AppInfo);

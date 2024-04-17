@@ -493,11 +493,11 @@ namespace SteamUpdateProject.Discord.Commands
 		}
 
 		/// <summary>
-		/// If user has certain permissons (Admin, manage channels or All) in channel.
+		/// If user has certain permissons (Admin, manage channels, or All) in channel.
 		/// </summary>
 		/// <param name="u">User</param>
 		/// <param name="c">Channel</param>
-		/// <returns>If the user has Admin, Manage Channel or All permission for the given channel.</returns>
+		/// <returns>If the user has Admin, Manage Channel, or All permission for the given channel.</returns>
 		public static bool HasPermission(DiscordMember u, DiscordChannel c)
 		{
 			if (u.Id == SteamUpdateBot.OverrideDiscordID && SteamUpdateBot.DiscordClient.DevOverride)

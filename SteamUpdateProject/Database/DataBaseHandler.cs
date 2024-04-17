@@ -16,8 +16,8 @@ namespace SteamUpdateProject
 
 		public DataBaseHandler()
 		{
-			var connectionString = "mongodb://localhost";
-			var clientSettings = MongoClientSettings.FromConnectionString(connectionString);
+			string connectionString = "mongodb://localhost";
+			MongoClientSettings clientSettings = MongoClientSettings.FromConnectionString(connectionString);
 			clientSettings.LinqProvider = LinqProvider.V2;
 			Client = new MongoClient(clientSettings);
 		}

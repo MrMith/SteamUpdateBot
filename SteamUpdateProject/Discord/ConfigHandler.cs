@@ -63,8 +63,7 @@ namespace SteamUpdateProject.Discord
 
 			ConfigJson cfgjson = JsonConvert.DeserializeObject<ConfigJson>(rawConfigJson);
 
-			if (cfgjson.DevOverride == null)
-				cfgjson.DevOverride = "0";
+			cfgjson.DevOverride ??= "0";
 
 			BotToken = cfgjson.Token;
 			BotPrefix = cfgjson.CommandPrefix;
@@ -73,6 +72,7 @@ namespace SteamUpdateProject.Discord
 			SteamPW = cfgjson.SteamPassword;
 		}
 
+		#region Json Struct
 		public struct ConfigJson
 		{
 			public ConfigJson(string token, string prefix, string steamName, string steamPW, string devOverride)
@@ -99,5 +99,6 @@ namespace SteamUpdateProject.Discord
 			[JsonProperty("override")]
 			public string DevOverride { get; set; }
 		}
+		#endregion
 	}
 }
