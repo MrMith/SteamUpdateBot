@@ -288,6 +288,7 @@ namespace SteamUpdateProject.Discord.Commands
 		///But I like the pain.
 		private readonly string[] _allPatchNotes = new string[]
 		{
+			"Jan 12th 2025\nStarting to see a theme of when I want to update this. Updated to .NET 9.0, upgraded and implemented all breaking changes with nuget packages, and make this a little more friendly to host.",
 			"June 12th 2022\nAdded **history** command *(Ex: !history 570)* which allows you to list all of the updates of an app in the database.",
 			"June 11th 2022\nDatabase no longer deletes every entry from the database when an app updates.",
 			"June 10th 2022\nSwapped the backend database from Entity Framework to MongoDB because its just much easier to work with on a small scale project.",
