@@ -12,6 +12,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -214,6 +215,18 @@ namespace SteamUpdateProject.Discord.Commands
 			builder.AddField("Total Exceptions:", LoggingAndErrorHandler.Exceptions.ToString());
 			builder.AddField("Total minutes running:", LoggingAndErrorHandler.MinutesRunning.ToString());
 
+			if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+			{
+				
+				ProcessStartInfo startInfo = new ProcessStartInfo() { FileName = "/usr/bin/vcgencmd", Arguments = "measure_temp", RedirectStandardOutput = true };
+				Process proc = new Process() { StartInfo = startInfo, };
+				proc.Start();
+				string output = proc.StandardOutput.ReadToEnd();
+				proc.WaitForExit();
+
+				builder.AddField("CPU Temperature:", output.Replace("temp=", ""));
+			}
+
 			if (currentProcess != null)
 			{
 				builder.AddField("Memory Used:", $"{(currentProcess.WorkingSet64 / 1048576)} MB");
@@ -225,12 +238,14 @@ namespace SteamUpdateProject.Discord.Commands
 		[Command("log"), Hidden]
 		public async Task OpenLog(CommandContext ctx)
 		{
-			if (!SubscriptionModule.IsDev(ctx.User))
+			if (!SubscriptionModule.IsDev(ctx.User) || !RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 				return;
 
 			await ctx.TriggerTypingAsync();
 
-			ProcessStartInfo startInfo = new ProcessStartInfo()
+			ProcessStartInfo startInfo = new ProcessStartInfo();
+
+			startInfo = new ProcessStartInfo()
 			{
 				Arguments = Directory.GetCurrentDirectory(),
 				FileName = "explorer.exe"
