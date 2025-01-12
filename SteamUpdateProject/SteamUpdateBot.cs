@@ -61,10 +61,17 @@ namespace SteamUpdateProject
 		public static DataBaseHandler DB;
 
 		/// <summary>
+		/// Contains everything needed to run this bot.
+		/// </summary>
+		public static ConfigHandler ConfigHandler;
+
+		/// <summary>
 		/// Main entry for the program. It all goes downhill.
 		/// </summary>
 		public static void Main()
 		{
+			ConfigHandler = new ConfigHandler();
+
 			#region Database start
 
 			DB = new DataBaseHandler();
@@ -78,17 +85,15 @@ namespace SteamUpdateProject
 			MinorDataHandler = new MinorDataHandler();
 			MinorDataHandler.ReadData();
 
-			ConfigHandler config = new ConfigHandler();
-
 			if (!Directory.Exists(LogPath))
 				Directory.CreateDirectory(LogPath);
 
 			DiscordClient = new DiscordBot();
-			DiscordClient.StartDiscordBot(config).GetAwaiter().GetResult();
+			DiscordClient.StartDiscordBot(ConfigHandler).GetAwaiter().GetResult();
 
-			OverrideDiscordID = ulong.Parse(config.DiscordID);
+			OverrideDiscordID = ulong.Parse(ConfigHandler.Config.DevOverride);
 
-			SteamClient = new SteamBot(config.SteamName, config.SteamPW, DiscordClient);
+			SteamClient = new SteamBot(ConfigHandler.Config.SteamName, ConfigHandler.Config.SteamPassword, DiscordClient);
 
 			while (SteamClient.IsRunning)
 			{

@@ -206,7 +206,10 @@ namespace SteamUpdateProject.Discord.Commands
 
 			builder.AddField("Ping:", ctx.Client.Ping.ToString(), true);
 			builder.AddField("Steam Status:", (!steamStatus ? "Online" : "Offline"), false);
-			builder.AddField("Total updates processed:", $"{LoggingAndErrorHandler.Updates} ({(int) (LoggingAndErrorHandler.Updates / LoggingAndErrorHandler.MinutesRunning)} per minute)", true);
+
+			string updatesProcessed = LoggingAndErrorHandler.Updates != 0 && LoggingAndErrorHandler.MinutesRunning != 0 ? ((int) (LoggingAndErrorHandler.Updates / LoggingAndErrorHandler.MinutesRunning)).ToString() : "0";
+			builder.AddField("Total updates processed:", $"{LoggingAndErrorHandler.Updates} ({updatesProcessed} per minute)", true);
+
 			builder.AddField("Total content updates:", LoggingAndErrorHandler.ContentUpdates.ToString());
 			builder.AddField("Total Exceptions:", LoggingAndErrorHandler.Exceptions.ToString());
 			builder.AddField("Total minutes running:", LoggingAndErrorHandler.MinutesRunning.ToString());

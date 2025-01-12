@@ -41,14 +41,14 @@ namespace SteamUpdateProject.Discord
 		{
 			Client = new DiscordClient(new DiscordConfiguration()
 			{
-				Token = config.BotToken,
+				Token = config.Config.Token,
 				TokenType = TokenType.Bot,
 				Intents = DiscordIntents.AllUnprivileged,
 			});
 
 			CommandsNextExtension commands = Client.UseCommandsNext(new CommandsNextConfiguration()
 			{
-				StringPrefixes = new[] { config.BotPrefix },
+				StringPrefixes = new[] { config.Config.CommandPrefix },
 				EnableDms = true,
 			});
 
@@ -198,7 +198,7 @@ namespace SteamUpdateProject.Discord
 		/// </summary>
 		private async void UpdateStatus()
 		{
-			await Client.UpdateStatusAsync(new DiscordActivity($"Total Steam updates: {LoggingAndErrorHandler.Updates}", ActivityType.Playing));
+			await Client.UpdateStatusAsync(new DiscordActivity($"Hosted Total Updates: {LoggingAndErrorHandler.Updates}", ActivityType.Playing));
 			Console.WriteLine("Updated Time: " + LoggingAndErrorHandler.Updates);
 			LoggingAndErrorHandler.MinutesRunning += 5;
 			SteamUpdateBot.MinorDataHandler.WriteData();

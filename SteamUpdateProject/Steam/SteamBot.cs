@@ -1,13 +1,14 @@
 using MongoDB.Driver;
 using SteamKit2;
+using SteamKit2.Authentication;
 using SteamUpdateProject.Discord;
 using SteamUpdateProject.Entities;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Security.Cryptography;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using static SteamKit2.Internal.CMsgRemoteClientBroadcastStatus;
 
 namespace SteamUpdateProject.Steam
 {
@@ -23,7 +24,7 @@ namespace SteamUpdateProject.Steam
 		private uint _lastChangeNumber = 0;
 		private readonly string _user;
 		private readonly string _pass;
-		private string _authCode, _twoFactorAuth;
+		private string _previouslyStoredGuardData;
 		private SteamApps Apps { get; set; }
 
 		public CallbackManager Manager;
@@ -49,7 +50,7 @@ namespace SteamUpdateProject.Steam
 			Manager.Subscribe<SteamClient.ConnectedCallback>(OnConnected);
 			Manager.Subscribe<SteamClient.DisconnectedCallback>(OnDisconnected);
 			Manager.Subscribe<SteamUser.LoggedOnCallback>(OnLoggedOn);
-			Manager.Subscribe<SteamUser.UpdateMachineAuthCallback>(OnMachineAuth);
+			Manager.Subscribe<SteamUser.LoggedOffCallback>(OnLoggedOff);
 			Manager.Subscribe<SteamApps.PICSChangesCallback>(AppChanges);
 		}
 
@@ -320,28 +321,54 @@ namespace SteamUpdateProject.Steam
 			return customProductInfo;
 		}
 
-		#region CodeThat100PercentIsntFromOtherProjects👀
+		#region Generic boilerplate steam connection code
 		//All code that is either boilerplate or I haven't written myself.
-		private void OnConnected(SteamClient.ConnectedCallback callback)
+		public async void OnConnected(SteamClient.ConnectedCallback callback)
 		{
 			Console.WriteLine("Connected to Steam! Logging in '{0}'...", _user);
 
-			byte[] sentryHash = null;
-			if (File.Exists("sentry.bin"))
-			{
-				byte[] sentryFile = File.ReadAllBytes("sentry.bin");
-				sentryHash = CryptoHelper.SHAHash(sentryFile);
-			}
+			var shouldRememberPassword = false;
 
-			_steamUser.LogOn(new SteamUser.LogOnDetails
+			// Begin authenticating via credentials
+			var authSession = await _steamClient.Authentication.BeginAuthSessionViaCredentialsAsync(new AuthSessionDetails
 			{
 				Username = _user,
 				Password = _pass,
-				AuthCode = _authCode,
-				TwoFactorCode = _twoFactorAuth,
-				SentryFileHash = sentryHash,
+				IsPersistentSession = shouldRememberPassword,
+
+				// See NewGuardData comment below
+				GuardData = _previouslyStoredGuardData,
+
+				/// <see cref="UserConsoleAuthenticator"/> is the default authenticator implemention provided by SteamKit
+				/// for ease of use which blocks the thread and asks for user input to enter the code.
+				/// However, if you require special handling (e.g. you have the TOTP secret and can generate codes on the fly),
+				/// you can implement your own <see cref="SteamKit2.Authentication.IAuthenticator"/>.
+				Authenticator = new UserConsoleAuthenticator(),
 			});
 
+			// Starting polling Steam for authentication response
+			var pollResponse = await authSession.PollingWaitForResultAsync();
+
+			if (pollResponse.NewGuardData != null)
+			{
+				// When using certain two factor methods (such as email 2fa), guard data may be provided by Steam
+				// for use in future authentication sessions to avoid triggering 2FA again (this works similarly to the old sentry file system).
+				// Do note that this guard data is also a JWT token and has an expiration date.
+				_previouslyStoredGuardData = pollResponse.NewGuardData;
+			}
+
+			// Logon to Steam with the access token we have received
+			// Note that we are using RefreshToken for logging on here
+			_steamUser.LogOn(new SteamUser.LogOnDetails
+			{
+				Username = pollResponse.AccountName,
+				AccessToken = pollResponse.RefreshToken,
+				ShouldRememberPassword = shouldRememberPassword, // If you set IsPersistentSession to true, this also must be set to true for it to work correctly
+			});
+
+			// This is not required, but it is possible to parse the JWT access token to see the scope and expiration date.
+			ParseJsonWebToken(pollResponse.AccessToken, nameof(pollResponse.AccessToken));
+			ParseJsonWebToken(pollResponse.RefreshToken, nameof(pollResponse.RefreshToken));
 		}
 
 		private void OnDisconnected(SteamClient.DisconnectedCallback callback)
@@ -356,39 +383,18 @@ namespace SteamUpdateProject.Steam
 			_steamClient.Connect();
 		}
 
-		private void OnLoggedOn(SteamUser.LoggedOnCallback callback)
+		void OnLoggedOn(SteamUser.LoggedOnCallback callback)
 		{
-			bool isSteamGuard = callback.Result == EResult.AccountLogonDenied;
-			bool is2FA = callback.Result == EResult.AccountLoginDeniedNeedTwoFactor;
-
-			if (isSteamGuard || is2FA)
-			{
-				Console.WriteLine("This account is SteamGuard protected!");
-
-				if (is2FA)
-				{
-					Console.Write("Please enter your 2 factor auth code from your authenticator app: ");
-					_twoFactorAuth = Console.ReadLine();
-				}
-				else
-				{
-					Console.Write("Please enter the auth code sent to the email at {0}: ", callback.EmailDomain);
-					_authCode = Console.ReadLine();
-				}
-
-				return;
-			}
-
 			if (callback.Result != EResult.OK)
 			{
 				Console.WriteLine("Unable to logon to Steam: {0} / {1}", callback.Result, callback.ExtendedResult);
 
-				//isRunning = false;
+				IsRunning = false;
 				return;
 			}
 
-			// at this point, we'd be able to perform actions on Steam
-			//Console.WriteLine("Test");
+			Console.WriteLine("Successfully logged on!");
+
 			Apps = _steamClient.GetHandler<SteamApps>();
 
 			_mainChangeTimer.Elapsed += (sender, args) => MainChangeTimer_Elapsed(sender, args);
@@ -397,38 +403,37 @@ namespace SteamUpdateProject.Steam
 			_mainChangeTimer.Start();
 		}
 
-		private void OnMachineAuth(SteamUser.UpdateMachineAuthCallback callback)
+		void OnLoggedOff(SteamUser.LoggedOffCallback callback)
 		{
-			int fileSize;
-			byte[] sentryHash;
-			using (FileStream fs = File.Open("sentry.bin", FileMode.OpenOrCreate, FileAccess.ReadWrite))
-			{
-				fs.Seek(callback.Offset, SeekOrigin.Begin);
-				fs.Write(callback.Data, 0, callback.BytesToWrite);
-				fileSize = (int) fs.Length;
+			Console.WriteLine("Logged off of Steam: {0}", callback.Result);
+		}
 
-				fs.Seek(0, SeekOrigin.Begin);
-				using SHA1 sha = SHA1.Create();
-				sentryHash = sha.ComputeHash(fs);
+		// This is simply showing how to parse JWT, this is not required to login to Steam
+		void ParseJsonWebToken(string token, string name)
+		{
+			// You can use a JWT library to do the parsing for you
+			var tokenComponents = token.Split('.');
+
+			// Fix up base64url to normal base64
+			var base64 = tokenComponents[1].Replace('-', '+').Replace('_', '/');
+
+			if (base64.Length % 4 != 0)
+			{
+				base64 += new string('=', 4 - base64.Length % 4);
 			}
-			_steamUser.SendMachineAuthResponse(new SteamUser.MachineAuthDetails
+
+			var payloadBytes = Convert.FromBase64String(base64);
+
+			// Payload can be parsed as JSON, and then fields such expiration date, scope, etc can be accessed
+			var payload = JsonDocument.Parse(payloadBytes);
+
+			// For brevity we will simply output formatted json to console
+			var formatted = JsonSerializer.Serialize(payload, new JsonSerializerOptions
 			{
-				JobID = callback.JobID,
-
-				FileName = callback.FileName,
-
-				BytesWritten = callback.BytesToWrite,
-				FileSize = fileSize,
-				Offset = callback.Offset,
-
-				Result = EResult.OK,
-				LastError = 0,
-
-				OneTimePassword = callback.OneTimePassword,
-
-				SentryFileHash = sentryHash,
+				WriteIndented = true,
 			});
-
+			Console.WriteLine($"{name}: {formatted}");
+			Console.WriteLine();
 		}
 		#endregion
 	}
