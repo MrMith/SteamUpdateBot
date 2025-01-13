@@ -4,15 +4,24 @@
             alt="Invite bot to your server!"></a>
 </p>
 
-# SteamUpdateBot
+<div>
+  <h1 align="center">SteamUpdateBot - Game Update Companion Bot for Discord</h1>  
 
+  <p align="center">This powerful Discord bot, built with <a href="https://github.com/DSharpPlus/DSharpPlus">DSharp+</a> and <a href="https://github.com/SteamRE/SteamKit">SteamKit</a>, bridges the gap between Steam and your server, ensuring you never miss an important game patch, content update, or announcement.</p>  
 
+  <h2>Key Features:</h2>  
+  <ul style="display: inline-block; text-align: left;">
+    <li><strong>Focused Updates:</strong> By default, it filters out minor changes, delivering only the updates that matter—like new content, bug fixes, and major game improvements.</li>  
+    <li><strong>Real-Time Notifications:</strong> Automatically alerts you in Discord whenever a Steam application receives an update.</li>  
+    <li><strong>Customizable Alerts:</strong> Configure which applications you want to track, ensuring you only get the updates you care about most.</li>  
+  </ul>  
+</div>
+  
+<p align="center">
+    <img src="https://i.imgur.com/OLV4GZP.gif" width="300" height="300" />
+</p>
 
-This is a Discord bot ([DSharp+](https://github.com/DSharpPlus/DSharpPlus)) that connects to Steam ([SteamKit](https://github.com/SteamRE/SteamKit)) and listens for any Steam application updates so a Text Channel/DM message can be sent to notify people about a steam application update. You can choose to filter out any non-content update (Store tag updates) and just be notified about content updates (Game files changing)
-
-<img src="https://i.imgur.com/OLV4GZP.gif" width="300" height="300" />
-
-##### I'm open to code quality issues or suggestions if you want to make an issue or DM me on discord (Mith#7575) or use the !feedback bot command!
+<h3 align="center">Use the !feedback bot command to report any issues or suggestions.</h3>
 
 ## Discord Commands
 | Commands Option        | Value Type      | Description       | Alias | Example |
