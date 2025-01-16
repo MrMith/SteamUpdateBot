@@ -1,16 +1,16 @@
 using System;
+using System.IO;
 using System.Runtime.ExceptionServices;
 
 namespace SteamUpdateProject
 {
-	//To-do -> use microsoft's logging system and not this.
-
-
 	/// <summary>
 	/// This class handles any errors and then logging said errors to give a easier time when debugging.
 	/// </summary>
 	internal class LoggingAndErrorHandler
 	{
+		public static string LogDir = Directory.GetCurrentDirectory() + "\\log\\";
+
 		/// Total number of exceptions
 		public static long Exceptions = 0;
 		/// Total number of apps with detectable content changes.
@@ -41,6 +41,16 @@ namespace SteamUpdateProject
 			if (e != null)
 			{
 				Console.WriteLine(e.ToString());
+
+				if (!Directory.Exists(LogDir))
+				{
+					Directory.CreateDirectory(LogDir);
+				}
+
+				using (StreamWriter fw = new(LogDir + $"{GetFormattedDate}-{code}-{type}.txt"))
+				{
+					fw.WriteLine(e.ToString());
+				}
 			}
 		}
 
