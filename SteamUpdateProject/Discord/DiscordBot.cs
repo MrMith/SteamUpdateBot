@@ -43,7 +43,7 @@ namespace SteamUpdateProject.Discord
 			{
 				Token = config.Config.Token,
 				TokenType = TokenType.Bot,
-				Intents = DiscordIntents.AllUnprivileged,
+				Intents = DiscordIntents.AllUnprivileged | DiscordIntents.MessageContents,
 			});
 
 			CommandsNextExtension commands = Client.UseCommandsNext(new CommandsNextConfiguration()
@@ -171,8 +171,19 @@ namespace SteamUpdateProject.Discord
 					{
 						//This is only seperated for debugging.
 						DiscordGuild _1st = await Client.GetGuildAsync((ulong) ServerInfo.GuildID);
-						DiscordChannel _2nd = _1st.GetChannel((ulong) ServerInfo.ChannelID);
-						await _2nd.SendMessageAsync(embed: AppUpdate);
+
+						ulong ulongChannelID = (ulong) ServerInfo.ChannelID;
+
+						if (_1st.Threads.ContainsKey(ulongChannelID))
+						{
+							DiscordThreadChannel threadChannel = _1st.Threads[ulongChannelID];
+							await threadChannel.SendMessageAsync(embed: AppUpdate);
+						}
+						else
+						{
+							DiscordChannel regularDiscordChannel = _1st.GetChannel(ulongChannelID);
+							await regularDiscordChannel.SendMessageAsync(embed: AppUpdate);
+						}
 					}
 					catch (Exception e)
 					{
@@ -186,7 +197,7 @@ namespace SteamUpdateProject.Discord
 
 							GIcollection.DeleteOne(deleteFilter);
 
-							Console.WriteLine("Missing Permissions, removing server's data from bot.");
+							Console.WriteLine("Missing Permissions, removing server's data from bot."); //Unsure how I feel about this looking back on it. If you have a strong case I'll remove this.
 						}
 					}
 				}

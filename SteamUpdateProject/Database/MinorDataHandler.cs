@@ -1,9 +1,13 @@
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using MongoDB.Bson;
+using MongoDB.Driver;
 using MongoDB.Driver.Core.Configuration;
 using Newtonsoft.Json;
 using SharpCompress.Writers;
 using SteamKit2;
+using SteamUpdateProject.Entities;
 using static SteamUpdateProject.Discord.ConfigHandler;
 
 namespace SteamUpdateProject
@@ -24,7 +28,14 @@ namespace SteamUpdateProject
 		/// </summary>
 		public void WriteData()
 		{
-			BotStats = new StatJson(LoggingAndErrorHandler.Updates, LoggingAndErrorHandler.ContentUpdates, LoggingAndErrorHandler.Exceptions, LoggingAndErrorHandler.MinutesRunning);
+			IMongoDatabase db = SteamUpdateBot.DB.Client.GetDatabase(SteamUpdateBot.DatabaseName);
+
+			FilterDefinition<AppInfo> emptyFilter = Builders<AppInfo>.Filter.Empty;
+			FilterDefinition<AppInfo> contentFilter = Builders<AppInfo>.Filter.Ne("DepoName", (BsonNull) null);
+
+			IMongoCollection<AppInfo> aI_Collection = db.GetCollection<AppInfo>(AppInfo.DBName);
+
+			BotStats = new StatJson(aI_Collection.CountDocuments(emptyFilter), aI_Collection.CountDocuments(contentFilter), LoggingAndErrorHandler.Exceptions, LoggingAndErrorHandler.MinutesRunning);
 
 			string seralizedObject = JsonConvert.SerializeObject(BotStats, Formatting.Indented);
 

@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Runtime.ExceptionServices;
+using static SteamKit2.GC.Underlords.Internal.CMsgClientToGCGetFriendCodesResponse;
 
 namespace SteamUpdateProject
 {
@@ -9,7 +10,7 @@ namespace SteamUpdateProject
 	/// </summary>
 	internal class LoggingAndErrorHandler
 	{
-		public static string LogDir = Directory.GetCurrentDirectory() + "\\log\\";
+		public static string LogDir = $"{Directory.GetCurrentDirectory()}{Path.DirectorySeparatorChar}log{Path.DirectorySeparatorChar}";
 
 		/// Total number of exceptions
 		public static long Exceptions = 0;
@@ -63,8 +64,20 @@ namespace SteamUpdateProject
 			if (e is System.Net.Sockets.SocketException || e is System.IO.IOException)
 				return; //What the hell even is this, no line numbers or anything. Just a meaningless error.
 
-			Console.WriteLine(e);
-			//To-do: Implement Microsoft's logging system.
+			if (e != null)
+			{
+				Console.WriteLine(e.ToString());
+
+				if (!Directory.Exists(LogDir))
+				{
+					Directory.CreateDirectory(LogDir);
+				}
+
+				using (StreamWriter fw = File.AppendText(LogDir + $"ErrorLog.txt"))
+				{
+					fw.WriteLine($"{GetFormattedDate()}: {e.ToString()}");
+				}
+			}
 		}
 
 		/// <summary>
