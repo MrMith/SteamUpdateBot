@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 namespace SteamUpdateProject.Discord.Commands
 {
 	/// <summary>
-	/// Handles all of the discord commands related to subscriptions, this including adding/removing apps, displaying that information and configuration options.
+	/// Handles all of the discord commands related to subscriptions, this including adding/removing apps, displaying that information, and configuration options.
 	/// </summary>
 	public class SubscriptionModule : BaseCommandModule
 	{

@@ -8,8 +8,7 @@ namespace SteamUpdateProject
 	/* To-Do
      * 
 	 *  Long Term
-	 *  1. Queue system for Steam ratelimiting
-	 *  2. Queue system for Discord ratelimiting (Might be included in DSharpPlus?)
+	 *  1. Split this frankenstein of a bot into separate projects Ex: Steam's backend, Discord's backend, and my handling of updates into 3 seperate projects.
 	 * 
 	 *  Short Term
 	 *  Rewrite the MASSIVE indented mess of parsing update information from steam.

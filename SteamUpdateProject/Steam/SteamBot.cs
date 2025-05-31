@@ -327,10 +327,10 @@ namespace SteamUpdateProject.Steam
 		{
 			Console.WriteLine("Connected to Steam! Logging in '{0}'...", _user);
 
-			var shouldRememberPassword = false;
+			bool shouldRememberPassword = false;
 
 			// Begin authenticating via credentials
-			var authSession = await _steamClient.Authentication.BeginAuthSessionViaCredentialsAsync(new AuthSessionDetails
+			CredentialsAuthSession authSession = await _steamClient.Authentication.BeginAuthSessionViaCredentialsAsync(new AuthSessionDetails
 			{
 				Username = _user,
 				Password = _pass,
@@ -347,7 +347,7 @@ namespace SteamUpdateProject.Steam
 			});
 
 			// Starting polling Steam for authentication response
-			var pollResponse = await authSession.PollingWaitForResultAsync();
+			AuthPollResult pollResponse = await authSession.PollingWaitForResultAsync();
 
 			if (pollResponse.NewGuardData != null)
 			{
@@ -412,23 +412,23 @@ namespace SteamUpdateProject.Steam
 		void ParseJsonWebToken(string token, string name)
 		{
 			// You can use a JWT library to do the parsing for you
-			var tokenComponents = token.Split('.');
+			string[] tokenComponents = token.Split('.');
 
 			// Fix up base64url to normal base64
-			var base64 = tokenComponents[1].Replace('-', '+').Replace('_', '/');
+			string base64 = tokenComponents[1].Replace('-', '+').Replace('_', '/');
 
 			if (base64.Length % 4 != 0)
 			{
 				base64 += new string('=', 4 - base64.Length % 4);
 			}
 
-			var payloadBytes = Convert.FromBase64String(base64);
+			byte[] payloadBytes = Convert.FromBase64String(base64);
 
 			// Payload can be parsed as JSON, and then fields such expiration date, scope, etc can be accessed
-			var payload = JsonDocument.Parse(payloadBytes);
+			JsonDocument payload = JsonDocument.Parse(payloadBytes);
 
 			// For brevity we will simply output formatted json to console
-			var formatted = JsonSerializer.Serialize(payload, new JsonSerializerOptions
+			string formatted = JsonSerializer.Serialize(payload, new JsonSerializerOptions
 			{
 				WriteIndented = true,
 			});

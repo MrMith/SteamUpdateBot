@@ -358,7 +358,7 @@ namespace SteamUpdateProject.Discord.Commands
 
 			IMongoCollection<AppInfo> aI_Collection = db.GetCollection<AppInfo>(AppInfo.DBName);
 
-			List<AppInfo> local_AI_List = aI_Collection.Find(aI_Filter).SortBy(x => x.LastUpdated).ToList();
+			List<AppInfo> local_AI_List = aI_Collection.Find(aI_Filter).SortByDescending(x => x.LastUpdated).ToList();
 
 			foreach (AppInfo aI in local_AI_List)
 			{

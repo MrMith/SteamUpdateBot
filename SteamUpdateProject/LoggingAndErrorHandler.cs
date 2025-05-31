@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using System.Runtime.ExceptionServices;
-using static SteamKit2.GC.Underlords.Internal.CMsgClientToGCGetFriendCodesResponse;
 
 namespace SteamUpdateProject
 {

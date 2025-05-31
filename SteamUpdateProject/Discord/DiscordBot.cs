@@ -43,7 +43,7 @@ namespace SteamUpdateProject.Discord
 			{
 				Token = config.Config.Token,
 				TokenType = TokenType.Bot,
-				Intents = DiscordIntents.AllUnprivileged | DiscordIntents.MessageContents,
+				Intents = DiscordIntents.AllUnprivileged | DiscordIntents.MessageContents | DiscordIntents.DirectMessages,
 			});
 
 			CommandsNextExtension commands = Client.UseCommandsNext(new CommandsNextConfiguration()
@@ -240,7 +240,7 @@ namespace SteamUpdateProject.Discord
 				{
 					if (e is DSharpPlus.Exceptions.UnauthorizedException)
 					{
-						Console.WriteLine($"{_guildKVP.Value.Name} is that bastard that doesn't have bot perms set-up correctly.");
+						//Sad bot noises :(
 					}
 				}
 			}
@@ -331,7 +331,7 @@ namespace SteamUpdateProject.Discord
 		{
 			IMongoDatabase db = SteamUpdateBot.DB.Client.GetDatabase(SteamUpdateBot.DatabaseName);
 
-			var filterAppID = Builders<GuildInfo>.Filter.ElemMatch(x => x.SubscribedApps, x => x.AppID == appid);
+			FilterDefinition<GuildInfo> filterAppID = Builders<GuildInfo>.Filter.ElemMatch(x => x.SubscribedApps, x => x.AppID == appid);
 
 			IMongoCollection<GuildInfo> GIcollection = db.GetCollection<GuildInfo>(GuildInfo.DBName);
 

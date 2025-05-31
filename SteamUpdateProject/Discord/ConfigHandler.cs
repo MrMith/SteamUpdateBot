@@ -21,23 +21,23 @@ namespace SteamUpdateProject.Discord
 			{
 				Console.WriteLine("No config.json found, input your config options here to be saved:\n");
 				Console.WriteLine("Input Bot Token: ");
-				var BotToken = Console.ReadLine();
+				string BotToken = Console.ReadLine();
 
 				Console.WriteLine("Input Bot Prefix: ");
-				var BotPrefix = Console.ReadLine();
+				string BotPrefix = Console.ReadLine();
 
 				Console.WriteLine("Input Steam Username: ");
-				var SteamName = Console.ReadLine();
+				string SteamName = Console.ReadLine();
 
 				Console.WriteLine("Input Steam Password: ");
-				var SteamPW = Console.ReadLine();
+				string SteamPW = Console.ReadLine();
 
 				Console.WriteLine("Input MongoDB connection string: ");
-				var ConnectionString = Console.ReadLine();
+				string ConnectionString = Console.ReadLine();
 
 				Console.WriteLine("Input Discord Dev Override ID (Optional): ");
-				var optionalDevOverride = Console.ReadLine();
-				var DiscordID = string.IsNullOrEmpty(optionalDevOverride) ? "0" : optionalDevOverride;
+				string optionalDevOverride = Console.ReadLine();
+				string DiscordID = string.IsNullOrEmpty(optionalDevOverride) ? "0" : optionalDevOverride;
 
 				Config = new ConfigJson(BotToken, BotPrefix, SteamName, SteamPW, ConnectionString, DiscordID);
 
