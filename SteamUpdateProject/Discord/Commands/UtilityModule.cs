@@ -288,6 +288,7 @@ namespace SteamUpdateProject.Discord.Commands
 		///But I like the pain.
 		private readonly string[] _allPatchNotes = new string[]
 		{
+			"May 31st 2025\nFix long standing issue preventing DM support, reverse order of history command, nuke var, and update nuget packages.",
 			"Jan 12th 2025\nStarting to see a theme of when I want to update this. Updated to .NET 9.0, upgraded and implemented all breaking changes with nuget packages, and make this a little more friendly to host.",
 			"June 12th 2022\nAdded **history** command *(Ex: !history 570)* which allows you to list all of the updates of an app in the database.",
 			"June 11th 2022\nDatabase no longer deletes every entry from the database when an app updates.",
