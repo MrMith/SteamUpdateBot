@@ -5,6 +5,7 @@ using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Enums;
 using DSharpPlus.Interactivity.Extensions;
 using MongoDB.Driver;
+using SteamUpdateProject.Database;
 using SteamUpdateProject.Discord.Commands;
 using SteamUpdateProject.Entities;
 using System;
@@ -48,7 +49,7 @@ namespace SteamUpdateProject.Discord
 
 			CommandsNextExtension commands = Client.UseCommandsNext(new CommandsNextConfiguration()
 			{
-				StringPrefixes = new[] { config.Config.CommandPrefix },
+				StringPrefixes = [config.Config.CommandPrefix],
 				EnableDms = true,
 			});
 
@@ -56,7 +57,7 @@ namespace SteamUpdateProject.Discord
 			commands.RegisterCommands<UtilityModule>();
 			commands.SetHelpFormatter<CustomHelpFormatter>();
 
-			this.Client.UseInteractivity(new InteractivityConfiguration
+			Client.UseInteractivity(new InteractivityConfiguration
 			{
 				PaginationBehaviour = PaginationBehaviour.WrapAround,
 				Timeout = TimeSpan.FromMinutes(4),
@@ -74,9 +75,9 @@ namespace SteamUpdateProject.Discord
 			if (e.Exception is DSharpPlus.CommandsNext.Exceptions.CommandNotFoundException) //I do not want to spy on people.
 				return Task.CompletedTask;
 
-			Exception ExceptionToSend = new Exception($"{e.Command} Was Executed: {e.Exception.ToString()}");
+			Exception exceptionToSend = new Exception($"{e.Command} Was Executed: {e.Exception}");
 
-			SteamUpdateBot.LAEH.BadlyFormattedFunction(ExceptionToSend);
+			SteamUpdateBot.LAEH.BadlyFormattedFunction(exceptionToSend);
 			return Task.CompletedTask;
 		}
 
@@ -94,66 +95,65 @@ namespace SteamUpdateProject.Discord
 			if (DateTime.Now > _timeForStatusUpdate)
 				UpdateStatus();
 
-			DiscordColor Color = new DiscordColor((float) _rand.Next(1, 100) / 100, (float) _rand.Next(1, 100) / 100, (float) _rand.Next(1, 100) / 100);
+			DiscordColor color = new DiscordColor((float) _rand.Next(1, 100) / 100, (float) _rand.Next(1, 100) / 100, (float) _rand.Next(1, 100) / 100);
 
-			DiscordEmbedBuilder AppEmbed = new DiscordEmbedBuilder
+			DiscordEmbedBuilder appEmbed = new DiscordEmbedBuilder
 			{
-				Color = Color,
+				Color = color,
 				Timestamp = DateTimeOffset.UtcNow,
-				Title = $"{app.Name ?? ""} Steam App Update!"
+				Title = $"{app.Name ?? ""} Steam App Update!",
+				//If this URL goes down then the bot has more things to worry about than a URL not working.
+				ImageUrl = app.Name == null ? "https://steamstore-a.akamaihd.net/public/shared/images/header/globalheader_logo.png?t=962016" : "https://steamcdn-a.akamaihd.net/steam/apps/" + app.AppID + "/header.jpg"
 			};
-
-			//If this URL goes down then the bot has more things to worry about than a URL not working.
-			AppEmbed.ImageUrl = app.Name == null ? "https://steamstore-a.akamaihd.net/public/shared/images/header/globalheader_logo.png?t=962016" : "https://steamcdn-a.akamaihd.net/steam/apps/" + app.AppID + "/header.jpg";
-			AppEmbed.AddField("Name", app.Name ?? "Unknown App", true);
-			AppEmbed.AddField("Change Number", app.ChangeNumber == 1 ? "DEBUG TEST UPDATE - IGNORE" : app.ChangeNumber.ToString(), true);
-			AppEmbed.AddField("AppID", app.AppID.ToString());
+			appEmbed.AddField("Name", app.Name ?? "Unknown App", true);
+			appEmbed.AddField("Change Number", app.ChangeNumber == 1 ? "DEBUG TEST UPDATE - IGNORE" : app.ChangeNumber.ToString(), true);
+			appEmbed.AddField("AppID", app.AppID.ToString());
 
 			//Hope this is okay XPaw :sweat:
-			AppEmbed.Url = $"https://steamdb.info/changelist/{app.ChangeNumber}/";
+			appEmbed.Url = $"https://steamdb.info/changelist/{app.ChangeNumber}/";
 
 			if (app.DepoName != null)
-				AppEmbed.AddField("Depo Changed", app.DepoName, true);
+				appEmbed.AddField("Depo Changed", app.DepoName, true);
 
-			DiscordEmbed AppUpdate = AppEmbed.Build();
+			DiscordEmbed appUpdate = appEmbed.Build();
 
 			IMongoDatabase db = SteamUpdateBot.DB.Client.GetDatabase(SteamUpdateBot.DatabaseName);
 
 			FilterDefinition<GuildInfo> filterAppID = Builders<GuildInfo>.Filter.ElemMatch(x => x.SubscribedApps, x => x.AppID == app.AppID);
 
-			IMongoCollection<GuildInfo> GIcollection = db.GetCollection<GuildInfo>(GuildInfo.DBName);
+			IMongoCollection<GuildInfo> gIcollection = db.GetCollection<GuildInfo>(GuildInfo.DBName);
 
-			List<GuildInfo> res = await GIcollection.Find(filterAppID).ToListAsync();
+			List<GuildInfo> res = await gIcollection.Find(filterAppID).ToListAsync();
 
 			FilterDefinition<GuildInfo> filterDebug = Builders<GuildInfo>.Filter.Eq("DebugMode", true);
 
-			res.AddRange(GIcollection.Find(filterDebug).ToList());
+			res.AddRange(gIcollection.Find(filterDebug).ToList());
 
-			foreach (GuildInfo ServerInfo in res)
+			foreach (GuildInfo serverInfo in res)
 			{
 				//If guild isn't subscribed to given app.
-				if (!ServerInfo.SubscribedApps.Exists(ExistingApp => ExistingApp.AppID == app.AppID) && !ServerInfo.DebugMode)
+				if (!serverInfo.SubscribedApps.Exists(existingApp => existingApp.AppID == app.AppID) && !serverInfo.DebugMode)
 					continue;
 
 				//If app has content updates (files changed) and guild has option to show only content updates.
-				if (!app.Content && !ServerInfo.ShowContent && !ServerInfo.DebugMode)
+				if (!app.Content && !serverInfo.ShowContent && !serverInfo.DebugMode)
 					continue;
 
 				//If guild has option to show only public (main default steam branch) updates or any update.
-				if (app.DepoName != null && ServerInfo.PublicDepoOnly && app.DepoName != "public")
+				if (app.DepoName != null && serverInfo.PublicDepoOnly && app.DepoName != "public")
 					continue;
 
-				if (ServerInfo.GuildID == 0) //DMs
+				if (serverInfo.GuildID == 0) //DMs
 				{
 					try
 					{
-						DiscordMember DMUser = await GetDiscordMember((ulong) ServerInfo.ChannelID);
+						DiscordMember dMUser = await GetDiscordMember((ulong) serverInfo.ChannelID);
 
 						//If we cannot find the user (we're not in the same server) then we continue on because discord will block DMs.
-						if (DMUser == null)
+						if (dMUser == null)
 							continue;
 
-						await DMUser.SendMessageAsync(embed: AppUpdate);
+						await dMUser.SendMessageAsync(embed: appUpdate);
 					}
 					catch (Exception e)
 					{
@@ -170,19 +170,19 @@ namespace SteamUpdateProject.Discord
 					try
 					{
 						//This is only seperated for debugging.
-						DiscordGuild _1st = await Client.GetGuildAsync((ulong) ServerInfo.GuildID);
+						DiscordGuild _1st = await Client.GetGuildAsync((ulong) serverInfo.GuildID);
 
-						ulong ulongChannelID = (ulong) ServerInfo.ChannelID;
+						ulong ulongChannelID = (ulong) serverInfo.ChannelID;
 
 						if (_1st.Threads.ContainsKey(ulongChannelID))
 						{
 							DiscordThreadChannel threadChannel = _1st.Threads[ulongChannelID];
-							await threadChannel.SendMessageAsync(embed: AppUpdate);
+							await threadChannel.SendMessageAsync(embed: appUpdate);
 						}
 						else
 						{
 							DiscordChannel regularDiscordChannel = _1st.GetChannel(ulongChannelID);
-							await regularDiscordChannel.SendMessageAsync(embed: AppUpdate);
+							await regularDiscordChannel.SendMessageAsync(embed: appUpdate);
 						}
 					}
 					catch (Exception e)
@@ -192,10 +192,10 @@ namespace SteamUpdateProject.Discord
 						else if ((e as DSharpPlus.Exceptions.UnauthorizedException).JsonMessage == "Missing Access")
 						{
 							FilterDefinition<GuildInfo> deleteFilter = Builders<GuildInfo>.Filter.And(
-								Builders<GuildInfo>.Filter.Eq("ChannelID", ServerInfo.ChannelID),
-								Builders<GuildInfo>.Filter.Eq("GuildID", ServerInfo.GuildID));
+								Builders<GuildInfo>.Filter.Eq("ChannelID", serverInfo.ChannelID),
+								Builders<GuildInfo>.Filter.Eq("GuildID", serverInfo.GuildID));
 
-							GIcollection.DeleteOne(deleteFilter);
+							gIcollection.DeleteOne(deleteFilter);
 
 							Console.WriteLine("Missing Permissions, removing server's data from bot."); //Unsure how I feel about this looking back on it. If you have a strong case I'll remove this.
 						}
@@ -220,19 +220,19 @@ namespace SteamUpdateProject.Discord
 		/// <summary>
 		/// Gets <see cref="DiscordMember"/> by <see cref="CommandContext.User.Id"/>
 		/// </summary>
-		/// <param name="_memberID">User's ID</param>
+		/// <param name="memberID">User's ID</param>
 		/// <returns>The <see cref="DiscordMember"/> with the ID specified</returns>
-		public async Task<DiscordMember> GetDiscordMember(ulong _memberID)
+		public async Task<DiscordMember> GetDiscordMember(ulong memberID)
 		{
-			foreach (KeyValuePair<ulong, DiscordGuild> _guildKVP in Client.Guilds)
+			foreach (KeyValuePair<ulong, DiscordGuild> guildKVP in Client.Guilds)
 			{
 				try
 				{
-					foreach (DiscordMember _member in await _guildKVP.Value.GetAllMembersAsync())
+					foreach (DiscordMember member in await guildKVP.Value.GetAllMembersAsync())
 					{
-						if (_member.Id == _memberID)
+						if (member.Id == memberID)
 						{
-							return _member;
+							return member;
 						}
 					}
 				}
@@ -252,36 +252,36 @@ namespace SteamUpdateProject.Discord
 		/// Will attempt to get <see cref="AppInfo"/> from database and if it cannot it will create that information in the database (Only QuickSearch is false)
 		/// </summary>
 		/// <param name="appid">Relevant Steam AppID</param>
-		/// <param name="QuickSearch">Do we only search Database or check Database and nothing is found then we search info from Steam</param>
+		/// <param name="quickSearch">Do we only search Database or check Database and nothing is found then we search info from Steam</param>
 		/// <returns><see cref="AppInfo"/> for the given appID.</returns>
-		public static AppInfo GetCachedAppInfo(long appid, bool QuickSearch = false)
+		public static AppInfo GetCachedAppInfo(long appid, bool quickSearch = false)
 		{
 			IMongoDatabase db = SteamUpdateBot.DB.Client.GetDatabase(SteamUpdateBot.DatabaseName);
 
 			FilterDefinition<AppInfo> filterAppID = Builders<AppInfo>.Filter.Eq("AppID", appid);
 
-			IMongoCollection<AppInfo> AIcollection = db.GetCollection<AppInfo>(AppInfo.DBName);
+			IMongoCollection<AppInfo> aIcollection = db.GetCollection<AppInfo>(AppInfo.DBName);
 
-			AppInfo temp = AIcollection.Find(filterAppID).Limit(1).SingleOrDefault();
+			AppInfo temp = aIcollection.Find(filterAppID).Limit(1).SingleOrDefault();
 
 			if (temp != null)
 			{
 				return temp;
 			}
 
-			if (QuickSearch)
+			if (quickSearch)
 				return null;
 
-			AppInfo LocalAppInfo = new AppInfo()
+			AppInfo localAppInfo = new AppInfo()
 			{
 				AppID = appid,
 				Name = SteamUpdateBot.SteamClient.GetAppName((uint) appid).Result
 			};
 
-			if (LocalAppInfo.Name != null)
+			if (localAppInfo.Name != null)
 			{
-				AIcollection.InsertOne(LocalAppInfo);
-				return LocalAppInfo;
+				aIcollection.InsertOne(localAppInfo);
+				return localAppInfo;
 			}
 
 			return null;
@@ -304,22 +304,22 @@ namespace SteamUpdateProject.Discord
 								Builders<GuildInfo>.Filter.Eq("ChannelID", channelid),
 								Builders<GuildInfo>.Filter.Eq("GuildID", guildid));
 
-			IMongoCollection<GuildInfo> GIcollection = db.GetCollection<GuildInfo>(GuildInfo.DBName);
+			IMongoCollection<GuildInfo> gIcollection = db.GetCollection<GuildInfo>(GuildInfo.DBName);
 
-			GuildInfo LocalGI = GIcollection.Find(chadFilter).Limit(1).SingleOrDefault();
+			GuildInfo localGI = gIcollection.Find(chadFilter).Limit(1).SingleOrDefault();
 
-			if (LocalGI != null)
-				return LocalGI;
+			if (localGI != null)
+				return localGI;
 
-			GuildInfo LocalGuildInfo = new GuildInfo()
+			GuildInfo localGuildInfo = new GuildInfo()
 			{
 				ChannelID = channelid,
 				GuildID = guildid
 			};
 
-			GIcollection.InsertOne(LocalGuildInfo);
+			gIcollection.InsertOne(localGuildInfo);
 
-			return LocalGuildInfo;
+			return localGuildInfo;
 		}
 
 		/// <summary>
@@ -333,9 +333,9 @@ namespace SteamUpdateProject.Discord
 
 			FilterDefinition<GuildInfo> filterAppID = Builders<GuildInfo>.Filter.ElemMatch(x => x.SubscribedApps, x => x.AppID == appid);
 
-			IMongoCollection<GuildInfo> GIcollection = db.GetCollection<GuildInfo>(GuildInfo.DBName);
+			IMongoCollection<GuildInfo> gIcollection = db.GetCollection<GuildInfo>(GuildInfo.DBName);
 
-			GuildInfo res = GIcollection.Find(filterAppID).Limit(1).SingleOrDefault();
+			GuildInfo res = gIcollection.Find(filterAppID).Limit(1).SingleOrDefault();
 
 			return res != null;
 		}

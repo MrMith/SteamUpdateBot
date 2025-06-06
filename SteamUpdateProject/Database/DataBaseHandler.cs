@@ -2,7 +2,7 @@ using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 using SteamUpdateProject.Entities;
 
-namespace SteamUpdateProject
+namespace SteamUpdateProject.Database
 {
 	/// <summary>
 	/// The main <see cref="DbContext"/> class that we get/set any information related to <see cref="AppInfo"/> or <see cref="GuildInfo"/>.

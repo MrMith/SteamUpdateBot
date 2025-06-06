@@ -266,7 +266,7 @@ namespace SteamUpdateProject.Steam
 				//This randomly errors and has cost me sleep so therefor slap a try-catch on it.
 				SteamApps.PICSTokensCallback appTokenInfo = await SteamUpdateBot.SteamClient.Apps.PICSGetAccessTokens(appid, null);
 
-				return appTokenInfo.AppTokensDenied.Contains(appid) || !appTokenInfo.AppTokens.ContainsKey(appid) ? 0 : appTokenInfo.AppTokens[appid];
+				return appTokenInfo.AppTokensDenied.Contains(appid) || !appTokenInfo.AppTokens.TryGetValue(appid, out ulong value) ? 0 : value;
 			}
 			catch
 			{
@@ -309,7 +309,7 @@ namespace SteamUpdateProject.Steam
 				{
 					request.AccessToken = accessToken;
 					customProductInfo.IsPublic = false;
-					customProductInfo.ProductInfo = (await SteamUpdateBot.SteamClient.Apps.PICSGetProductInfo(new List<SteamApps.PICSRequest>() { request }, new List<SteamApps.PICSRequest>() { })).Results;
+					customProductInfo.ProductInfo = (await SteamUpdateBot.SteamClient.Apps.PICSGetProductInfo([request], [])).Results;
 				}
 				catch
 				{

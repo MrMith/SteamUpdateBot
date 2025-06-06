@@ -1,3 +1,4 @@
+using SteamUpdateProject.Database;
 using SteamUpdateProject.Discord;
 using SteamUpdateProject.Steam;
 using System;
@@ -42,7 +43,11 @@ namespace SteamUpdateProject
 		/// <summary>
 		/// Name of mongoDB database. This is so I can't mispell the database name.
 		/// </summary>
+#if DEBUG
+		public static string DatabaseName = "DebugSteamInformation";
+#else
 		public static string DatabaseName = "SteamInformation";
+#endif
 
 		/// <summary>
 		/// Main path to logs.

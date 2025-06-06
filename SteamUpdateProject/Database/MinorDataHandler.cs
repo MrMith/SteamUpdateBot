@@ -8,18 +8,22 @@ using Newtonsoft.Json;
 using SharpCompress.Writers;
 using SteamKit2;
 using SteamUpdateProject.Entities;
-using static SteamUpdateProject.Discord.ConfigHandler;
 
-namespace SteamUpdateProject
+namespace SteamUpdateProject.Database
 {
 	/// <summary>
 	/// This handles small data like <see cref="LoggingAndErrorHandler.Updates"/>, <see cref="LoggingAndErrorHandler.ContentUpdates"/>, <see cref="LoggingAndErrorHandler.Exceptions"/> and finally <see cref="LoggingAndErrorHandler.MinutesRunning"/> so we can keep track of those small things.
 	/// </summary>
 	internal class MinorDataHandler
 	{
-		private const string fileName = "SteamData.json";
 
-		private readonly string _operatingFile = Directory.GetCurrentDirectory() + "//" + fileName;
+#if DEBUG
+		private const string FileName = "DebugSteamData.json";
+#else
+		private const string FileName = "SteamData.json";
+#endif
+
+		private readonly string _operatingFile = Directory.GetCurrentDirectory() + "//" + FileName;
 
 		public StatJson BotStats;
 
@@ -69,27 +73,19 @@ namespace SteamUpdateProject
 			LoggingAndErrorHandler.MinutesRunning = BotStats.MinutesRunning;
 		}
 
-		public struct StatJson
+		public struct StatJson(long updates, long contentUpdates, long exceptions, long minutesRunning)
 		{
-			public StatJson(long updates, long contentUpdates, long exceptions, long minutesRunning)
-			{
-				Updates = updates;
-				ContentUpdates = contentUpdates;
-				Exceptions = exceptions;
-				MinutesRunning = minutesRunning;
-			}
+			[JsonProperty(nameof(Updates))]
+			public long Updates { get; private set; } = updates;
 
-			[JsonProperty("Updates")]
-			public long Updates { get; private set; }
+			[JsonProperty(nameof(ContentUpdates))]
+			public long ContentUpdates { get; private set; } = contentUpdates;
 
-			[JsonProperty("ContentUpdates")]
-			public long ContentUpdates { get; private set; }
+			[JsonProperty(nameof(Exceptions))]
+			public long Exceptions { get; private set; } = exceptions;
 
-			[JsonProperty("Exceptions")]
-			public long Exceptions { get; private set; }
-
-			[JsonProperty("MinutesRunning")]
-			public long MinutesRunning { get; private set; }
+			[JsonProperty(nameof(MinutesRunning))]
+			public long MinutesRunning { get; private set; } = minutesRunning;
 		}
 	}
 }

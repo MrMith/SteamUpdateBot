@@ -74,7 +74,7 @@ namespace SteamUpdateProject
 
 				using (StreamWriter fw = File.AppendText(LogDir + $"ErrorLog.txt"))
 				{
-					fw.WriteLine($"{GetFormattedDate()}: {e.ToString()}");
+					fw.WriteLine($"{GetFormattedDate()}: {e}");
 				}
 			}
 		}

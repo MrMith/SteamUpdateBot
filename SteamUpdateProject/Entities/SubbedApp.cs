@@ -7,16 +7,11 @@ namespace SteamUpdateProject.Entities
 	/// <summary>
 	/// This is a dummy class that the database uses because I can't make a int list.
 	/// </summary>
-	public class SubbedApp : IEquatable<SubbedApp>
+	public class SubbedApp(long appid) : IEquatable<SubbedApp>
 	{
-		public SubbedApp(long appid)
-		{
-			AppID = appid;
-		}
-
 		[Key]
 		public int Key { get; set; }
-		public long AppID { get; set; }
+		public long AppID { get; set; } = appid;
 
 		#region Equality Methods
 		public override bool Equals(object obj)

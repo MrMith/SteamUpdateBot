@@ -14,7 +14,7 @@ namespace SteamUpdateProject.Entities
 		/// <summary>
 		/// Name of document? in mongoDB.
 		/// </summary>
-		public static string DBName = "GuildInfo";
+		public const string DBName = "GuildInfo";
 
 		/// <summary>
 		/// Relevant GuildID
@@ -44,7 +44,7 @@ namespace SteamUpdateProject.Entities
 		/// <summary>
 		/// List of apps this certain channel is subscribed to.
 		/// </summary>
-		public virtual List<SubbedApp> SubscribedApps { get; set; } = new List<SubbedApp>();
+		public virtual List<SubbedApp> SubscribedApps { get; set; } = [];
 
 		/// <summary>
 		/// Checks if this Guild is subscribed to this app.
@@ -90,7 +90,7 @@ namespace SteamUpdateProject.Entities
 		/// <returns>List of AppIDs that were added to the subscribed list of <see cref="GuildInfo"/>.</returns>
 		public List<uint> SubMultipleApps(List<uint> listOfApps)
 		{
-			List<uint> listOfAddedApps = new List<uint>();
+			List<uint> listOfAddedApps = [];
 
 			foreach (uint appid in listOfApps)
 			{
@@ -153,7 +153,7 @@ namespace SteamUpdateProject.Entities
 		/// <returns>List of AppIDs that have been removed successfully.</returns>
 		public List<uint> RemoveMultipleApps(List<uint> listOfApps)
 		{
-			List<uint> appsThatHaveBeenRemoved = new List<uint>();
+			List<uint> appsThatHaveBeenRemoved = [];
 
 			foreach (uint appid in listOfApps)
 			{
@@ -183,7 +183,7 @@ namespace SteamUpdateProject.Entities
 
 		public List<uint> RemoveMultipleApps(List<SubbedApp> listOfApps)
 		{
-			List<uint> listToReturn = new List<uint>();
+			List<uint> listToReturn = [];
 
 			foreach (SubbedApp app in listOfApps)
 			{

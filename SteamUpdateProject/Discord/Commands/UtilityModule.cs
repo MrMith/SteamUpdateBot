@@ -243,9 +243,7 @@ namespace SteamUpdateProject.Discord.Commands
 
 			await ctx.TriggerTypingAsync();
 
-			ProcessStartInfo startInfo = new ProcessStartInfo();
-
-			startInfo = new ProcessStartInfo()
+			ProcessStartInfo startInfo = new ProcessStartInfo()
 			{
 				Arguments = Directory.GetCurrentDirectory(),
 				FileName = "explorer.exe"
@@ -286,8 +284,8 @@ namespace SteamUpdateProject.Discord.Commands
 
 		///Not the best way to do it since its hard-coded 
 		///But I like the pain.
-		private readonly string[] _allPatchNotes = new string[]
-		{
+		private readonly string[] _allPatchNotes =
+		[
 			"May 31st 2025\nFix long standing issue preventing DM support, reverse order of history command, nuke var, and update nuget packages.",
 			"Jan 12th 2025\nStarting to see a theme of when I want to update this. Updated to .NET 9.0, upgraded and implemented all breaking changes with nuget packages, and make this a little more friendly to host.",
 			"June 12th 2022\nAdded **history** command *(Ex: !history 570)* which allows you to list all of the updates of an app in the database.",
@@ -302,21 +300,23 @@ namespace SteamUpdateProject.Discord.Commands
 			"Dec 30th 2021\nOptimized the useage of the bot by reducing the amount of times I am an idiot.",
 			"Dec 22nd 2021\nSwapped over to .NET 6.0 and changed some of the code to reflect using those new features.",
 			"Dec 13th 2021\nAdded a new **feedback** command so you can more easily leave feedback for me."
-		};
+		];
 
 		[Command("patchnotes"), Aliases("pn", "changes", "updates", "update", "patchnote"), Description("Shows changes made to the bot.")]
 		public async Task PatchNotes(CommandContext ctx)
 		{
 			await ctx.TriggerTypingAsync();
 
-			List<Page> pagesToShow = new List<Page>();
+			List<Page> pagesToShow = [];
 
 			foreach (string note in _allPatchNotes)
 			{
 				string[] notes = note.Split("\n");
 
-				DiscordEmbedBuilder discordEmbed = new DiscordEmbedBuilder();
-				discordEmbed.Title = "Patch Notes";
+				DiscordEmbedBuilder discordEmbed = new DiscordEmbedBuilder
+				{
+					Title = "Patch Notes"
+				};
 				discordEmbed.AddField(notes[0], notes[1]);
 
 				pagesToShow.Add(new Page("", discordEmbed));

@@ -1,10 +1,11 @@
 using Newtonsoft.Json;
+using SteamUpdateProject.Discord;
 using SteamUpdateProject.Steam;
 using System;
 using System.IO;
 using System.Text;
 
-namespace SteamUpdateProject.Discord
+namespace SteamUpdateProject
 {
 	/// <summary>
 	/// This is used for verifying the config and getting the data related to the <see cref="DiscordBot"/> token and <see cref="SteamBot"/> login information.
@@ -21,25 +22,28 @@ namespace SteamUpdateProject.Discord
 			{
 				Console.WriteLine("No config.json found, input your config options here to be saved:\n");
 				Console.WriteLine("Input Bot Token: ");
-				string BotToken = Console.ReadLine();
+				string botToken = Console.ReadLine();
+
+				Console.WriteLine("Input Debug Bot Token (Optional): ");
+				string optionalBotToken= Console.ReadLine();
 
 				Console.WriteLine("Input Bot Prefix: ");
-				string BotPrefix = Console.ReadLine();
+				string botPrefix = Console.ReadLine();
 
 				Console.WriteLine("Input Steam Username: ");
-				string SteamName = Console.ReadLine();
+				string steamName = Console.ReadLine();
 
 				Console.WriteLine("Input Steam Password: ");
-				string SteamPW = Console.ReadLine();
+				string steamPW = Console.ReadLine();
 
 				Console.WriteLine("Input MongoDB connection string: ");
-				string ConnectionString = Console.ReadLine();
+				string connectionString = Console.ReadLine();
 
 				Console.WriteLine("Input Discord Dev Override ID (Optional): ");
 				string optionalDevOverride = Console.ReadLine();
-				string DiscordID = string.IsNullOrEmpty(optionalDevOverride) ? "0" : optionalDevOverride;
+				string discordID = string.IsNullOrEmpty(optionalDevOverride) ? "0" : optionalDevOverride;
 
-				Config = new ConfigJson(BotToken, BotPrefix, SteamName, SteamPW, ConnectionString, DiscordID);
+				Config = new ConfigJson(token: botToken, prefix: botPrefix, steamName: steamName, steamPW: steamPW, connectionString: connectionString, devOverride: discordID, debugToken: optionalBotToken);
 
 				string seralizedObject = JsonConvert.SerializeObject(Config, Formatting.Indented);
 
@@ -59,35 +63,28 @@ namespace SteamUpdateProject.Discord
 		}
 
 		#region Json Struct
-		public struct ConfigJson
+		public struct ConfigJson(string token, string prefix, string steamName, string steamPW, string connectionString, string devOverride, string debugToken)
 		{
-			public ConfigJson(string token, string prefix, string steamName, string steamPW, string connectionString, string devOverride)
-			{
-				Token = token;
-				CommandPrefix = prefix;
-				SteamName = steamName;
-				SteamPassword = steamPW;
-				DBConnectionString = connectionString;
-				DevOverride = devOverride;
-			}
-
 			[JsonProperty("token")]
-			public string Token { get; private set; }
+			public string Token { get; private set; } = token;
+
+			[JsonProperty("debugtoken")]
+			public string DebugToken { get; private set; } = debugToken;
 
 			[JsonProperty("prefix")]
-			public string CommandPrefix { get; private set; }
+			public string CommandPrefix { get; private set; } = prefix;
 
 			[JsonProperty("steamname")]
-			public string SteamName { get; private set; }
+			public string SteamName { get; private set; } = steamName;
 
 			[JsonProperty("steampw")]
-			public string SteamPassword { get; private set; }
+			public string SteamPassword { get; private set; } = steamPW;
 
 			[JsonProperty("override")]
-			public string DevOverride { get; set; }
+			public string DevOverride { get; set; } = devOverride;
 
 			[JsonProperty("DBConnectionString")]
-			public string DBConnectionString { get; set; }
+			public string DBConnectionString { get; set; } = connectionString;
 		}
 		#endregion
 	}
